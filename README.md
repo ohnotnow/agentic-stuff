@@ -10,6 +10,7 @@ A curated set of reusable skills and task-focused agents for technical LLM codin
 - **larastan** (`skills/larastan/SKILL.md`): Playbook for installing/configuring/running PHPStan + Larastan in Laravel projects, separating framework false positives from real defects and iterating analysis levels.
 - **laravel-livewire-principles** (`skills/livewire-principles/SKILL.md`): Engineering principles for simpler Livewire code and tests, emphasizing framework trust, behavior-driven tests, and avoiding defensive over-engineering.
 - **technical-overview** (`skills/technical-overview/SKILL.md`): Generator workflow for creating concise `TECHNICAL_OVERVIEW.md` docs that map stack, architecture, domain model, routes, and key logic for rapid onboarding.
+- **uofg-design-system** (`skills/uofg-design-system/SKILL.md`): University of Glasgow web design system guidance for HTML, CSS, React, Tailwind, FluxUI and general UI work using official UofG brand tokens, layout rules, and component patterns.
 
 ## Agents
 
@@ -18,4 +19,3 @@ A curated set of reusable skills and task-focused agents for technical LLM codin
 - **plan-to-beads** (`agents/plan-to-beads.md`): Converts approved planning artifacts into consultant-ready Beads epics/issues with dependencies, implementation detail, and handoff quality.
 - **test-debug** (`agents/test-debug.md`): Lightweight debugging assistant for stubborn failing tests that prioritizes strategic `dump()` instrumentation over speculative rewrites.
 - **test-quality-checker** (`agents/test-quality-checker.md`): Test-review agent that evaluates robustness and realism of Laravel tests, highlighting false-confidence patterns and practical coverage gaps.
-

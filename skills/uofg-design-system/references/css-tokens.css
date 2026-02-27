@@ -1,0 +1,554 @@
+/*
+ * University of Glasgow Design System — CSS Custom Properties
+ * Source: https://design.gla.ac.uk
+ *
+ * Usage: Include this file, then use var(--uofg-*) throughout your CSS.
+ */
+
+/* ============================================
+   COLOUR TOKENS
+   ============================================ */
+
+:root {
+  /* Primary */
+  --uofg-university-blue: #011451;   /* Deep navy — footers, dark headers */
+  --uofg-dark-blue: #005398;         /* Practical blue — buttons, links, accents */
+  --uofg-blue: #005398;              /* Alias: default blue for interactive elements */
+  --uofg-blue-rgb: 0, 83, 152;
+
+  /* Primary tints */
+  --uofg-blue-80: #344374;
+  --uofg-blue-60: #677297;
+  --uofg-blue-40: #99A1B9;
+  --uofg-blue-20: #CCD0DC;
+  --uofg-blue-10: #E6E7EE;
+
+  /* Vanilla (greys) */
+  --uofg-dark-grey-1: #666666;
+  --uofg-dark-grey-2: #4D4D4D;
+  --uofg-dark-grey-3: #323232;
+  --uofg-light-grey-1: #F5F5F5;
+  --uofg-light-grey-2: #E6E6E6;
+  --uofg-light-grey-3: #CCCCCC;
+  --uofg-mid-grey-1: #B3B3B3;
+  --uofg-mid-grey-2: #999999;
+  --uofg-mid-grey-3: #757575;
+
+  /* UI / status */
+  --uofg-error: #D4351C;
+  --uofg-success: #8BC34A;
+  --uofg-highlight: #FFDD00;
+
+  /* Common */
+  --uofg-white: #FFFFFF;
+  --uofg-black: #000000;
+  --uofg-body-text: var(--uofg-dark-grey-3);
+  --uofg-focus-ring: var(--uofg-highlight);
+
+  /* ============================================
+     TYPOGRAPHY TOKENS
+     ============================================ */
+
+  --uofg-font-family: 'Noto Sans', system-ui, -apple-system, sans-serif;
+
+  /* Font weights */
+  --uofg-font-thin: 100;
+  --uofg-font-light: 300;
+  --uofg-font-regular: 400;
+  --uofg-font-medium: 500;
+  --uofg-font-semibold: 600;
+  --uofg-font-bold: 700;
+  --uofg-font-extrabold: 800;
+  --uofg-font-black: 900;
+
+  /* Suggested type scale (adjust to your project) */
+  --uofg-text-xs: 0.75rem;    /* 12px */
+  --uofg-text-sm: 0.875rem;   /* 14px */
+  --uofg-text-base: 1rem;     /* 16px */
+  --uofg-text-lg: 1.125rem;   /* 18px */
+  --uofg-text-xl: 1.25rem;    /* 20px */
+  --uofg-text-2xl: 1.5rem;    /* 24px */
+  --uofg-text-3xl: 1.875rem;  /* 30px */
+  --uofg-text-4xl: 2.25rem;   /* 36px */
+  --uofg-text-5xl: 3rem;      /* 48px */
+
+  /* ============================================
+     SPACING TOKENS
+     ============================================ */
+
+  --uofg-space-1: 0.25rem;   /* 4px */
+  --uofg-space-2: 0.5rem;    /* 8px */
+  --uofg-space-3: 0.75rem;   /* 12px */
+  --uofg-space-4: 1rem;      /* 16px */
+  --uofg-space-5: 1.25rem;   /* 20px */
+  --uofg-space-6: 1.5rem;    /* 24px */
+  --uofg-space-7: 2rem;      /* 32px */
+  --uofg-space-8: 2.5rem;    /* 40px */
+  --uofg-space-9: 3rem;      /* 48px */
+  --uofg-space-10: 3.5rem;   /* 56px */
+  --uofg-space-11: 4rem;     /* 64px */
+  --uofg-space-12: 6rem;     /* 96px */
+
+  /* ============================================
+     GRID / LAYOUT TOKENS
+     ============================================ */
+
+  --uofg-grid-columns: 12;
+  --uofg-grid-gutter: 24px;
+  --uofg-grid-margin: 24px;
+
+  /* Breakpoints (use in media queries — can't use custom properties there,
+     but documented here for reference) */
+  /* --uofg-bp-xs:     0px    */
+  /* --uofg-bp-sm:     768px  */
+  /* --uofg-bp-md:     1024px */
+  /* --uofg-bp-lg:     1400px */
+  /* --uofg-bp-xl:     1900px */
+
+  /* ============================================
+     COMPONENT TOKENS
+     ============================================ */
+
+  /* Border radius */
+  --uofg-radius-sm: 4px;
+  --uofg-radius-md: 8px;
+  --uofg-radius-lg: 12px;
+  --uofg-radius-full: 9999px;
+
+  /* Transitions */
+  --uofg-transition-fast: 150ms ease;
+  --uofg-transition-normal: 250ms ease;
+}
+
+/* ============================================
+   BASE STYLES
+   ============================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--uofg-font-family);
+  font-weight: var(--uofg-font-regular);
+  font-size: var(--uofg-text-base);
+  line-height: 1.5;
+  color: var(--uofg-body-text);
+  margin: 0;
+}
+
+/* ============================================
+   FOCUS STYLES
+   ============================================ */
+
+:focus-visible {
+  outline: 3px solid var(--uofg-focus-ring);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+.uofg-btn {
+  font-family: var(--uofg-font-family);
+  font-size: var(--uofg-text-base);
+  font-weight: var(--uofg-font-semibold);
+  padding: var(--uofg-space-3) var(--uofg-space-6);
+  border: 2px solid transparent;
+  border-radius: var(--uofg-radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--uofg-space-2);
+  text-decoration: none;
+  transition: background-color var(--uofg-transition-fast),
+              border-color var(--uofg-transition-fast),
+              color var(--uofg-transition-fast);
+}
+
+.uofg-btn:focus-visible {
+  outline: 3px solid var(--uofg-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Primary button */
+.uofg-btn--primary {
+  background-color: var(--uofg-blue);
+  color: var(--uofg-white);
+  border-color: var(--uofg-blue);
+}
+
+.uofg-btn--primary:hover {
+  background-color: var(--uofg-blue-80);
+  border-color: var(--uofg-blue-80);
+}
+
+.uofg-btn--primary:disabled {
+  background-color: var(--uofg-blue-40);
+  border-color: var(--uofg-blue-40);
+  cursor: not-allowed;
+}
+
+/* Secondary button */
+.uofg-btn--secondary {
+  background-color: var(--uofg-light-grey-2);
+  color: var(--uofg-dark-grey-3);
+  border-color: var(--uofg-light-grey-2);
+}
+
+.uofg-btn--secondary:hover {
+  background-color: var(--uofg-light-grey-3);
+  border-color: var(--uofg-light-grey-3);
+}
+
+/* Outline button */
+.uofg-btn--outline {
+  background-color: transparent;
+  color: var(--uofg-blue);
+  border-color: var(--uofg-blue);
+}
+
+.uofg-btn--outline:hover {
+  background-color: var(--uofg-blue-10);
+}
+
+/* Full-width variant */
+.uofg-btn--full {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ============================================
+   FORM INPUTS
+   ============================================ */
+
+.uofg-label {
+  display: block;
+  font-weight: var(--uofg-font-semibold);
+  margin-bottom: var(--uofg-space-2);
+  color: var(--uofg-dark-grey-3);
+}
+
+.uofg-label__required {
+  color: var(--uofg-blue);
+}
+
+.uofg-input {
+  font-family: var(--uofg-font-family);
+  font-size: var(--uofg-text-base);
+  padding: var(--uofg-space-3);
+  border: 1px solid var(--uofg-mid-grey-1);
+  border-radius: var(--uofg-radius-sm);
+  width: 100%;
+  transition: border-color var(--uofg-transition-fast);
+}
+
+.uofg-input:focus {
+  border-color: var(--uofg-blue);
+  outline: 3px solid var(--uofg-focus-ring);
+  outline-offset: 2px;
+}
+
+.uofg-input--error {
+  border-color: var(--uofg-error);
+}
+
+.uofg-hint {
+  font-size: var(--uofg-text-sm);
+  color: var(--uofg-mid-grey-3);
+  margin-top: var(--uofg-space-1);
+}
+
+.uofg-error-message {
+  font-size: var(--uofg-text-sm);
+  color: var(--uofg-error);
+  margin-top: var(--uofg-space-1);
+}
+
+textarea.uofg-input {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* ============================================
+   ACCORDION
+   ============================================ */
+
+.uofg-accordion {
+  width: 100%;
+  border-bottom: 1px solid var(--uofg-light-grey-3);
+}
+
+.uofg-accordion__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--uofg-space-6);
+  background: none;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  font-family: var(--uofg-font-family);
+  font-size: var(--uofg-text-lg);
+  font-weight: var(--uofg-font-semibold);
+  color: var(--uofg-dark-grey-3);
+  text-align: left;
+}
+
+.uofg-accordion__header:hover {
+  background-color: var(--uofg-light-grey-1);
+}
+
+.uofg-accordion__header:focus-visible {
+  outline: 3px solid var(--uofg-focus-ring);
+  outline-offset: -3px;
+}
+
+.uofg-accordion__icon {
+  transition: transform var(--uofg-transition-normal);
+}
+
+.uofg-accordion[open] .uofg-accordion__icon {
+  transform: rotate(180deg);
+}
+
+.uofg-accordion__content {
+  padding: 0 var(--uofg-space-6) var(--uofg-space-6);
+}
+
+/* ============================================
+   TABLE
+   ============================================ */
+
+.uofg-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--uofg-text-base);
+}
+
+.uofg-table th {
+  background-color: var(--uofg-blue);
+  color: var(--uofg-white);
+  font-weight: var(--uofg-font-semibold);
+  padding: var(--uofg-space-3) var(--uofg-space-4);
+  text-align: left;
+}
+
+.uofg-table td {
+  padding: var(--uofg-space-3) var(--uofg-space-4);
+  border-bottom: 1px solid var(--uofg-light-grey-3);
+}
+
+.uofg-table tbody tr:hover {
+  background-color: var(--uofg-light-grey-1);
+}
+
+/* ============================================
+   TILE (card-style navigation component)
+   ============================================ */
+
+.uofg-tile {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid var(--uofg-light-grey-3);
+  border-radius: var(--uofg-radius-md);
+  overflow: hidden;
+  transition: box-shadow var(--uofg-transition-fast);
+}
+
+.uofg-tile:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.uofg-tile:focus-visible {
+  outline: 3px solid var(--uofg-focus-ring);
+  outline-offset: 2px;
+}
+
+.uofg-tile__image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.uofg-tile__body {
+  padding: var(--uofg-space-6);
+}
+
+.uofg-tile__title {
+  font-size: var(--uofg-text-lg);
+  font-weight: var(--uofg-font-bold);
+  color: var(--uofg-blue);
+  margin: 0 0 var(--uofg-space-2);
+}
+
+.uofg-tile__desc {
+  font-size: var(--uofg-text-sm);
+  color: var(--uofg-dark-grey-1);
+  margin: 0;
+}
+
+/* Tile grid — max 3 across */
+.uofg-tile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--uofg-space-6);
+  max-width: 100%;
+}
+
+/* ============================================
+   BLOCKQUOTE
+   ============================================ */
+
+.uofg-blockquote {
+  border-left: 4px solid var(--uofg-blue);
+  padding: var(--uofg-space-6);
+  margin: var(--uofg-space-7) 0;
+  background-color: var(--uofg-light-grey-1);
+}
+
+.uofg-blockquote__text {
+  font-size: var(--uofg-text-lg);
+  font-style: italic;
+  color: var(--uofg-dark-grey-3);
+  margin: 0 0 var(--uofg-space-3);
+}
+
+.uofg-blockquote__attribution {
+  font-size: var(--uofg-text-sm);
+  font-weight: var(--uofg-font-semibold);
+  color: var(--uofg-dark-grey-1);
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+
+.uofg-footer {
+  background-color: var(--uofg-blue);
+  color: var(--uofg-white);
+  padding: var(--uofg-space-9) var(--uofg-space-6);
+}
+
+.uofg-footer a {
+  color: var(--uofg-white);
+  text-decoration: underline;
+}
+
+.uofg-footer a:hover {
+  color: var(--uofg-blue-20);
+}
+
+.uofg-footer__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--uofg-space-7);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.uofg-footer__heading {
+  font-size: var(--uofg-text-sm);
+  font-weight: var(--uofg-font-bold);
+  text-transform: uppercase;
+  margin-bottom: var(--uofg-space-3);
+}
+
+.uofg-footer__bottom {
+  border-top: 1px solid var(--uofg-blue-60);
+  margin-top: var(--uofg-space-7);
+  padding-top: var(--uofg-space-6);
+  font-size: var(--uofg-text-sm);
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ============================================
+   ACTION PANEL (sits above footer)
+   ============================================ */
+
+.uofg-action-panel {
+  background-color: var(--uofg-light-grey-1);
+  padding: var(--uofg-space-7) var(--uofg-space-6);
+}
+
+.uofg-action-panel__title {
+  font-size: var(--uofg-text-sm);
+  font-weight: var(--uofg-font-semibold);
+  color: var(--uofg-mid-grey-3);
+  margin-bottom: var(--uofg-space-4);
+}
+
+.uofg-action-panel__link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--uofg-space-4) 0;
+  border-top: 1px solid var(--uofg-light-grey-3);
+  text-decoration: none;
+  color: var(--uofg-dark-grey-3);
+  font-size: var(--uofg-text-lg);
+}
+
+.uofg-action-panel__link:hover {
+  color: var(--uofg-blue);
+}
+
+/* ============================================
+   UTILITY: GRID CONTAINER
+   ============================================ */
+
+.uofg-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--uofg-grid-margin);
+}
+
+.uofg-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--uofg-grid-gutter);
+}
+
+/* Span helpers */
+.uofg-col-1  { grid-column: span 1; }
+.uofg-col-2  { grid-column: span 2; }
+.uofg-col-3  { grid-column: span 3; }
+.uofg-col-4  { grid-column: span 4; }
+.uofg-col-5  { grid-column: span 5; }
+.uofg-col-6  { grid-column: span 6; }
+.uofg-col-7  { grid-column: span 7; }
+.uofg-col-8  { grid-column: span 8; }
+.uofg-col-9  { grid-column: span 9; }
+.uofg-col-10 { grid-column: span 10; }
+.uofg-col-11 { grid-column: span 11; }
+.uofg-col-12 { grid-column: span 12; }
+
+/* Responsive: stack on small screens */
+@media (max-width: 767px) {
+  .uofg-grid > * {
+    grid-column: span 12;
+  }
+}
+
+/* ============================================
+   MEDIA QUERIES (breakpoints for reference)
+   ============================================ */
+
+/* Small: 768px+ */
+@media (min-width: 768px) { }
+
+/* Medium: 1024px+ */
+@media (min-width: 1024px) { }
+
+/* Large: 1400px+ */
+@media (min-width: 1400px) { }
+
+/* XLarge: 1900px+ */
+@media (min-width: 1900px) { }
