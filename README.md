@@ -6,8 +6,10 @@ A curated set of reusable skills and task-focused agents for technical LLM codin
 
 - **beads** (`skills/beads/SKILL.md`): Quick-reference workflow for the `bd` Git-backed issue tracker, including dependencies, epics, and session-to-session continuity.
 - **frontend-design-with-flux** (`skills/frontend-fluxui/SKILL.md`): Practical Flux UI v2 + Livewire design guidance for building production-grade interfaces with consistent component patterns and sane defaults.
+- **github-create** (`skills/github-create/SKILL.md`): Workflow for creating a brand-new GitHub repository from the current project, pushing code, and handling finishing touches like README, LICENSE, and repo metadata.
 - **grounded-recommendation** (`skills/grounded-recommendation/SKILL.md`): Structured decision-making process for technical recommendations: investigate first, present findings, then make a recommendation with explicit uncertainty.
 - **larastan** (`skills/larastan/SKILL.md`): Playbook for installing/configuring/running PHPStan + Larastan in Laravel projects, separating framework false positives from real defects and iterating analysis levels.
+- **laravel-cloud** (`skills/laravel-cloud/SKILL.md`): Demo-app deployment and lifecycle workflow for Laravel Cloud using the `cloud` CLI, covering first deploys, updates, and teardown.
 - **laravel-livewire-principles** (`skills/livewire-principles/SKILL.md`): Engineering principles for simpler Livewire code and tests, emphasizing framework trust, behavior-driven tests, and avoiding defensive over-engineering.
 - **technical-overview** (`skills/technical-overview/SKILL.md`): Generator workflow for creating concise `TECHNICAL_OVERVIEW.md` docs that map stack, architecture, domain model, routes, and key logic for rapid onboarding.
 - **uofg-design-system** (`skills/uofg-design-system/SKILL.md`): University of Glasgow web design system guidance for HTML, CSS, React, Tailwind, FluxUI and general UI work using official UofG brand tokens, layout rules, and component patterns.
