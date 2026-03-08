@@ -13,6 +13,16 @@ Manage the full lifecycle of Laravel Cloud demo applications: create, deploy, an
 - The current directory must be a git repository with a remote
 - For Flux UI projects: `FLUX_USERNAME` and `FLUX_LICENSE_KEY` must be set in the local shell environment
 
+### Finding the `cloud` CLI
+
+The `cloud` binary may not be on the default PATH. If `which cloud` fails, check these common locations:
+
+```bash
+find /usr/local/bin /opt/homebrew/bin "$HOME/.composer/vendor/bin" "$HOME/.config/composer/vendor/bin" "$HOME/bin" "$HOME/.local/bin" -name "cloud" -type f 2>/dev/null
+```
+
+Use the full path for all subsequent commands if needed (e.g. `~/.composer/vendor/bin/cloud`).
+
 ## Workflows
 
 ### 1. Create & Deploy New Demo
@@ -43,7 +53,7 @@ If either is missing, warn the user and stop. Never hardcode credentials in the 
 
 Check if `.cloud/` or `.cloud` appears in `.gitignore`. If not, offer to append it. The directory contains machine-specific IDs (application_id, organization_id) — not secrets, but not useful to commit.
 
-**Step 4: Ship the app**
+**Step 4: Create the app (without deploying yet)**
 
 Derive the app name from the git repository name (the repo slug, e.g. `my-amazing-app`).
 
@@ -51,9 +61,11 @@ Derive the app name from the git repository name (the repo slug, e.g. `my-amazin
 cloud ship --name=<repo-name> --database=postgres --database-preset=dev --json
 ```
 
-This creates the application, a production environment, and a serverless Postgres database.
+This creates the application, a production environment, and a serverless Postgres database. **Important:** `cloud ship` automatically triggers an initial build using default commands. This initial build will almost certainly fail (missing Flux credentials, wrong build commands, etc.) — this is expected and harmless. Wait for it to complete before proceeding.
 
 **Step 5: Set environment variables**
+
+Now that the app and environment exist, configure them *before* deploying again.
 
 ```bash
 cloud environment:variables --action=set --key=SSO_ENABLED --value=false --force
@@ -89,13 +101,21 @@ cloud environment:update --build-command="<build_command>" --deploy-command="<de
 
 **Step 7: Deploy**
 
+Now that environment variables and build/deploy commands are configured, trigger the actual deploy:
+
 ```bash
 cloud deploy 2>&1
 ```
 
 Run in the background (`run_in_background: true`) with a timeout of 600000ms (10 minutes) — fresh deploys can take several minutes. The `cloud deploy` output is extremely noisy (ASCII art banner, animated spinners producing thousands of lines). The `--no-ansi`, `-q`, and `--silent` flags do not help — `--no-ansi` still outputs the art, and `-q`/`--silent` suppress everything including the final URL. Just let it run in the background and check the result when done.
 
-After completion, tell the user the deploy has finished and use `cloud application:get --json` to confirm the app status and retrieve the URL.
+After completion, check the result by grepping the output for the final JSON status line:
+
+```bash
+grep '"status":"deployment' <output_file> | tail -1
+```
+
+This avoids wading through thousands of spinner lines. A successful deploy ends with `"status":"deployment.succeeded"` and includes the URL. Also use `cloud application:get --json` to confirm the app status.
 
 ### 2. Deploy Update
 
