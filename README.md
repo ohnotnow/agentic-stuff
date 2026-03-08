@@ -4,10 +4,11 @@ A curated set of reusable skills and task-focused agents for technical LLM codin
 
 ## Skills
 
-- **beads** (`skills/beads/SKILL.md`): Quick-reference workflow for the `bd` Git-backed issue tracker, including dependencies, epics, and session-to-session continuity.
+- **ait** (`skills/ait/SKILL.md`): Local-first issue tracker for coding agents, useful for planning work, tracking multi-step tasks, modelling dependencies, coordinating between agents, and resuming after session loss or compaction.
 - **frontend-design-with-flux** (`skills/frontend-fluxui/SKILL.md`): Practical Flux UI v2 + Livewire design guidance for building production-grade interfaces with consistent component patterns and sane defaults.
 - **github-create** (`skills/github-create/SKILL.md`): Workflow for creating a brand-new GitHub repository from the current project, pushing code, and handling finishing touches like README, LICENSE, and repo metadata.
 - **grounded-recommendation** (`skills/grounded-recommendation/SKILL.md`): Structured decision-making process for technical recommendations: investigate first, present findings, then make a recommendation with explicit uncertainty.
+- **humaniser** (`skills/humaniser/SKILL.md`): Editing guide for removing common AI-writing tells and rewriting text so it reads more naturally, with clearer voice and fewer formulaic patterns.
 - **larastan** (`skills/larastan/SKILL.md`): Playbook for installing/configuring/running PHPStan + Larastan in Laravel projects, separating framework false positives from real defects and iterating analysis levels.
 - **laravel-cloud** (`skills/laravel-cloud/SKILL.md`): Demo-app deployment and lifecycle workflow for Laravel Cloud using the `cloud` CLI, covering first deploys, updates, and teardown.
 - **laravel-livewire-principles** (`skills/livewire-principles/SKILL.md`): Engineering principles for simpler Livewire code and tests, emphasizing framework trust, behavior-driven tests, and avoiding defensive over-engineering.
@@ -16,8 +17,8 @@ A curated set of reusable skills and task-focused agents for technical LLM codin
 
 ## Agents
 
-- **beads-audit** (`agents/beads-audit.md`): Audits open Beads issues against the codebase and reports likely-complete vs still-open items with evidence, without mutating issue state.
+- **ait-audit** (`agents/ait-audit.md`): Audit agent for reviewing open `ait` issues against the current codebase and reporting work that appears complete but has not been closed.
 - **modern-livewire** (`agents/modern-livewire.md`): Refactoring guide agent for modern Livewire v4/Flux v2 patterns that reduce component complexity and cognitive load.
-- **plan-to-beads** (`agents/plan-to-beads.md`): Converts approved planning artifacts into consultant-ready Beads epics/issues with dependencies, implementation detail, and handoff quality.
+- **plan-to-ait** (`agents/plan-to-ait.md`): Conversion agent for turning approved plan-mode plans into consultant-ready `ait` epics and issues that a fresh coding agent can execute.
 - **test-debug** (`agents/test-debug.md`): Lightweight debugging assistant for stubborn failing tests that prioritizes strategic `dump()` instrumentation over speculative rewrites.
 - **test-quality-checker** (`agents/test-quality-checker.md`): Test-review agent that evaluates robustness and realism of Laravel tests, highlighting false-confidence patterns and practical coverage gaps.
