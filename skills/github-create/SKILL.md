@@ -99,15 +99,17 @@ If the user has a `resources/readme-style.md` file in the skill directory, read 
 
 Do NOT include generic filler, badges, or sections with no real content.
 
+After writing the readme, if the `/readme` skill was used, the humaniser agent runs automatically as part of that skill. If you created a basic readme manually instead, spawn the humaniser agent (from `~/.claude/agents/humaniser.md`) for an editorial pass, if available.
+
 ### Step 6: Handle LICENSE
 
 Check if a `LICENSE` file exists in the project root.
 
 If no LICENSE exists:
 
-1. Check the user's memory files for a stored license attribution name.
+1. Check the user's memory files for a stored license attribution name. 
 2. **If a name is found**: Ask with a light touch: "Shall I add an MIT License attributed to **[Name]**? (Or would you prefer a different name for this one?)"
-3. **If no name is found**: Ask: "Would you like me to add an MIT License? If so, what name should it be attributed to?" Offer to remember the name for future projects.
+3. **If no name is found**: Check the git config for the users git name and email. Ask: "Would you like me to add an MIT License? If so, what name should it be attributed to?" Offer the names from git and also to remember the name for future projects.
 
 Use the template at `assets/MIT-LICENSE-TEMPLATE`, replacing `{{YEAR}}` with the current year and `{{AUTHOR}}` with the confirmed name.
 
