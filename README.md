@@ -20,6 +20,6 @@ A curated set of reusable skills and task-focused agents for technical LLM codin
 - **ait-audit** (`agents/ait-audit.md`): Audit agent for reviewing open `ait` issues against the current codebase and reporting work that appears complete but has not been closed.
 - **humaniser** (`agents/humaniser.md`): Editorial pass agent for removing common AI-writing patterns from generated text files like READMEs and docs.
 - **modern-livewire** (`agents/modern-livewire.md`): Refactoring guide agent for modern Livewire v4/Flux v2 patterns that reduce component complexity and cognitive load.
-- **plan-to-ait** (`agents/plan-to-ait.md`): Conversion agent for turning approved plan-mode plans into consultant-ready `ait` epics and issues that a fresh coding agent can execute.
+- **plan-to-ait** (`agents/plan-to-ait.md`): Conversion agent for turning approved plan-mode plans or specific planning documents into consultant-ready `ait` epics and issues that a fresh coding agent can execute.
 - **test-debug** (`agents/test-debug.md`): Lightweight debugging assistant for stubborn failing tests that prioritizes strategic `dump()` instrumentation over speculative rewrites.
 - **test-quality-checker** (`agents/test-quality-checker.md`): Test-review agent that evaluates robustness and realism of Laravel tests, highlighting false-confidence patterns and practical coverage gaps.
