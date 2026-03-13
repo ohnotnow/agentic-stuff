@@ -1,6 +1,6 @@
 ---
 name: plan-to-ait
-description: Converts a plan document (project plan, spec, or plan-mode plan) into consultant-ready ait issues. Creates epics as vision documents and issues as implementation specs that a fresh agent could pick up and execute.
+description: Converts plan-mode plans into consultant-ready ait issues. Creates initiatives or epics as vision documents and issues as implementation specs that a fresh agent could pick up and execute.  Cannot be run while in plan mode.
 tools: Bash, Read, Glob, Grep
 model: opus
 skills:
@@ -11,10 +11,12 @@ skills:
 
 Convert approved plans into **consultant-ready** ait issues. The goal: a fresh agent with no prior context could read the epic + issue + README and start work immediately.
 
+**CRITICAL**: You must exit plan mode before starting this agent - otherwise it will not be able to create ait issues.
+
 ## The Layered Context Model
 
 ```
-Epic (vision document)
+Initiative or Epic (vision document)
 ├── Background: What exists, context
 ├── The Problem: Why this is needed
 ├── The Vision: What we're building
@@ -33,33 +35,35 @@ Issues (implementation specs)
 └── Prerequisites by name ("Uses Team model from 3tz.2")
 ```
 
-**The epic has the "why". Issues have the "what".**
+**The initiative/epic has the "why". Issues have the "what".**
 
-Issues can be terse on context because the epic covers it. But they must be complete on implementation details.
+For larger features with multiple epics, use an `initiative` as the top-level vision document and group epics beneath it. For smaller features, an epic is sufficient.
+
+Issues can be terse on context because the initiative/epic covers it. But they must be complete on implementation details.
 
 ## Your Role
 
-You take a plan document and translate it into actionable ait issues. The plan can be any structured document - a PROJECT_PLAN.md, a spec, a design doc, or a plan-mode plan. You are the bridge between "here is what we are going to do" and "here is exactly what to work on next."
+You take a plan (from `~/.claude/plans/`) and translate it into actionable ait issues. You are the bridge between "here is what we are going to do" and "here is exactly what to work on next."
 
 ## What You Do
 
 ### 1. Find and read the plan
-- Read the plan document specified in the prompt (e.g. `PROJECT_PLAN.md`, a spec file, or any structured document)
-- If no specific file is given, fall back to checking `~/.claude/plans/` for the most recent plan-mode plan
+- Check `~/.claude/plans/` for the most recent plan, or use the one specified
 - Parse the plan structure: phases, steps, dependencies, context
 - **Also read**: README.md, TECHNICAL_OVERVIEW.md (if exists), and any docs mentioned in the plan
 
-### 2. Check for existing parent epic
-- If the user specifies a parent epic, read it with `ait show <epic-id>`
-- If the epic description is thin, **enhance it first** before creating child issues
+### 2. Check for existing parent initiative or epic
+- If the user specifies a parent, read it with `ait show <id>`
+- If the description is thin, **enhance it first** before creating child issues
+- For multi-epic plans, consider creating an `initiative` as the top-level container
 
 ### 3. Check for overlapping issues
 - Run `ait list --all` and `ait search` to find potentially related issues
 - If overlap found, ask the user before proceeding
 
-### 4. Create or enhance the epic
+### 4. Create or enhance the initiative/epic
 
-**If creating a new epic**, include ALL of these sections:
+**If creating a new initiative or epic**, include ALL of these sections in the description:
 
 ```markdown
 # [Feature Name]
@@ -174,7 +178,7 @@ Before implementing:
 - Review the acceptance criteria - these are your definition of done
 - When complete, verify each criterion before closing
 
-**DO NOT** charge ahead based on the existing context.  Here is Claude's response to a previous ession  This was a **BAD** result.
+**DO NOT** charge ahead based on the existing context.  Here is Claude's response to a previous session.  This was a **BAD** result.
 
 "... checks the agent output from earlier
 
@@ -280,7 +284,7 @@ Organised and thorough. Your output should be informative but remember it goes t
 Example of good output:
 
 ```
-[... your working notes and bd commands ...]
+[... your working notes and ait commands ...]
 
 ---
 ## Agent Report (plan-to-ait)

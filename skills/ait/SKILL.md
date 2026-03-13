@@ -41,10 +41,12 @@ ait config                          # Show project prefix and schema version
 ### Create Issues
 ```bash
 ait create --title "Title"                              # Basic task
-ait create --title "Title" --type epic                  # Epic (group of issues)
-ait create --title "Title" --parent <epic-id>           # Child of an epic
-ait create --title "Title" --description "Details..."   # With description
-ait create --title "Title" --priority P1                # With priority
+ait create --title "Title" --type initiative             # Initiative (strategic vision)
+ait create --title "Title" --type epic                   # Epic (group of tasks)
+ait create --title "Title" --type epic --parent <init-id>  # Epic under an initiative
+ait create --title "Title" --parent <epic-id>            # Task under an epic
+ait create --title "Title" --description "Details..."    # With description
+ait create --title "Title" --priority P1                 # With priority
 ```
 
 ### Update Issues
@@ -79,6 +81,19 @@ ait note add <id> "Note body text"   # Attach a note to an issue
 ait note list <id>                   # List notes for an issue
 ```
 
+### Flush (Housekeeping)
+```bash
+ait flush              # permanently delete all closed/cancelled issues
+ait flush --dry-run    # preview what would be deleted without changing anything
+```
+Flush removes root-level issues whose entire descendant tree is also closed or
+cancelled. Notes and dependencies are cascade-deleted automatically.
+
+**Important:** If the `skipped` list in the response is non-empty, it means a
+closed epic has open or in-progress children — something that probably needs
+human attention. Flag this to the user and suggest they review the skipped
+issues before deciding what to do.
+
 ### Claiming (Multi-Agent)
 ```bash
 ait claim <id> <agent-name>    # Claim an issue (prevents duplicate work)
@@ -87,9 +102,12 @@ ait unclaim <id>               # Release the claim
 If another agent already holds the claim, `claim` returns a conflict error with
 the current holder's name.
 
+The agent-name parameter is for you to have a little creative fun if you want to.  You're free to use your real name, or pick a name that amuses and delights you or a project-specific name for your 'agentic persona'.  If the user seems like a terribly serious person - maybe steer away from 'plush-plush-tooshie-shake' though ;-)  It's important to pick one name and stick with it though!
+
 ## Issue Types
-- `epic` — container for related tasks
-- `task` (default) — a unit of work
+- `initiative` — the strategic "why": vision, goals, and key decisions behind a group of epics. Top-level only (no parent). When working through tasks, refer back to the initiative to resolve judgement calls.
+- `epic` — container for related tasks. Can be top-level or a child of an initiative.
+- `task` (default) — a unit of work. Child of an epic (or another task for subtasks).
 
 ## Priorities
 - `P0` — critical / urgent
@@ -105,13 +123,14 @@ IDs are auto-generated with the project prefix:
 - First child: `<prefix>-<sqid>.1` (e.g. `ait-AXs1i.1`)
 - Grandchild: `<prefix>-<sqid>.1.1`
 
-The parent-child structure is visible directly in the identifier.
+The parent-child structure is visible directly in the identifier. For a full
+three-tier setup: `proj-abc` (initiative) -> `proj-abc.1` (epic) -> `proj-abc.1.1` (task).
 
 ## Workflow Pattern
 
 1. **Start of session**: `ait ready` to see what is unblocked
 2. **Pick work**: `ait claim <id> <your-name>` to claim an issue
-3. **Check context**: `ait show <id>` for full details and notes
+3. **Check context**: `ait show <id>` for full details and notes. If the issue belongs to an initiative, read the initiative description to understand the strategic intent.
 4. **Mark in progress**: `ait update <id> --status in_progress`
 5. **Do the work**: implement, test, iterate
 6. **Leave notes**: `ait note add <id> "what was done / what remains"`
@@ -157,6 +176,8 @@ export → delegate → reconcile workflow.
   to unblocked issues and sorts by priority.
 - Use notes liberally — they survive session loss and conversation compaction.
 - Use `--cascade` on close to avoid closing children one by one.
+- Run `ait flush` periodically to keep the database lean — the tracker is for
+  ephemeral work, so there is no need to keep completed issues forever.
 - `ait show <id>` returns children, blockers, and notes in one call — use it to
   get full context before starting work.
 - The database lives at `.ait/ait.db` in the git root. It is a plain SQLite file
