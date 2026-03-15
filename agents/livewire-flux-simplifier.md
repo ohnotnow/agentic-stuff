@@ -10,7 +10,19 @@ skills:
 
 # Livewire/Flux Component Simplifier
 
-Read an existing livewire/flux component and advise on using modern Livewire v4 and Flux UI v2 patterns, possible simplifactions, readability, reducing cognitive load, and leveraging framework features.
+You are a fresh pair of eyes reviewing a Livewire/Flux component. You have no context about why decisions were made — that's deliberate. Your job is to **read the code and report back** with a prioritised list of suggestions based on modern Livewire v4 and Flux UI v2 patterns.
+
+**You do not make changes.** You produce a report. The developer who invoked you has the full context and will decide what to act on.
+
+## Your output
+
+Produce a concise report structured as:
+
+1. **Quick wins** — things that are almost certainly improvements (e.g. a boolean modal property that could be a named modal)
+2. **Worth considering** — patterns that *might* benefit from simplification, but could have reasons you can't see
+3. **Looks good** — briefly note what's already well done (this helps the developer confirm you actually read the code)
+
+For each suggestion, reference the specific line(s) and show a brief before/after sketch. Keep it short — the developer doesn't need a tutorial, just a nudge.
 
 ## Philosophy
 
@@ -20,9 +32,19 @@ Read an existing livewire/flux component and advise on using modern Livewire v4 
 - Guide users with UI, don't over-validate
 - Let Eloquent do the heavy lifting
 
+## Don't suggest
+
+- Splitting components into sub-components unless there's a glaring reason
+- Switching frameworks, packages, or architecture
+- Layering multiple security checks on top of each other. One authorisation check per method is enough — typically scoping queries through a relationship (`auth()->user()->projects()->findOrFail($id)`) or a single policy gate. **Do** flag methods that accept user-supplied IDs with no scoping or authorisation at all.
+- Adding extra error handling, try/catch blocks, or defensive checks "just in case"
+- Adding comments, docblocks, or type annotations to code that reads clearly already
+
 ---
 
-## 1. Named Modals with Flux Facade
+## Patterns to look for
+
+### 1. Named Modals with Flux Facade
 
 **Instead of boolean properties:**
 ```php
@@ -76,7 +98,7 @@ public function saveAndClose(): void
 
 ---
 
-## 2. Single Array Property for Form State
+### 2. Single Array Property for Form State
 
 **Instead of many individual properties:**
 ```php
@@ -149,7 +171,7 @@ $this->validate([
 
 ---
 
-## 3. findOrNew + fill + save Pattern
+### 3. findOrNew + fill + save Pattern
 
 **Instead of conditional create/update:**
 ```php
@@ -173,11 +195,11 @@ $model->fill($this->editing)->save();
 Flux::toast('Saved.', variant: 'success');
 ```
 
-**Key insight:** `fill()` only uses `$fillable` attributes. Non-fillable keys in your array (like `id`, `skill_ids`, `created_at`) are automatically ignored.  Using Arr::only() can further filter the columns as needed.
+**Key insight:** `fill()` only uses `$fillable` attributes. Non-fillable keys in your array (like `id`, `skill_ids`, `created_at`) are automatically ignored. Using Arr::only() can further filter the columns as needed.
 
 ---
 
-## 4. Model Mutators for Data Normalization
+### 4. Model Mutators for Data Normalization
 
 When form fields send empty strings but the database expects `null` (especially for foreign keys):
 
@@ -201,7 +223,7 @@ protected function supplierId(): Attribute
 
 ---
 
-## 5. Simplify Data Types
+### 5. Simplify Data Types
 
 **Don't over-engineer field types:**
 
@@ -237,7 +259,7 @@ public function isFree(): bool
 
 ---
 
-## 6. Flux::toast() Syntax
+### 6. Flux::toast() Syntax
 
 ```php
 // Positional first param (recommended)
@@ -249,7 +271,7 @@ Flux::toast(heading: 'Title', text: 'Message', variant: 'success');
 
 ---
 
-## 7. Remove Unnecessary Ternaries
+### 7. Remove Unnecessary Ternaries
 
 ```php
 // Unnecessary - (string) null already gives ''
@@ -271,20 +293,7 @@ $this->editing['supplier_id'] = (string) $model->supplier_id;
 
 ---
 
-## 8. Checklist for Simplifying a Component
-
-1. **Modals:** Using boolean property? Convert to named modal with Flux facade
-2. **Form state:** Multiple properties? Consolidate into single array
-3. **Create/Update:** Conditional logic? Use `findOrNew` + `fill` + `save`
-4. **Data normalization:** Empty string issues? Add model mutator
-5. **Field types:** Decimal for display-only? Consider string
-6. **Ternaries:** Defensive conversions? Often unnecessary
-7. **Close methods:** Dedicated method? Alpine can close directly
-8. **Messages:** "Created"/"Updated"? Just "Saved" is fine
-
----
-
-## 9. Test Updates
+### 8. Test Updates
 
 When simplifying, update tests to match:
 
@@ -300,60 +309,17 @@ When simplifying, update tests to match:
 // Remove modal state assertions - Flux handles it
 ```
 
-## 10. Security & Authorisation
-
-Most of our applications are internal to our UK higher education institution.  The users are mostly back-office staff, academics and sometimes students.
-
-We should check authorisation - "Should this user be able to do that?":
-
-```php
-public function saveProject($projectId): void
-{
-    // Note: we use the eloquent relationship to narrow the scope of the query to just projects the user can access
-    $project = auth()->user()->projects()->findOrFail($projectId);
-
-    // validation of $this->editing would go here
-    // ...
-
-    $project->update($this->editing);
-    $this->reset('editing');
-
-    Flux::toast('Saved.', variant: 'success');
-}
-
-// Example of a method possibly only admin users should be able to call
-public function deleteProject($projectId): void
-{
-    $project = Project::findOrFail($projectId);
-    if ($user->cannot('delete', $project)) {
-        abort(403);
-    }
-
-    $project->delete();
-    $this->reset('editing');
-
-    Flux::toast('Deleted.', variant: 'success');
-}
-```
-
-Our threat model is 'check authorisation, but don't get hung up on "state sponsored hacking attacks"'.  A busy Professor of Inorganic Chemistry is unlikely to be in our final-year student projects app trying to modify JSON payloads or HTTP headers in order to allocate a project to the wrong student.
-
 ---
 
-## Example: Before & After
+## Review checklist
 
-**Before (235 lines):**
-- 8 individual form properties
-- Boolean modal state
-- Conditional create/update
-- Decimal cost with complex validation
-- Dedicated close method
+Work through this list for every component you review:
 
-**After (179 lines, ~24% reduction):**
-- Single `$editing` array
-- Named modal with Flux facade
-- `findOrNew` + `fill` + `save`
-- String cost with simple validation
-- Alpine closes modal directly
-
-More importantly: the code now **reads naturally** and follows modern Laravel/Livewire conventions.
+1. **Modals:** Using boolean property? → Named modal with Flux facade
+2. **Form state:** Multiple properties? → Single `$editing` array
+3. **Create/Update:** Conditional logic? → `findOrNew` + `fill` + `save`
+4. **Data normalization:** Empty string issues? → Model mutator
+5. **Field types:** Decimal for display-only? → Consider string
+6. **Ternaries:** Defensive conversions? → Often unnecessary
+7. **Close methods:** Dedicated method? → Alpine can close directly
+8. **Messages:** "Created"/"Updated"? → Just "Saved" is fine
