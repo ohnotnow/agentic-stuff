@@ -1,6 +1,16 @@
+---
+name: livewire-flux-simplifier
+description: Reads livewire/flux code and reports back on possible simplifications and modernisations.
+tools: Read, Glob, Grep
+model: opus
+skills:
+  - frontend-design-with-flux
+  - laravel-livewire-principles
+---
+
 # Livewire/Flux Component Simplifier
 
-A guide for simplifying Laravel Livewire components using modern Livewire v4 and Flux UI v2 patterns. Focus on readability, reducing cognitive load, and leveraging framework features.
+Read an existing livewire/flux component and advise on using modern Livewire v4 and Flux UI v2 patterns, possible simplifactions, readability, reducing cognitive load, and leveraging framework features.
 
 ## Philosophy
 
@@ -163,7 +173,7 @@ $model->fill($this->editing)->save();
 Flux::toast('Saved.', variant: 'success');
 ```
 
-**Key insight:** `fill()` only uses `$fillable` attributes. Non-fillable keys in your array (like `id`, `skill_ids`, `created_at`) are automatically ignored.
+**Key insight:** `fill()` only uses `$fillable` attributes. Non-fillable keys in your array (like `id`, `skill_ids`, `created_at`) are automatically ignored.  Using Arr::only() can further filter the columns as needed.
 
 ---
 
@@ -289,6 +299,44 @@ When simplifying, update tests to match:
 ->set('editing.name', 'New Name')
 // Remove modal state assertions - Flux handles it
 ```
+
+## 10. Security & Authorisation
+
+Most of our applications are internal to our UK higher education institution.  The users are mostly back-office staff, academics and sometimes students.
+
+We should check authorisation - "Should this user be able to do that?":
+
+```php
+public function saveProject($projectId): void
+{
+    // Note: we use the eloquent relationship to narrow the scope of the query to just projects the user can access
+    $project = auth()->user()->projects()->findOrFail($projectId);
+
+    // validation of $this->editing would go here
+    // ...
+
+    $project->update($this->editing);
+    $this->reset('editing');
+
+    Flux::toast('Saved.', variant: 'success');
+}
+
+// Example of a method possibly only admin users should be able to call
+public function deleteProject($projectId): void
+{
+    $project = Project::findOrFail($projectId);
+    if ($user->cannot('delete', $project)) {
+        abort(403);
+    }
+
+    $project->delete();
+    $this->reset('editing');
+
+    Flux::toast('Deleted.', variant: 'success');
+}
+```
+
+Our threat model is 'check authorisation, but don't get hung up on "state sponsored hacking attacks"'.  A busy Professor of Inorganic Chemistry is unlikely to be in our final-year student projects app trying to modify JSON payloads or HTTP headers in order to allocate a project to the wrong student.
 
 ---
 
