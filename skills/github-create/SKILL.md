@@ -129,10 +129,10 @@ git commit -m "chore: add project documentation"
 git push origin HEAD
 ```
 
-Then set the repository description:
+Then set the repository description (do not skip this step):
 
 ```bash
-gh repo edit <repo-url> -d "<description>"
+gh repo edit <repo-url> -d "Very short description of the project"
 ```
 
 ### Step 9: Done
