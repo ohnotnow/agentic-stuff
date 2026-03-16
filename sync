@@ -1,0 +1,188 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.10"
+# dependencies = ["pyyaml"]
+# ///
+"""Sync skills, agents and commands to local AI tool config directories."""
+
+import os
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+import yaml
+
+REPO_DIR = Path(__file__).resolve().parent
+CONFIG_FILE = REPO_DIR / "sync.yaml"
+EXAMPLE_FILE = REPO_DIR / "sync.yaml.example"
+
+# Maps config keys to repo subdirectories
+CONTENT_TYPES = {
+    "skills": REPO_DIR / "skills",
+    "agents": REPO_DIR / "agents",
+    "commands": REPO_DIR / "commands",
+}
+
+
+def load_config() -> dict:
+    if not CONFIG_FILE.exists():
+        print(f"No sync.yaml found. Copy the example to get started:")
+        print(f"  cp {EXAMPLE_FILE.name} {CONFIG_FILE.name}")
+        sys.exit(1)
+    with open(CONFIG_FILE) as f:
+        return yaml.safe_load(f)
+
+
+def expand_path(p: str) -> Path:
+    return Path(os.path.expanduser(p))
+
+
+def newest_mtime(path: Path) -> float:
+    """Return the newest mtime of a file or any file within a directory."""
+    if path.is_file():
+        return path.stat().st_mtime
+    if path.is_dir():
+        mtimes = [f.stat().st_mtime for f in path.rglob("*") if f.is_file()]
+        return max(mtimes) if mtimes else 0
+    return 0
+
+
+def show_diff(src: Path, dest: Path) -> None:
+    """Show a diff between source and destination."""
+    try:
+        result = subprocess.run(
+            ["diff", "-ru", str(src), str(dest)],
+            capture_output=True,
+            text=True,
+        )
+        print(result.stdout if result.stdout else "  (no text differences)")
+    except FileNotFoundError:
+        print("  (diff not available)")
+
+
+def ask_user(prompt: str, src: Path | None = None, dest: Path | None = None) -> bool:
+    """Prompt the user. Returns True to overwrite, False to skip. Ctrl-C exits."""
+    while True:
+        try:
+            hint = "[y/N/d]" if src else "[y/N]"
+            answer = input(f"  {prompt} {hint} ").strip().lower()
+        except (EOFError, KeyboardInterrupt):
+            print("\nAborted.")
+            sys.exit(130)
+
+        if answer in ("d", "diff") and src and dest:
+            show_diff(src, dest)
+            continue
+
+        return answer in ("y", "yes")
+
+
+def sync_item(src: Path, dest: Path, force: bool = False) -> str:
+    """Sync a single file or directory. Returns a status string."""
+    if not src.exists():
+        return "missing"
+
+    if dest.exists():
+        src_mtime = newest_mtime(src)
+        dest_mtime = newest_mtime(dest)
+
+        if dest_mtime > src_mtime and not force:
+            print(f"  ⚠  {dest} is NEWER than repo source")
+            if not ask_user("Overwrite with older repo version?", src, dest):
+                return "skipped (dest newer)"
+
+    # Copy
+    if src.is_dir():
+        if dest.exists():
+            shutil.rmtree(dest)
+        shutil.copytree(src, dest)
+    else:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dest)
+
+    return "synced"
+
+
+def sync_target(
+    name: str, config: dict, skipped: list, force: bool = False
+) -> None:
+    print(f"\n📁 {name}")
+
+    for content_type, repo_subdir in CONTENT_TYPES.items():
+        dest_base_str = config.get(content_type)
+        if not dest_base_str:
+            continue
+
+        dest_base = expand_path(dest_base_str)
+        dest_base.mkdir(parents=True, exist_ok=True)
+
+        if not repo_subdir.exists():
+            continue
+
+        items = sorted(repo_subdir.iterdir())
+        for item in items:
+            if item.name.startswith("."):
+                continue
+            dest = dest_base / item.name
+            status = sync_item(item, dest, force=force)
+            icon = "✓" if status == "synced" else "⊘"
+            print(f"  {icon} {content_type}/{item.name} → {status}")
+            if "skipped" in status:
+                skipped.append((dest, item))
+
+
+def main() -> None:
+    force = "--force" in sys.argv
+    dry_run = "--dry-run" in sys.argv
+
+    if dry_run:
+        print("Dry run — showing what would be synced:\n")
+        config = load_config()
+        for name, target in config.get("targets", {}).items():
+            if not target.get("enabled", False):
+                continue
+            print(f"📁 {name}")
+            for content_type, repo_subdir in CONTENT_TYPES.items():
+                dest_str = target.get(content_type)
+                if not dest_str or not repo_subdir.exists():
+                    continue
+                for item in sorted(repo_subdir.iterdir()):
+                    if item.name.startswith("."):
+                        continue
+                    dest = expand_path(dest_str) / item.name
+                    exists = "exists" if dest.exists() else "new"
+                    print(f"  {content_type}/{item.name} → {dest} ({exists})")
+        return
+
+    config = load_config()
+    targets = config.get("targets", {})
+
+    if not targets:
+        print("No targets defined in sync.yaml")
+        sys.exit(1)
+
+    enabled = {k: v for k, v in targets.items() if v.get("enabled", False)}
+    if not enabled:
+        print("No targets enabled in sync.yaml")
+        sys.exit(1)
+
+    print(f"Syncing to {len(enabled)} target(s)...")
+    if force:
+        print("(--force: overwriting without prompts)")
+
+    skipped: list[tuple[Path, Path]] = []
+    for name, target in enabled.items():
+        sync_target(name, target, skipped, force=force)
+
+    if skipped:
+        print("\n⚠  Skipped (destination newer than repo):")
+        for dest, src in skipped:
+            print(f"  {dest}")
+            print(f"    ← repo: {src}")
+
+    print("\nDone.")
+
+
+if __name__ == "__main__":
+    main()

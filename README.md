@@ -23,3 +23,19 @@ A curated set of reusable skills and task-focused agents for technical LLM codin
 - **plan-to-ait** (`agents/plan-to-ait.md`): Conversion agent for turning approved plan-mode plans or specific planning documents into consultant-ready `ait` epics and issues that a fresh coding agent can execute.
 - **test-debug** (`agents/test-debug.md`): Lightweight debugging assistant for stubborn failing tests that prioritizes strategic `dump()` instrumentation over speculative rewrites.
 - **test-quality-checker** (`agents/test-quality-checker.md`): Test-review agent that evaluates robustness and realism of Laravel tests, highlighting false-confidence patterns and practical coverage gaps.
+
+## Syncing to your tools
+
+Different AI coding tools (Claude Code, Codex, Gemini, Cursor, etc.) each have their own config directories for skills, agents and commands. The `sync` script copies everything from this repo into the right places.
+
+1. Copy the example config: `cp sync.yaml.example sync.yaml`
+2. Enable the tools you use and adjust paths if needed (`sync.yaml` is gitignored).
+3. Run `./sync` (requires [uv](https://docs.astral.sh/uv/)).
+
+If a destination file is **newer** than the repo source, the script will warn you and offer a diff before overwriting — handy if you've been editing skills in-place. Skipped files are listed at the end for easy copy-back.
+
+```
+./sync             # sync with prompts for newer destinations
+./sync --dry-run   # preview only
+./sync --force     # overwrite everything without asking
+```

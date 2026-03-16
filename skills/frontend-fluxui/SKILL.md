@@ -151,15 +151,9 @@ Always prefer flux:input shorthand syntax over the verbose flux:field syntax.  I
 ```blade
 {{-- Shorthand --}}
 <flux:input label="Email" description="We won't share this" wire:model="email" />
-
-{{-- Expands to --}}
-<flux:field>
-    <flux:label>Email</flux:label>
-    <flux:description>We won't share this</flux:description>
-    <flux:input wire:model="email" />
-    <flux:error name="email" />
-</flux:field>
 ```
+
+This covers the display of the label, description and also error messages for the field.
 
 ---
 

@@ -36,7 +36,7 @@ Look for `README.md` in the project root.
 
 Check for `assets/guidelines.md` in this skill's directory (`~/.claude/skills/readme/assets/guidelines.md`).
 
-If the file exists and has legitmate content, read it and follow its guidance. The guidelines file takes priority over the defaults in this skill. It is the main customisation point for teams and individuals — they can add their own conventions without editing this SKILL.md.
+If the file exists and has content, read it and follow its guidance. The guidelines file takes priority over the defaults in this skill. It is the main customisation point for teams and individuals — they can add their own conventions without editing this SKILL.md.
 
 ### Step 3: Detect project type
 

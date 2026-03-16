@@ -1,0 +1,22 @@
+# Sync configuration - copy to sync.yaml and adjust to taste.
+# Paths support ~ for home directory.
+# Omit a key (skills/agents/commands) if the tool doesn't support that concept.
+
+targets:
+  claude:
+    enabled: true
+    skills: ~/.claude/skills/
+    agents: ~/.claude/agents/
+    commands: ~/.claude/commands/
+
+  codex:
+    enabled: false
+    skills: ~/.codex/skills/
+
+  gemini:
+    enabled: false
+    skills: ~/.gemini/skills/
+
+  cursor:
+    enabled: false
+    skills: ~/.cursor/skills-cursor/
