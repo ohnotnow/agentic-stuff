@@ -34,6 +34,22 @@ Different AI coding tools (Claude Code, Codex, Gemini, Cursor, etc.) each have t
 
 If a destination file is **newer** than the repo source, the script will warn you and offer a diff before overwriting — handy if you've been editing skills in-place. Skipped files are listed at the end for easy copy-back.
 
+To skip specific items entirely (e.g. you have your own `readme` skill), add an `ignore` block globally or per-target in `sync.yaml`:
+
+```yaml
+# Never sync these to any target
+ignore:
+  skills: [readme]
+
+targets:
+  claude:
+    enabled: true
+    skills: ~/.claude/skills/
+    # Also skip these for claude specifically
+    ignore:
+      skills: [uofg-design-system]
+```
+
 ```
 ./sync             # sync with prompts for newer destinations
 ./sync --dry-run   # preview only

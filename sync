@@ -78,6 +78,13 @@ def ask_user(prompt: str, src: Path | None = None, dest: Path | None = None) -> 
         return answer in ("y", "yes")
 
 
+def ignored_names(config: dict, global_config: dict, content_type: str) -> set[str]:
+    """Build the set of ignored names for a content type (global + per-target)."""
+    global_ignores = global_config.get("ignore", {}).get(content_type, []) or []
+    target_ignores = config.get("ignore", {}).get(content_type, []) or []
+    return set(global_ignores) | set(target_ignores)
+
+
 def sync_item(src: Path, dest: Path, force: bool = False) -> str:
     """Sync a single file or directory. Returns a status string."""
     if not src.exists():
@@ -105,7 +112,7 @@ def sync_item(src: Path, dest: Path, force: bool = False) -> str:
 
 
 def sync_target(
-    name: str, config: dict, skipped: list, force: bool = False
+    name: str, config: dict, global_config: dict, skipped: list, force: bool = False
 ) -> None:
     print(f"\n📁 {name}")
 
@@ -120,9 +127,13 @@ def sync_target(
         if not repo_subdir.exists():
             continue
 
+        ignores = ignored_names(config, global_config, content_type)
         items = sorted(repo_subdir.iterdir())
         for item in items:
             if item.name.startswith("."):
+                continue
+            if item.name in ignores:
+                print(f"  ⊘ {content_type}/{item.name} → ignored")
                 continue
             dest = dest_base / item.name
             status = sync_item(item, dest, force=force)
@@ -147,8 +158,12 @@ def main() -> None:
                 dest_str = target.get(content_type)
                 if not dest_str or not repo_subdir.exists():
                     continue
+                ignores = ignored_names(target, config, content_type)
                 for item in sorted(repo_subdir.iterdir()):
                     if item.name.startswith("."):
+                        continue
+                    if item.name in ignores:
+                        print(f"  {content_type}/{item.name} → ignored")
                         continue
                     dest = expand_path(dest_str) / item.name
                     exists = "exists" if dest.exists() else "new"
@@ -173,7 +188,7 @@ def main() -> None:
 
     skipped: list[tuple[Path, Path]] = []
     for name, target in enabled.items():
-        sync_target(name, target, skipped, force=force)
+        sync_target(name, target, config, skipped, force=force)
 
     if skipped:
         print("\n⚠  Skipped (destination newer than repo):")

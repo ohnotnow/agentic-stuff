@@ -2,12 +2,20 @@
 # Paths support ~ for home directory.
 # Omit a key (skills/agents/commands) if the tool doesn't support that concept.
 
+# Global ignores — these are never synced to any target.
+# ignore:
+#   skills: [readme]
+#   agents: [humaniser]
+
 targets:
   claude:
     enabled: true
     skills: ~/.claude/skills/
     agents: ~/.claude/agents/
     commands: ~/.claude/commands/
+    # Per-target ignores — merged with global ignores.
+    # ignore:
+    #   skills: [uofg-design-system]
 
   codex:
     enabled: false
