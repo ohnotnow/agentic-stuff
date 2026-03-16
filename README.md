@@ -14,6 +14,7 @@ A curated set of reusable skills and task-focused agents for technical LLM codin
 - **readme** (`skills/readme/SKILL.md`): README generator workflow that reads the real codebase, writes a GitHub-style `README.md`, and keeps claims grounded in the project.
 - **technical-overview** (`skills/technical-overview/SKILL.md`): Generator workflow for creating concise `TECHNICAL_OVERVIEW.md` docs that map stack, architecture, domain model, routes, and key logic for rapid onboarding.
 - **uofg-design-system** (`skills/uofg-design-system/SKILL.md`): University of Glasgow web design system guidance for HTML, CSS, React, Tailwind, FluxUI and general UI work using official UofG brand tokens, layout rules, and component patterns.
+- **shell-function** (`skills/shell-function/SKILL.md`): Create a shell function appropriate for your shell (bash, zsh, fish, etc.) that does what you ask.
 
 ## Agents
 
