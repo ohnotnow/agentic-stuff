@@ -1,7 +1,7 @@
 ---
 name: ait
 description: >
-  Local-first issue tracker for coding agents. Use when planning work, tracking
+  Local-first issue tracker for coding agents. Use when the user asks you to use `ait`, planning work, tracking
   multi-step tasks, modelling dependencies, coordinating between agents, or
   resuming after session loss or conversation compaction.
 allowed-tools: "Read,Bash(ait:*)"
@@ -149,6 +149,7 @@ three-tier setup: `proj-abc` (initiative) -> `proj-abc.1` (epic) -> `proj-abc.1.
 7. **Close**: `ait close <id>` (or `--cascade` for an epic and its children)
 8. **Next**: `ait ready` again to find the next unblocked item
 9. **End of session**: `ait status` for an overall summary
+10. **Ask the user if it's ok to run `ait flush`**: The epics and tasks are for your detailed planning and tracking, so running a flush once in a while keeps `ait` clean
 
 ## Output Modes
 
@@ -167,6 +168,8 @@ ait init --prefix myproject    # Set the project prefix for issue IDs
 ```
 If no prefix is set, one is inferred from the directory name. The prefix can be
 changed later with `init --prefix` — existing IDs are re-keyed automatically.
+
+This is especially useful of the default prefix would be long to read over and over again as it's embedded in the IDs.  So rather than `this-amazing-project-to-store-license-usage-AXs1i` it is much more token-efficient to chose a prefix of `licuse`.
 
 ## Custom Database Path
 
