@@ -99,6 +99,9 @@ def sync_item(src: Path, dest: Path, force: bool = False) -> str:
             if not ask_user("Overwrite with older repo version?", src, dest):
                 return "skipped (dest newer)"
 
+        if src_mtime <= dest_mtime and not force:
+            return "unchanged"
+
     # Copy
     if src.is_dir():
         if dest.exists():
@@ -137,6 +140,9 @@ def sync_target(
                 continue
             dest = dest_base / item.name
             status = sync_item(item, dest, force=force)
+            if status == "unchanged":
+                print(f"  → {content_type}/{item.name} unchanged")
+                continue
             icon = "✓" if status == "synced" else "⊘"
             print(f"  {icon} {content_type}/{item.name} → {status}")
             if "skipped" in status:
