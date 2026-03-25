@@ -85,14 +85,11 @@ def ignored_names(config: dict, global_config: dict, content_type: str) -> set[s
     return set(global_ignores) | set(target_ignores)
 
 
-def sync_item(src: Path, dest: Path, force: bool = False) -> str:
-    """Sync a single file or directory. Returns a status string."""
-    if not src.exists():
-        return "missing"
-
+def _sync_file(src: Path, dest: Path, force: bool = False) -> str:
+    """Sync a single file. Returns a status string."""
     if dest.exists():
-        src_mtime = newest_mtime(src)
-        dest_mtime = newest_mtime(dest)
+        src_mtime = src.stat().st_mtime
+        dest_mtime = dest.stat().st_mtime
 
         if dest_mtime > src_mtime and not force:
             print(f"  ⚠  {dest} is NEWER than repo source")
@@ -102,16 +99,35 @@ def sync_item(src: Path, dest: Path, force: bool = False) -> str:
         if src_mtime <= dest_mtime and not force:
             return "unchanged"
 
-    # Copy
-    if src.is_dir():
-        if dest.exists():
-            shutil.rmtree(dest)
-        shutil.copytree(src, dest)
-    else:
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(src, dest)
-
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src, dest)
     return "synced"
+
+
+def sync_item(src: Path, dest: Path, force: bool = False) -> str:
+    """Sync a single file or directory. Returns a status string."""
+    if not src.exists():
+        return "missing"
+
+    if src.is_file():
+        return _sync_file(src, dest, force)
+
+    # For directories, merge by syncing each source file individually
+    # (preserves any user-added files in the destination)
+    statuses = []
+    for src_file in sorted(src.rglob("*")):
+        if not src_file.is_file():
+            continue
+        dest_file = dest / src_file.relative_to(src)
+        statuses.append(_sync_file(src_file, dest_file, force))
+
+    if not statuses:
+        return "unchanged"
+    if any(s == "synced" for s in statuses):
+        return "synced"
+    if any("skipped" in s for s in statuses):
+        return "skipped (dest newer)"
+    return "unchanged"
 
 
 def sync_target(
