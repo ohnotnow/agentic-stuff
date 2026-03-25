@@ -301,15 +301,26 @@ def extract_codex_session_metadata(records: list[dict]) -> dict:
 
 def _is_codex_system_content(text: str) -> bool:
     """Check if text is Codex system/environment boilerplate."""
-    markers = (
+    prefix_markers = (
         "<environment_context>",
         "<permissions instructions>",
         "<permissions",
         "<sandbox_environment>",
         "<custom_instructions>",
+        # AGENTS.md / skill instructions injected by the harness
+        "# AGENTS.md instructions for",
+        "AGENTS.md instructions for",
+    )
+    # Harness warnings that appear as user messages
+    substring_markers = (
+        "Warning: apply_patch was requested via exec_command",
     )
     stripped = text.strip()
-    return any(stripped.startswith(m) for m in markers)
+    if any(stripped.startswith(m) for m in prefix_markers):
+        return True
+    if any(m in stripped for m in substring_markers):
+        return True
+    return False
 
 
 def extract_codex_messages(records: list[dict]) -> list[Message]:
