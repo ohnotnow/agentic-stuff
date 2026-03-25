@@ -16,7 +16,7 @@ The user may provide:
 - **A session ID**: use that specific session
 - **A file path**: use that JSONL file directly
 
-#### Default: discover the latest completed session
+#### Default: discover the latest session
 
 Claude Code stores sessions at `~/.claude/projects/{encoded-path}/`. The encoded path replaces `/` with `-` in the absolute CWD path.
 
@@ -27,22 +27,7 @@ python3 ~/.claude/skills/conversation-to-html/scripts/extract_chat_markdown.py \
   --list-sessions
 ```
 
-This lists all sessions for the current project, sorted by most recent first.
-
-**Important**: The current in-progress session should be excluded. To do this, find the current session ID. It is the `sessionId` field in the JSONL being actively written. The simplest approach: check which `.jsonl` file in the project directory was modified most recently — that is the current session. Pass its stem (filename without `.jsonl`) to `--exclude-session`.
-
-To find and exclude the current session automatically:
-
-```bash
-# Find the current session ID (most recently modified JSONL)
-ENCODED=$(pwd | sed 's|/|-|g')
-CURRENT_SESSION=$(ls -t ~/.claude/projects/${ENCODED}/*.jsonl 2>/dev/null | head -1 | xargs basename | sed 's/.jsonl$//')
-
-# List sessions excluding the current one
-python3 ~/.claude/skills/conversation-to-html/scripts/extract_chat_markdown.py \
-  --list-sessions \
-  --exclude-session "$CURRENT_SESSION"
-```
+This lists all sessions for the current project, sorted by most recent first. The current in-progress session is included — it's fine to convert it.
 
 If the user wants a specific session, use `--session-id UUID` with `--discover`.
 
@@ -54,14 +39,14 @@ Briefly tell the user:
 
 ### 3. Generate the HTML
 
+When `--title` is provided and no explicit `-o` is given, the script automatically generates a filename from the title as a filesystem-safe slug with today's date appended (e.g. `--title "Chat About Lovely Cats"` produces `chat-about-lovely-cats-2026-03-25.html`). You do not need to pass `-o` unless the user wants a specific path.
+
 ```bash
 python3 ~/.claude/skills/conversation-to-html/scripts/extract_chat_markdown.py \
   --discover \
-  --exclude-session "$CURRENT_SESSION" \
   --format html \
   --timestamps \
-  --title "Your Title Here" \
-  -o conversation.html
+  --title "Your Title Here"
 ```
 
 Or with a specific session:
@@ -72,8 +57,7 @@ python3 ~/.claude/skills/conversation-to-html/scripts/extract_chat_markdown.py \
   --session-id "SESSION_UUID" \
   --format html \
   --timestamps \
-  --title "Your Title Here" \
-  -o conversation.html
+  --title "Your Title Here"
 ```
 
 Or with a direct file path:
@@ -83,8 +67,7 @@ python3 ~/.claude/skills/conversation-to-html/scripts/extract_chat_markdown.py \
   /path/to/session.jsonl \
   --format html \
   --timestamps \
-  --title "Your Title Here" \
-  -o conversation.html
+  --title "Your Title Here"
 ```
 
 ### 4. Verify the output
@@ -106,7 +89,7 @@ Report where the file was written and its message count. Suggest they open it in
 ## Output features
 
 The generated HTML includes:
-- UofG-branded hero section with session metadata (date, duration, model, message count)
+- Hero section with session metadata (date, duration, model, message count)
 - Chat-bubble layout (user messages right-aligned in blue, assistant left-aligned in white)
 - Avatar icons (person for user, star for assistant)
 - Syntax-highlighted code blocks via Prism.js (requires internet for CDN; degrades gracefully offline)
@@ -131,8 +114,7 @@ python3 ~/.claude/skills/conversation-to-html/scripts/extract_chat_markdown.py \
   --discover \
   --format html \
   --timestamps \
-  --title "Codex Session" \
-  -o codex-conversation.html
+  --title "Codex Session"
 ```
 
 You can also pass a specific Codex JSONL file directly (with `--source codex` to use the correct parser):
@@ -143,7 +125,7 @@ python3 ~/.claude/skills/conversation-to-html/scripts/extract_chat_markdown.py \
   ~/.codex/sessions/2026/03/24/rollout-*.jsonl \
   --format html \
   --timestamps \
-  -o codex-conversation.html
+  --title "Codex Session"
 ```
 
 The `--session-id` flag does substring matching for Codex, so you can use a partial UUID.

@@ -277,16 +277,19 @@ def extract_codex_session_metadata(records: list[dict]) -> dict:
     for record in records[:20]:
         if record.get("type") == "session_meta":
             payload = record.get("payload", {})
-            if payload.get("timestamp") and "first_timestamp" not in meta:
-                meta["first_timestamp"] = payload["timestamp"]
             if payload.get("cwd") and "cwd" not in meta:
                 meta["cwd"] = payload["cwd"]
             if payload.get("cli_version") and "version" not in meta:
                 meta["version"] = payload["cli_version"]
             if payload.get("model_provider") and "model" not in meta:
                 meta["model"] = payload["model_provider"]
-        if record.get("timestamp") and "first_timestamp" not in meta:
-            meta["first_timestamp"] = record["timestamp"]
+    # Use the first actual message timestamp as the base
+    for record in records:
+        if record.get("type") == "response_item":
+            p = record.get("payload", {})
+            if p.get("type") == "message" and p.get("role") in ("user", "assistant") and record.get("timestamp"):
+                meta["first_timestamp"] = record["timestamp"]
+                break
     for record in reversed(records[-20:]):
         ts = record.get("timestamp")
         if ts:
@@ -382,14 +385,17 @@ def extract_session_metadata(records: list[dict]) -> dict:
     for record in records[:20]:
         if record.get("slug") and "slug" not in meta:
             meta["slug"] = record["slug"]
-        if record.get("timestamp") and "first_timestamp" not in meta:
-            meta["first_timestamp"] = record["timestamp"]
         if record.get("cwd") and "cwd" not in meta:
             meta["cwd"] = record["cwd"]
         if record.get("version") and "version" not in meta:
             meta["version"] = record["version"]
         if record.get("message", {}).get("model") and "model" not in meta:
             meta["model"] = record["message"]["model"]
+    # Use the first actual message timestamp as the base (not preamble records)
+    for record in records:
+        if record.get("type") in ("user", "assistant") and record.get("timestamp"):
+            meta["first_timestamp"] = record["timestamp"]
+            break
     # Find last timestamp
     for record in reversed(records[-20:]):
         if record.get("timestamp"):
@@ -462,6 +468,14 @@ def format_timestamp(ts: str | None, base_ts: str | None = None) -> str:
         return local_dt.strftime("%H:%M")
     except (ValueError, TypeError):
         return ts[:16] if ts else ""
+
+
+def slugify(text: str) -> str:
+    """Convert text to a filesystem-safe slug (lowercase, hyphens, no special chars)."""
+    slug = text.lower()
+    slug = re.sub(r"[^a-z0-9]+", "-", slug)
+    slug = slug.strip("-")
+    return slug
 
 
 def format_date(ts: str | None) -> str:
@@ -662,7 +676,7 @@ def render_html(
     duration = format_duration(meta.get("first_timestamp"), meta.get("last_timestamp"))
     model_name = html.escape(meta.get("model", ""))
     is_codex = meta.get("source") == "codex"
-    eyebrow_label = "University of Glasgow &middot; Codex CLI Session" if is_codex else "University of Glasgow &middot; Claude Code Session"
+    eyebrow_label = "Codex CLI Session" if is_codex else "Claude Code Session"
     footer_label = "Generated from a Codex CLI session log" if is_codex else "Generated from a Claude Code session log"
 
     # Build transcript items
@@ -1102,7 +1116,13 @@ def main() -> int:
         return 1
 
     output_suffix = ".html" if args.format == "html" else ".md"
-    output_path = args.output or input_path.with_suffix(output_suffix)
+    if args.output:
+        output_path = args.output
+    elif args.title:
+        date_str = datetime.now().strftime("%Y-%m-%d")
+        output_path = Path(f"{slugify(args.title)}-{date_str}{output_suffix}")
+    else:
+        output_path = input_path.with_suffix(output_suffix)
 
     records = list(iter_jsonl(input_path))
 
