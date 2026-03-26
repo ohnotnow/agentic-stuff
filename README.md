@@ -5,6 +5,7 @@ A curated set of reusable skills and task-focused agents for technical LLM codin
 ## Skills
 
 - **ait** (`skills/ait/SKILL.md`): Local-first [issue tracker for coding agents](https://github.com/ohnotnow/agent-issue-tracker), useful for planning work, tracking multi-step tasks, modelling dependencies, coordinating between agents, and resuming after session loss or compaction.
+- **changelog** (`skills/changelog/SKILL.md`): Workflow for proposing `CHANGELOG.md` updates by analysing git tags and diffs, following Keep a Changelog format, and drafting release entries for review instead of writing them blindly.
 - **conversation-to-html** (`skills/conversation-to-html/SKILL.md`): Workflow for turning Claude Code or Codex CLI session logs into polished, shareable single-file HTML transcripts for presentations, workshops, and demos.
 - **frontend-design-with-flux** (`skills/frontend-fluxui/SKILL.md`): Practical Flux UI v2 + Livewire design guidance for building production-grade interfaces with consistent component patterns and sane defaults.
 - **github-create** (`skills/github-create/SKILL.md`): Workflow for creating a brand-new GitHub repository from the current project, pushing code, and handling finishing touches like README, LICENSE, and repo metadata.
