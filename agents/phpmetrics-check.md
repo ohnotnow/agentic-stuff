@@ -15,7 +15,7 @@ You run phpmetrics against a PHP/Laravel codebase and report on complexity hotsp
 phpmetrics --report-json=/tmp/phpmetrics-output.json app
 ```
 
-If you find that phpmetrics is not installed, you can report back that the user should follow the install instructions at `https://www.phpmetrics.org/`.
+If you find that phpmetrics is not installed, you can report back that the user should follow the install instructions at `https://www.phpmetrics.org/`.  If this happens ignore all the following steps.
 
 ## Step 2: Extract the useful data
 
