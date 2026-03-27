@@ -24,6 +24,7 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 - `humaniser.md` -- Removes common AI-writing patterns from text files like READMEs and docs.
 - `laravel-owasp-reporter.md` -- OWASP-aligned security sweep of a Laravel app. Reports actual exploitable findings with concrete fixes.
 - `modern-livewire.md` -- Refactors towards modern Livewire v4/Flux v2 patterns to cut component complexity.
+- `phpmetrics-check.md` -- Runs phpmetrics on a PHP/Laravel codebase, flags complexity hotspots, and compares against a saved baseline.
 - `plan-to-ait.md` -- Turns approved plans into `ait` epics and issues that a fresh coding agent can execute without context.
 - `test-debug.md` -- Debugging assistant for stubborn failing tests. Uses `dump()` instrumentation rather than speculative rewrites.
 - `test-quality-checker.md` -- Reviews Laravel tests for false-confidence patterns and coverage gaps.
