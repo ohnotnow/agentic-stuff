@@ -111,9 +111,32 @@ Write the complete README.md to the project root as a single file.
 
 Always prefer actual commands found in the project over these defaults. Read the manifest's scripts section, Makefile targets, or pyproject.toml scripts to find the real commands.
 
-### Step 7: Run the humaniser agent
+### Step 7: Pick a tone
 
-Check if `~/.claude/agents/humaniser.md` exists. If it does, spawn it as a sub-agent using the Agent tool, pointing it at the README.md file you just wrote. The humaniser agent runs with fresh context (no memory of writing the README) and does an editorial pass to remove AI writing patterns.
+Before running the humaniser, decide whether the project suits a `natural` or `professional` tone.
+
+**Signals for `natural`** (personal, opinionated, first-person friendly):
+- Single author, hobby or experimental project
+- Playful or informal project name
+- No `CONTRIBUTING.md`, no CI config, no corporate package namespace
+- README audience is likely the author or casual users
+
+**Signals for `professional`** (clear, measured, third-person):
+- Multiple contributors or team-owned
+- Has `CONTRIBUTING.md`, code of conduct, or formal issue templates
+- Corporate or organisational package namespace
+- Library or framework intended for external consumers
+- CI/CD pipelines, release workflows, semantic versioning
+
+**When it's ambiguous** — for example a well-structured Laravel app that could be either a personal experiment or a work project — ask the user:
+
+> "This looks like it could be a personal project or something more formal. Should the README sound casual and personal, or more professional?"
+
+Most of the time this question won't fire. Only ask when the signals genuinely point both ways.
+
+### Step 8: Run the humaniser agent
+
+Check if `~/.claude/agents/humaniser.md` exists. If it does, spawn it as a sub-agent using the Agent tool, pointing it at the README.md file you just wrote and telling it to use the tone chosen in step 7. The humaniser agent runs with fresh context (no memory of writing the README) and does an editorial pass to remove AI writing patterns.
 
 If the agent file does not exist, skip this step silently.
 
@@ -142,7 +165,7 @@ These rules catch the worst offenders. The humaniser agent (step 7) does a more 
 
 ## Integration with github-create
 
-When called from the github-create skill, this skill generates the README and runs the humaniser agent, then returns. It does not handle licence creation, repository description, or any git operations — github-create manages those separately.
+When called from the github-create skill, this skill generates the README, picks a tone (step 7), and runs the humaniser agent, then returns. It does not handle licence creation, repository description, or any git operations — github-create manages those separately.
 
 ## The guidelines file
 
