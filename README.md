@@ -17,6 +17,7 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 - `technical-overview` -- Generates a `TECHNICAL_OVERVIEW.md` covering stack, architecture, domain model, routes, and key logic. Useful for onboarding.
 - `uofg-design-system` -- University of Glasgow web design system. Brand tokens, layout rules, and component patterns for HTML, CSS, React, Tailwind, and FluxUI.
 - `shell-function` -- Creates a shell function (bash, zsh, fish, etc.) that does what you describe.
+- `sop-creator` -- Writes Standard Operating Procedure documents from user outlines. Asks minimal clarifying questions, then generates a clean Markdown SOP with purpose, prerequisites, procedure, and verification steps.
 
 ## Agents
 
