@@ -206,3 +206,32 @@ cloud application:get <app-id> --json
 - Use `cloud environment:logs` to debug deployment issues.
 - Use `cloud application:list --json` to see all apps across the organisation. **Caution:** this output includes environment variables in plain text — do not log or pipe it anywhere persistent.
 - The `cloud` CLI is very new and has known bugs (e.g. `repo:config` LazyCollection error). If a command fails unexpectedly, check if a workaround exists in this skill before giving up.
+
+## Known CLI Issues (as of v0.1.15)
+
+### `{"message":"Required."}` on every command
+
+**Symptom:** Every non-interactive CLI command (`application:list`, `environment:variables`, `deploy`, etc.) fails with `{"message":"Required."}` and no further explanation.
+
+**Cause:** The `organization_id` is missing from `.cloud/config.json`. The CLI needs it for all API calls but gives no indication that this is what's missing. The `cloud auth` command does not save it, and `cloud ship` does not always create the config file.
+
+**Fix:** You need to get the organisation ID. If `application:list` also fails (chicken-and-egg), the user must run the command interactively in their terminal to select the org and see the output. Then look for the org ID in the app details (format: `org-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`).
+
+Ensure `.cloud/config.json` contains **both** fields:
+
+```json
+{
+    "organization_id": "org-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "application_id": "app-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+}
+```
+
+Once the `organization_id` is present, non-interactive commands work normally.
+
+### `cloud auth` creates duplicate organisations
+
+Each run of `cloud auth` may create a new organisation with the same name. This is a known quirk — it doesn't cause problems but is confusing when listing apps. The user may need to select the correct org interactively.
+
+### App created via web UI not linked locally
+
+If the user created the app through the Laravel Cloud web UI rather than `cloud ship`, there will be no `.cloud/config.json`. Use `cloud application:get <app-id>` interactively to get the org ID and app ID, then create the config file manually (see "Linking an Existing App" above).
