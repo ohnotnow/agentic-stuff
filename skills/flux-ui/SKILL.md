@@ -1,6 +1,6 @@
 ---
-name: frontend-design-with-flux
-description: Create production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, or applications which are using livewire / flux.
+name: flux-ui
+description: Flux UI v2 component reference for Laravel/Livewire. Use when building interfaces with Flux components - covers syntax, patterns, common mistakes, and modal/form/table patterns.
 ---
 
 # Flux UI v2 Quick Reference
@@ -68,8 +68,8 @@ Only use `variant="danger"` for genuinely destructive actions (delete, remove).
 </flux:modal>
 ```
 
-### Modals - New trigger bahaviour
-In flux v2, modals can be triggered by a `<flux:modal.trigger>` component with the name prop matchers rather than toggling component state or events.
+### Modals - Trigger Behaviour
+In Flux v2, modals can be triggered by a `<flux:modal.trigger>` component with the name prop matcher rather than toggling component state or events.
 
 ```blade
 <flux:modal.trigger name="edit-profile">
@@ -146,7 +146,7 @@ Note: `flux:table.columns` and `flux:table.rows` are required wrappers. Always u
 
 ## Form Shorthand
 
-Always prefer flux:input shorthand syntax over the verbose flux:field syntax.  Inputs accept `label` and `description` props directly:
+Always prefer flux:input shorthand syntax over the verbose flux:field syntax. Inputs accept `label` and `description` props directly:
 
 ```blade
 {{-- Shorthand --}}
@@ -211,6 +211,27 @@ Flux::modal('edit-user')->show();
 Flux::modal('edit-user')->close();
 ```
 
+Opening/closing from Alpine (no server roundtrip):
+```blade
+<flux:button x-on:click="$flux.modal('edit-user').close()">Cancel</flux:button>
+```
+
+---
+
+## Flux Toast Notifications
+
+```php
+use Flux\Flux;
+
+// Positional first param (recommended)
+Flux::toast('Item saved.', variant: 'success');
+
+// All named params - text: is required (or Flux crashes)
+Flux::toast(heading: 'Success!', text: 'Item saved.', variant: 'success');
+```
+
+Variants: `success`, `warning`, `danger`
+
 ---
 
 ## Icons
@@ -230,10 +251,9 @@ Icons come from Heroicons - you can get the list of valid icons from [heroicon-l
 
 1. **Use Flux components** - `<flux:text>` not `<p>`, `<flux:link>` not `<a>`
 2. **You handle spacing** - use Tailwind gap/margin between components (prefer 6 for vertical spacing, 4 for horizontal, and 2 for grouped items)
-3. **Don't over-style** - Flux handles visual styling, avoid adding color classes
+3. **Don't over-style** - Flux handles visual styling, avoid adding colour classes
 4. **Button restraint** - most buttons are unstyled, only primary action gets `variant="primary"`. There is no need to use other variants unless specifically asked by the user.
 5. **Flyout modals** - use `variant="flyout"` by default
 6. **wire:key in loops** - always add for Livewire compatibility
 7. **Consult docs** - when unsure or trying to use a component you haven't read recently, use the laravel boost `search-docs` tool before guessing - it will save the user time and money
-8. **Icon names** - If you are not 100% about a name - consult the list.  Invalid names will cause flux to crash.
-
+8. **Icon names** - If you are not 100% about a name - consult the list. Invalid names will cause Flux to crash.

@@ -1,0 +1,133 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Migration script for the Livewire/Flux skill reorganisation (April 2025).
+#
+# Removes old skill/agent names that have been replaced, then runs sync
+# to install the new versions. Only needs to be run once per machine.
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+CLAUDE_DIR="${HOME}/.claude"
+BACKUP_FILE="${HOME}/claude-backup-$(date +%Y%m%d-%H%M%S).zip"
+
+# What's being replaced
+OLD_SKILLS=("frontend-fluxui" "livewire-principles")
+OLD_AGENTS=("livewire-flux-simplifier.md")
+
+# What replaces them
+NEW_SKILLS=("flux-ui" "modern-livewire" "ui-to-flux" "quality-gate")
+NEW_AGENTS=("livewire-flux-reviewer.md")
+
+echo "=========================================="
+echo "  Skill & Agent Migration"
+echo "=========================================="
+echo ""
+echo "This script removes old skill/agent names that have been replaced"
+echo "in the repo, then runs ./sync to install the new versions."
+echo ""
+echo "Renames:"
+echo "  skills/frontend-fluxui      -> skills/flux-ui"
+echo "  skills/livewire-principles   -> skills/modern-livewire"
+echo "  agents/livewire-flux-simplifier.md -> agents/livewire-flux-reviewer.md"
+echo ""
+echo "New:"
+echo "  skills/ui-to-flux"
+echo "  skills/quality-gate"
+echo ""
+
+# Check ~/.claude exists
+if [ ! -d "$CLAUDE_DIR" ]; then
+    echo "No ~/.claude directory found. Nothing to migrate."
+    exit 0
+fi
+
+# Check for old items
+found_old=0
+for skill in "${OLD_SKILLS[@]}"; do
+    [ -d "${CLAUDE_DIR}/skills/${skill}" ] && found_old=1
+done
+for agent in "${OLD_AGENTS[@]}"; do
+    [ -f "${CLAUDE_DIR}/agents/${agent}" ] && found_old=1
+done
+
+if [ "$found_old" -eq 0 ]; then
+    echo "No old skill/agent names found in ~/.claude — nothing to migrate."
+    echo "If you just need to sync, run: ./sync"
+    exit 0
+fi
+
+echo "Found old items to remove:"
+for skill in "${OLD_SKILLS[@]}"; do
+    [ -d "${CLAUDE_DIR}/skills/${skill}" ] && echo "  ~/.claude/skills/${skill}/"
+done
+for agent in "${OLD_AGENTS[@]}"; do
+    [ -f "${CLAUDE_DIR}/agents/${agent}" ] && echo "  ~/.claude/agents/${agent}"
+done
+echo ""
+
+# Offer backup
+echo "*** This will DELETE the items listed above, then run ./sync ***"
+echo ""
+read -rp "Create a zip backup of ~/.claude/{skills,agents,commands} first? [Y/n] " backup_answer
+backup_answer="${backup_answer:-y}"
+
+if [[ "$backup_answer" =~ ^[Yy] ]]; then
+    echo ""
+    echo "Backing up to ${BACKUP_FILE} ..."
+    (
+        cd "$CLAUDE_DIR"
+        dirs_to_zip=()
+        [ -d skills ]   && dirs_to_zip+=(skills)
+        [ -d agents ]   && dirs_to_zip+=(agents)
+        [ -d commands ]  && dirs_to_zip+=(commands)
+        if [ ${#dirs_to_zip[@]} -gt 0 ]; then
+            zip -rq "$BACKUP_FILE" "${dirs_to_zip[@]}"
+        fi
+    )
+    echo "Done. Backup saved to ${BACKUP_FILE}"
+    echo ""
+fi
+
+# Final confirmation
+read -rp "Proceed with migration? [y/N] " proceed
+if [[ ! "$proceed" =~ ^[Yy] ]]; then
+    echo "Aborted."
+    exit 0
+fi
+
+echo ""
+
+# Remove old items
+for skill in "${OLD_SKILLS[@]}"; do
+    target="${CLAUDE_DIR}/skills/${skill}"
+    if [ -d "$target" ]; then
+        rm -rf "$target"
+        echo "Removed skills/${skill}/"
+    fi
+done
+
+for agent in "${OLD_AGENTS[@]}"; do
+    target="${CLAUDE_DIR}/agents/${agent}"
+    if [ -f "$target" ]; then
+        rm "$target"
+        echo "Removed agents/${agent}"
+    fi
+done
+
+echo ""
+
+# Run sync
+if [ ! -f "${SCRIPT_DIR}/sync.yaml" ]; then
+    echo "No sync.yaml found. Copy the example first:"
+    echo "  cp sync.yaml.example sync.yaml"
+    echo ""
+    echo "Old items have been removed. Run ./sync after setting up sync.yaml."
+    exit 0
+fi
+
+echo "Running ./sync ..."
+echo ""
+"${SCRIPT_DIR}/sync"
+
+echo ""
+echo "Migration complete."
