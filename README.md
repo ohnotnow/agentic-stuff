@@ -18,6 +18,7 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 - `feature-workflow` -- Streamlined workflow for building features with `ait` issue tracking. Handles orientation, planning (via plan mode), issue creation (via `plan-to-ait`), implementation with acceptance criteria checking, and optional quality gate at the end.
 - `flux-ui` -- Flux UI v2 component reference for Laravel/Livewire. Covers syntax, patterns, common mistakes, and modal/form/table patterns.
 - `github-create` -- Creates a new GitHub repo from the current project, pushes code, and sorts out the README, licence, and metadata.
+- `golang` -- Conventions and patterns for Go CLI/TUI projects. Covers project layout, SQLite storage, Bubble Tea TUIs, embedded web UIs, flag parsing, migrations, error handling, and testing.
 - `grounded-recommendation` -- Makes the agent investigate before recommending. Present findings first, then a recommendation with explicit uncertainty.
 - `larastan` -- Installs and runs PHPStan + Larastan, separates framework false positives from real defects, and iterates through analysis levels.
 - `laravel-cloud` -- Deploy, update, and tear down demo apps on Laravel Cloud using the `cloud` CLI.
