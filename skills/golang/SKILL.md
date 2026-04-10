@@ -1,11 +1,8 @@
 ---
-name: golang
+name: golang-user-conventions
 description: >
-  Conventions and patterns for Go CLI/TUI projects. Use when creating a new Go
-  project, adding SQLite storage, building a Bubble Tea TUI, adding an embedded
-  web UI, or reviewing Go code structure. Covers project layout, database
-  patterns, migrations, TUI design, embedded web frontends, CLI flag parsing,
-  config, error handling, and testing.
+  Users conventions and patterns for Go CLI/TUI projects. Use when working on a Go
+  project
 allowed-tools: "Read,Write,Edit,Bash,Glob,Grep"
 version: "0.3.0"
 author: "ohnotnow <https://github.com/ohnotnow>"
