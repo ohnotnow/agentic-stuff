@@ -1,0 +1,414 @@
+/* @theme uofg */
+
+/*
+ * University of Glasgow — Marp Presentation Theme
+ * Pure brand compliance. Noto Sans, university blues, institutional.
+ * Built from UofG Design System css-tokens.css
+ */
+
+@import 'default';
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Noto+Sans+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* UofG brand palette */
+  --uofg-university-blue: #011451;
+  --uofg-dark-blue: #005398;
+  --uofg-blue-80: #344374;
+  --uofg-blue-60: #677297;
+  --uofg-blue-40: #99A1B9;
+  --uofg-blue-20: #CCD0DC;
+  --uofg-blue-10: #E6E7EE;
+  --uofg-highlight: #FFDD00;
+  --uofg-dark-grey-3: #323232;
+  --uofg-dark-grey-1: #666666;
+  --uofg-light-grey-1: #F5F5F5;
+  --uofg-light-grey-2: #E6E6E6;
+  --uofg-light-grey-3: #CCCCCC;
+
+  /* Theme tokens */
+  --color-bg: #FAFAFA;
+  --color-fg: var(--uofg-dark-grey-3);
+  --color-heading: var(--uofg-university-blue);
+  --color-accent: var(--uofg-dark-blue);
+  --color-muted: var(--uofg-dark-grey-1);
+  --color-surface: var(--uofg-light-grey-1);
+  --color-border: var(--uofg-light-grey-3);
+  --color-code-bg: var(--uofg-blue-10);
+
+  /*
+   * Override default Marp theme variables
+   * These control blockquote borders, table striping, and syntax highlighting
+   */
+  --borderColor-default: transparent;
+  --bgColor-muted: transparent;
+  --bgColor-default: transparent;
+
+  /* Syntax highlighting — readable on dark navy code blocks */
+  --color-prettylights-syntax-comment: #8B95A8;
+  --color-prettylights-syntax-constant: #79C0FF;
+  --color-prettylights-syntax-entity: #D2A8FF;
+  --color-prettylights-syntax-entity-tag: #7EE787;
+  --color-prettylights-syntax-keyword: #FF7B72;
+  --color-prettylights-syntax-string: #A5D6FF;
+  --color-prettylights-syntax-variable: #FFA657;
+  --color-prettylights-syntax-brackethighlighter-angle: #9198A1;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #F85149;
+  --color-prettylights-syntax-carriage-return-bg: #B62324;
+  --color-prettylights-syntax-carriage-return-text: #F0F6FC;
+  --color-prettylights-syntax-markup-heading: #1F6FEB;
+  --color-prettylights-syntax-markup-bold: #F0F6FC;
+  --color-prettylights-syntax-markup-italic: #F0F6FC;
+  --color-prettylights-syntax-markup-list: #F2CC60;
+  --color-prettylights-syntax-storage-modifier-import: #D0D8E8;
+  --color-prettylights-syntax-string-regexp: #7EE787;
+}
+
+/* ============================================
+   BASE SLIDE
+   ============================================ */
+
+section {
+  width: 1280px;
+  height: 720px;
+  font-family: 'Noto Sans', system-ui, -apple-system, sans-serif;
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1.5;
+  padding: 60px 70px;
+  background-color: var(--color-bg);
+  color: var(--color-fg);
+  letter-spacing: -0.01em;
+}
+
+/* ============================================
+   HEADINGS
+   ============================================ */
+
+section h1 {
+  font-size: 1.8em;
+  font-weight: 700;
+  color: var(--color-heading);
+  margin-bottom: 16px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+section h2 {
+  font-size: 1.35em;
+  font-weight: 600;
+  color: var(--color-heading);
+  margin-bottom: 12px;
+  line-height: 1.25;
+}
+
+section h3 {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: var(--uofg-blue-80);
+  margin-bottom: 8px;
+}
+
+section h4 {
+  font-size: 1em;
+  font-weight: 600;
+  color: var(--uofg-dark-grey-3);
+}
+
+/* ============================================
+   BODY TEXT & LINKS
+   ============================================ */
+
+section p {
+  margin-bottom: 16px;
+}
+
+section a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+section strong {
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
+section em {
+  font-style: italic;
+}
+
+/* ============================================
+   LISTS
+   ============================================ */
+
+section ul,
+section ol {
+  margin-bottom: 16px;
+  padding-left: 1.4em;
+}
+
+section li {
+  margin-bottom: 6px;
+  line-height: 1.45;
+}
+
+section li::marker {
+  color: var(--color-accent);
+}
+
+/* ============================================
+   CODE
+   ============================================ */
+
+section code {
+  font-family: 'Noto Sans Mono', 'Menlo', monospace;
+  font-size: 0.85em;
+  background-color: var(--color-code-bg);
+  padding: 2px 7px;
+  border-radius: 4px;
+  color: var(--uofg-university-blue);
+}
+
+section pre {
+  background-color: var(--uofg-university-blue);
+  border-radius: 8px;
+  padding: 24px 28px;
+  margin: 16px 0;
+  overflow: visible;
+}
+
+section pre code {
+  background: transparent;
+  color: #C8D0E8;
+  font-size: 0.72em;
+  line-height: 1.55;
+  padding: 0;
+}
+
+/* ============================================
+   BLOCKQUOTES
+   ============================================ */
+
+section blockquote {
+  background-color: var(--uofg-blue-10);
+  border: none !important;
+  border-radius: 8px;
+  padding: 20px 28px;
+  margin: 20px 0;
+  font-style: italic;
+  color: var(--uofg-blue-80);
+}
+
+section blockquote p {
+  margin: 0;
+}
+
+/* ============================================
+   TABLES
+   ============================================ */
+
+section table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88em;
+  margin: 16px 0;
+}
+
+section table th {
+  background-color: var(--uofg-dark-blue);
+  color: #FFFFFF;
+  font-weight: 600;
+  padding: 10px 16px;
+  text-align: left;
+}
+
+section table th:first-child {
+  border-radius: 6px 0 0 0;
+}
+
+section table th:last-child {
+  border-radius: 0 6px 0 0;
+}
+
+section table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+section table tr {
+  background-color: transparent !important;
+}
+
+/* ============================================
+   IMAGES
+   ============================================ */
+
+section img {
+  border-radius: 6px;
+}
+
+img[alt~="center"] {
+  display: block;
+  margin: 0 auto;
+}
+
+/* ============================================
+   HEADER & FOOTER
+   ============================================ */
+
+header {
+  position: absolute;
+  top: 22px;
+  left: 70px;
+  right: 70px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--uofg-blue-60);
+  letter-spacing: 0.02em;
+}
+
+footer {
+  position: absolute;
+  bottom: 22px;
+  left: 70px;
+  right: 70px;
+  font-size: 14px;
+  color: var(--uofg-dark-grey-1);
+}
+
+/* ============================================
+   PAGINATION
+   ============================================ */
+
+section::after {
+  font-family: 'Noto Sans', sans-serif;
+  font-size: 13px;
+  color: var(--uofg-blue-40);
+  font-weight: 500;
+  bottom: 22px;
+  right: 70px;
+}
+
+/* ============================================
+   TITLE / LEAD SLIDES
+   ============================================ */
+
+section.lead {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: flex-start;
+  text-align: left;
+  background-color: var(--uofg-university-blue);
+  color: #FFFFFF;
+  padding: 60px 80px;
+}
+
+section.lead h1 {
+  font-size: 2.4em;
+  color: #FFFFFF;
+  margin-bottom: 20px;
+  max-width: 80%;
+}
+
+section.lead h2 {
+  font-size: 1.25em;
+  font-weight: 400;
+  color: var(--uofg-blue-20);
+  margin-bottom: 8px;
+}
+
+section.lead p {
+  color: var(--uofg-blue-40);
+  font-size: 0.9em;
+}
+
+section.lead a {
+  color: var(--uofg-highlight);
+}
+
+section.lead::after {
+  color: var(--uofg-blue-60);
+}
+
+/* ============================================
+   INVERTED SLIDES
+   ============================================ */
+
+section.invert {
+  background-color: var(--uofg-dark-blue);
+  color: #FFFFFF;
+}
+
+section.invert h1,
+section.invert h2,
+section.invert h3 {
+  color: #FFFFFF;
+}
+
+section.invert strong {
+  color: var(--uofg-highlight);
+}
+
+section.invert code {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #E8ECF4;
+}
+
+section.invert blockquote {
+  background-color: rgba(255, 255, 255, 0.08);
+  border: none !important;
+  color: var(--uofg-blue-20);
+}
+
+section.invert table th {
+  background-color: var(--uofg-university-blue);
+}
+
+section.invert table td {
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+section.invert::after {
+  color: var(--uofg-blue-40);
+}
+
+/* ============================================
+   SECTION DIVIDER — use class "divider"
+   ============================================ */
+
+section.divider {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: flex-start;
+  background-color: var(--uofg-blue-10);
+  padding: 60px 80px;
+}
+
+section.divider h1 {
+  font-size: 2em;
+  color: var(--uofg-university-blue);
+}
+
+section.divider h2 {
+  font-weight: 400;
+  color: var(--uofg-blue-60);
+}
+
+/* ============================================
+   TWO-COLUMN HELPER — use class "cols"
+   ============================================ */
+
+section.cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr;
+  gap: 0 48px;
+  align-items: start;
+}
+
+section.cols h1,
+section.cols h2 {
+  grid-column: 1 / -1;
+}

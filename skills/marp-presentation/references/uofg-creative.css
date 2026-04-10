@@ -1,0 +1,508 @@
+/* @theme uofg-creative */
+
+/*
+ * University of Glasgow — Brand-Creative Marp Theme
+ * UofG palette foundations with more visual personality.
+ * Literata display font paired with Noto Sans body.
+ * For mixed-audience content where brand recognition matters
+ * but the presentation needs to breathe and engage.
+ */
+
+@import 'default';
+@import url('https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;0,7..72,700;0,7..72,800;1,7..72,400;1,7..72,600&family=Noto+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Noto+Sans+Mono:wght@400;500&display=swap');
+
+:root {
+  /* UofG brand palette — foundation, not ceiling */
+  --uofg-university-blue: #011451;
+  --uofg-dark-blue: #005398;
+  --uofg-blue-80: #344374;
+  --uofg-blue-60: #677297;
+  --uofg-blue-40: #99A1B9;
+  --uofg-blue-20: #CCD0DC;
+  --uofg-blue-10: #E6E7EE;
+  --uofg-highlight: #FFDD00;
+
+  /* Richer derived surfaces — warmed toward the blue hue */
+  --surface-warm: #F6F5F2;
+  --surface-cream: #EFEDE8;
+  --surface-deep: #0A1A4A;
+  --ink-primary: #1A1A2E;
+  --ink-secondary: #4A4A5E;
+  --ink-muted: #7A7A8E;
+  --accent-gold: #C8A832;
+  --accent-gold-soft: #F5EED4;
+
+  /* Theme tokens */
+  --color-bg: var(--surface-warm);
+  --color-fg: var(--ink-primary);
+  --color-heading: var(--uofg-university-blue);
+  --color-accent: var(--uofg-dark-blue);
+
+  /*
+   * Override default Marp theme variables
+   */
+  --borderColor-default: transparent;
+  --bgColor-muted: transparent;
+  --bgColor-default: transparent;
+
+  /* Syntax highlighting — readable on dark navy code blocks */
+  --color-prettylights-syntax-comment: #8B95A8;
+  --color-prettylights-syntax-constant: #79C0FF;
+  --color-prettylights-syntax-entity: #D2A8FF;
+  --color-prettylights-syntax-entity-tag: #7EE787;
+  --color-prettylights-syntax-keyword: #FF7B72;
+  --color-prettylights-syntax-string: #A5D6FF;
+  --color-prettylights-syntax-variable: #FFA657;
+  --color-prettylights-syntax-brackethighlighter-angle: #9198A1;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #F85149;
+  --color-prettylights-syntax-carriage-return-bg: #B62324;
+  --color-prettylights-syntax-carriage-return-text: #F0F6FC;
+  --color-prettylights-syntax-markup-heading: #1F6FEB;
+  --color-prettylights-syntax-markup-bold: #F0F6FC;
+  --color-prettylights-syntax-markup-italic: #F0F6FC;
+  --color-prettylights-syntax-markup-list: #F2CC60;
+  --color-prettylights-syntax-storage-modifier-import: #D0D8E8;
+  --color-prettylights-syntax-string-regexp: #7EE787;
+}
+
+/* ============================================
+   BASE SLIDE
+   ============================================ */
+
+section {
+  width: 1280px;
+  height: 720px;
+  font-family: 'Noto Sans', system-ui, sans-serif;
+  font-size: 25px;
+  font-weight: 400;
+  line-height: 1.55;
+  padding: 64px 76px;
+  background-color: var(--color-bg);
+  color: var(--color-fg);
+  letter-spacing: -0.005em;
+}
+
+/* ============================================
+   HEADINGS — Literata display serif
+   ============================================ */
+
+section h1 {
+  font-family: 'Literata', Georgia, serif;
+  font-size: 2em;
+  font-weight: 700;
+  color: var(--color-heading);
+  margin-bottom: 20px;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  font-optical-sizing: auto;
+}
+
+section h2 {
+  font-family: 'Literata', Georgia, serif;
+  font-size: 1.4em;
+  font-weight: 600;
+  color: var(--uofg-blue-80);
+  margin-bottom: 14px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+section h3 {
+  font-family: 'Noto Sans', sans-serif;
+  font-weight: 600;
+  color: var(--uofg-dark-blue);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.78em;
+  margin-bottom: 10px;
+}
+
+section h4 {
+  font-family: 'Noto Sans', sans-serif;
+  font-size: 1em;
+  font-weight: 600;
+  color: var(--ink-secondary);
+}
+
+/* ============================================
+   BODY TEXT & LINKS
+   ============================================ */
+
+section p {
+  margin-bottom: 16px;
+  max-width: 72ch;
+}
+
+section a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-decoration-color: var(--uofg-blue-40);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 150ms ease;
+}
+
+section strong {
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
+/* ============================================
+   LISTS
+   ============================================ */
+
+section ul,
+section ol {
+  margin-bottom: 16px;
+  padding-left: 1.2em;
+}
+
+section li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+section ul > li::marker {
+  color: var(--accent-gold);
+  font-weight: 700;
+}
+
+section ol > li::marker {
+  color: var(--uofg-dark-blue);
+  font-weight: 600;
+}
+
+/* ============================================
+   CODE
+   ============================================ */
+
+section code {
+  font-family: 'Noto Sans Mono', 'Menlo', monospace;
+  font-size: 0.82em;
+  background-color: var(--surface-cream);
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: var(--uofg-university-blue);
+}
+
+section pre {
+  background-color: var(--surface-deep);
+  border-radius: 10px;
+  padding: 28px 32px;
+  margin: 20px 0;
+  overflow: visible;
+  box-shadow: 0 2px 16px rgba(1, 20, 81, 0.12);
+}
+
+section pre code {
+  background: transparent;
+  color: #B8C0D8;
+  font-size: 0.7em;
+  line-height: 1.6;
+  padding: 0;
+}
+
+/* ============================================
+   BLOCKQUOTES
+   ============================================ */
+
+section blockquote {
+  background-color: var(--accent-gold-soft);
+  border: none !important;
+  border-radius: 10px;
+  padding: 24px 32px;
+  margin: 24px 0;
+  position: relative;
+}
+
+section blockquote::before {
+  content: '\201C';
+  font-family: 'Literata', Georgia, serif;
+  font-size: 3em;
+  color: var(--accent-gold);
+  position: absolute;
+  top: -8px;
+  left: 16px;
+  line-height: 1;
+  opacity: 0.6;
+}
+
+section blockquote p {
+  font-family: 'Literata', Georgia, serif;
+  font-style: italic;
+  color: var(--ink-secondary);
+  margin: 0;
+  padding-left: 8px;
+  font-size: 0.95em;
+  line-height: 1.6;
+}
+
+/* ============================================
+   TABLES
+   ============================================ */
+
+section table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86em;
+  margin: 20px 0;
+}
+
+section table th {
+  background-color: var(--uofg-university-blue);
+  color: #FFFFFF;
+  font-weight: 600;
+  padding: 12px 18px;
+  text-align: left;
+  font-size: 0.9em;
+  letter-spacing: 0.02em;
+}
+
+section table th:first-child {
+  border-radius: 8px 0 0 0;
+}
+
+section table th:last-child {
+  border-radius: 0 8px 0 0;
+}
+
+section table td {
+  padding: 11px 18px;
+  border-bottom: 1px solid var(--surface-cream);
+}
+
+section table tr {
+  background-color: transparent !important;
+}
+
+/* ============================================
+   IMAGES
+   ============================================ */
+
+section img {
+  border-radius: 8px;
+}
+
+img[alt~="center"] {
+  display: block;
+  margin: 0 auto;
+}
+
+/* ============================================
+   HEADER & FOOTER
+   ============================================ */
+
+header {
+  position: absolute;
+  top: 24px;
+  left: 76px;
+  right: 76px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+footer {
+  position: absolute;
+  bottom: 24px;
+  left: 76px;
+  right: 76px;
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+/* ============================================
+   PAGINATION
+   ============================================ */
+
+section::after {
+  font-family: 'Noto Sans', sans-serif;
+  font-size: 12px;
+  color: var(--uofg-blue-40);
+  font-weight: 500;
+  bottom: 24px;
+  right: 76px;
+}
+
+/* ============================================
+   TITLE / LEAD SLIDES
+   ============================================ */
+
+section.lead {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: flex-end;
+  align-items: flex-start;
+  text-align: left;
+  background-color: var(--uofg-university-blue);
+  color: #FFFFFF;
+  padding: 64px 84px 80px;
+}
+
+section.lead h1 {
+  font-family: 'Literata', Georgia, serif;
+  font-size: 2.6em;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin-bottom: 16px;
+  max-width: 85%;
+  line-height: 1.08;
+}
+
+section.lead h2 {
+  font-family: 'Noto Sans', sans-serif;
+  font-size: 1em;
+  font-weight: 400;
+  color: var(--uofg-blue-20);
+  margin-bottom: 6px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+section.lead p {
+  color: var(--uofg-blue-40);
+  font-size: 0.85em;
+}
+
+section.lead a {
+  color: var(--accent-gold);
+  text-decoration-color: rgba(200, 168, 50, 0.4);
+}
+
+section.lead::after {
+  color: var(--uofg-blue-60);
+}
+
+/* ============================================
+   INVERTED SLIDES
+   ============================================ */
+
+section.invert {
+  background-color: var(--uofg-dark-blue);
+  color: #F0EDE6;
+}
+
+section.invert h1,
+section.invert h2 {
+  color: #FFFFFF;
+}
+
+section.invert h3 {
+  color: var(--uofg-blue-20);
+}
+
+section.invert strong {
+  color: var(--accent-gold);
+}
+
+section.invert code {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #D4D8E8;
+}
+
+section.invert blockquote {
+  background-color: rgba(255, 255, 255, 0.06);
+  border: none !important;
+}
+
+section.invert blockquote::before {
+  color: var(--accent-gold);
+  opacity: 0.4;
+}
+
+section.invert blockquote p {
+  color: var(--uofg-blue-20);
+}
+
+section.invert table th {
+  background-color: var(--uofg-university-blue);
+}
+
+section.invert table td {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+section.invert::after {
+  color: var(--uofg-blue-40);
+}
+
+/* ============================================
+   SECTION DIVIDER — use class "divider"
+   ============================================ */
+
+section.divider {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: flex-start;
+  background-color: var(--surface-cream);
+  padding: 64px 84px;
+}
+
+section.divider h1 {
+  font-family: 'Literata', Georgia, serif;
+  font-size: 2.2em;
+  font-weight: 800;
+  color: var(--uofg-university-blue);
+}
+
+section.divider h2 {
+  font-family: 'Noto Sans', sans-serif;
+  font-weight: 400;
+  font-size: 1em;
+  color: var(--ink-muted);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ============================================
+   HIGHLIGHT SLIDE — use class "highlight"
+   For key takeaways or standout quotes
+   ============================================ */
+
+section.highlight {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: flex-start;
+  background-color: var(--uofg-university-blue);
+  color: #FFFFFF;
+  padding: 64px 100px;
+}
+
+section.highlight h1 {
+  font-family: 'Literata', Georgia, serif;
+  font-size: 1.9em;
+  font-weight: 700;
+  color: var(--accent-gold);
+  line-height: 1.3;
+  max-width: 80%;
+}
+
+section.highlight p {
+  color: var(--uofg-blue-20);
+  font-size: 0.9em;
+  max-width: 65ch;
+}
+
+section.highlight::after {
+  color: var(--uofg-blue-60);
+}
+
+/* ============================================
+   TWO-COLUMN HELPER — use class "cols"
+   ============================================ */
+
+section.cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr;
+  gap: 0 56px;
+  align-items: start;
+}
+
+section.cols h1,
+section.cols h2 {
+  grid-column: 1 / -1;
+}

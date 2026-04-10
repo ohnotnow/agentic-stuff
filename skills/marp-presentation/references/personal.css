@@ -1,0 +1,517 @@
+/* @theme personal */
+
+/*
+ * Personal / Unconstrained Marp Theme
+ * Dark, warm, opinionated. No brand constraints.
+ * Bricolage Grotesque display + Hanken Grotesk body.
+ * Terracotta accent on deep warm surfaces.
+ */
+
+@import 'default';
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* Warm dark palette */
+  --bg-deep: #1C1917;
+  --bg-surface: #231F1C;
+  --bg-raised: #2C2724;
+  --bg-subtle: #36302C;
+
+  /* Warm light text */
+  --ink-primary: #E8E0D8;
+  --ink-secondary: #B8AFA6;
+  --ink-muted: #867E76;
+  --ink-faint: #5C5650;
+
+  /* Terracotta accent — warm, earthy, distinctive */
+  --accent: #C47A5A;
+  --accent-bright: #D4906E;
+  --accent-dim: #9C6248;
+  --accent-surface: rgba(196, 122, 90, 0.1);
+
+  /* Complementary cool accent for contrast */
+  --cool: #6A9CAE;
+  --cool-dim: #4E7A8A;
+
+  /* Status */
+  --success: #8AAE6A;
+  --warning: #C4A85A;
+  --error: #C45A5A;
+
+  /* Theme tokens */
+  --color-bg: var(--bg-deep);
+  --color-fg: var(--ink-primary);
+
+  /*
+   * Override default Marp theme variables
+   */
+  --borderColor-default: transparent;
+  --bgColor-muted: transparent;
+  --bgColor-default: transparent;
+  --fgColor-default: var(--ink-primary);
+  --fgColor-muted: var(--ink-muted);
+
+  /* Syntax highlighting — warm tones readable on dark brown code blocks */
+  --color-prettylights-syntax-comment: #867E76;
+  --color-prettylights-syntax-constant: #6A9CAE;
+  --color-prettylights-syntax-entity: #D4906E;
+  --color-prettylights-syntax-entity-tag: #8AAE6A;
+  --color-prettylights-syntax-keyword: #C47A5A;
+  --color-prettylights-syntax-string: #C4A85A;
+  --color-prettylights-syntax-variable: #6A9CAE;
+  --color-prettylights-syntax-brackethighlighter-angle: #867E76;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #C45A5A;
+  --color-prettylights-syntax-carriage-return-bg: #C45A5A;
+  --color-prettylights-syntax-carriage-return-text: #E8E0D8;
+  --color-prettylights-syntax-markup-heading: #D4906E;
+  --color-prettylights-syntax-markup-bold: #E8E0D8;
+  --color-prettylights-syntax-markup-italic: #E8E0D8;
+  --color-prettylights-syntax-markup-list: #C4A85A;
+  --color-prettylights-syntax-storage-modifier-import: #B8AFA6;
+  --color-prettylights-syntax-string-regexp: #8AAE6A;
+}
+
+/* ============================================
+   BASE SLIDE
+   ============================================ */
+
+section {
+  width: 1280px;
+  height: 720px;
+  font-family: 'Hanken Grotesk', system-ui, sans-serif;
+  font-size: 25px;
+  font-weight: 400;
+  line-height: 1.55;
+  padding: 60px 72px;
+  background-color: var(--color-bg);
+  color: var(--color-fg);
+  letter-spacing: -0.01em;
+}
+
+/* ============================================
+   HEADINGS — Bricolage Grotesque
+   ============================================ */
+
+section h1 {
+  font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+  font-size: 2em;
+  font-weight: 700;
+  color: var(--ink-primary);
+  margin-bottom: 18px;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  font-optical-sizing: auto;
+}
+
+section h2 {
+  font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+  font-size: 1.4em;
+  font-weight: 600;
+  color: var(--accent-bright);
+  margin-bottom: 14px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+section h3 {
+  font-family: 'Hanken Grotesk', sans-serif;
+  font-size: 0.78em;
+  font-weight: 600;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+}
+
+section h4 {
+  font-family: 'Hanken Grotesk', sans-serif;
+  font-size: 1em;
+  font-weight: 600;
+  color: var(--ink-secondary);
+}
+
+/* ============================================
+   BODY TEXT & LINKS
+   ============================================ */
+
+section p {
+  margin-bottom: 16px;
+  max-width: 68ch;
+  color: var(--ink-secondary);
+  line-height: 1.6;
+}
+
+section a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: var(--accent-dim);
+  text-underline-offset: 3px;
+}
+
+section strong {
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+section em {
+  font-style: italic;
+  color: var(--ink-secondary);
+}
+
+/* ============================================
+   LISTS
+   ============================================ */
+
+section ul,
+section ol {
+  margin-bottom: 16px;
+  padding-left: 1.2em;
+  color: var(--ink-secondary);
+}
+
+section li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+section ul > li::marker {
+  color: var(--accent);
+}
+
+section ol > li::marker {
+  color: var(--accent);
+  font-weight: 600;
+  font-family: 'Bricolage Grotesque', sans-serif;
+}
+
+/* ============================================
+   CODE
+   ============================================ */
+
+section code {
+  font-family: 'JetBrains Mono', 'Menlo', monospace;
+  font-size: 0.82em;
+  background-color: var(--bg-raised);
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: var(--accent-bright);
+}
+
+section pre {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--bg-subtle);
+  border-radius: 10px;
+  padding: 26px 30px;
+  margin: 20px 0;
+  overflow: visible;
+}
+
+section pre code {
+  background: transparent;
+  color: #D0C8C0;
+  font-size: 0.7em;
+  line-height: 1.6;
+  padding: 0;
+  border: none;
+}
+
+/* ============================================
+   BLOCKQUOTES
+   ============================================ */
+
+section blockquote {
+  background-color: var(--accent-surface);
+  border: none !important;
+  border-radius: 10px;
+  padding: 24px 32px;
+  margin: 24px 0;
+}
+
+section blockquote p {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 500;
+  color: var(--ink-primary);
+  margin: 0;
+  font-size: 1.05em;
+  line-height: 1.45;
+  font-style: normal;
+}
+
+/* ============================================
+   TABLES
+   ============================================ */
+
+section table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86em;
+  margin: 20px 0;
+}
+
+section table th {
+  background-color: var(--bg-raised);
+  color: var(--ink-primary);
+  font-weight: 600;
+  padding: 12px 18px;
+  text-align: left;
+  font-size: 0.88em;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+section table th:first-child {
+  border-radius: 8px 0 0 0;
+}
+
+section table th:last-child {
+  border-radius: 0 8px 0 0;
+}
+
+section table td {
+  padding: 11px 18px;
+  border-bottom: 1px solid var(--bg-subtle);
+  color: var(--ink-secondary);
+}
+
+section table tr {
+  background-color: transparent !important;
+}
+
+/* ============================================
+   IMAGES
+   ============================================ */
+
+section img {
+  border-radius: 8px;
+}
+
+img[alt~="center"] {
+  display: block;
+  margin: 0 auto;
+}
+
+/* ============================================
+   HEADER & FOOTER
+   ============================================ */
+
+header {
+  position: absolute;
+  top: 24px;
+  left: 72px;
+  right: 72px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-faint);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+footer {
+  position: absolute;
+  bottom: 24px;
+  left: 72px;
+  right: 72px;
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+/* ============================================
+   PAGINATION
+   ============================================ */
+
+section::after {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-faint);
+  font-weight: 500;
+  bottom: 24px;
+  right: 72px;
+}
+
+/* ============================================
+   TITLE / LEAD SLIDES
+   ============================================ */
+
+section.lead {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: flex-end;
+  align-items: flex-start;
+  text-align: left;
+  background-color: var(--bg-deep);
+  color: var(--ink-primary);
+  padding: 60px 80px 72px;
+}
+
+section.lead h1 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 2.8em;
+  font-weight: 800;
+  color: var(--ink-primary);
+  margin-bottom: 12px;
+  max-width: 90%;
+  line-height: 1.04;
+  letter-spacing: -0.04em;
+}
+
+section.lead h2 {
+  font-family: 'Hanken Grotesk', sans-serif;
+  font-size: 1em;
+  font-weight: 400;
+  color: var(--accent);
+  margin-bottom: 6px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+section.lead p {
+  color: var(--ink-muted);
+  font-size: 0.85em;
+}
+
+section.lead::after {
+  color: var(--ink-faint);
+}
+
+/* ============================================
+   LIGHT SLIDES — use class "light"
+   For when you need a white background break
+   ============================================ */
+
+section.light {
+  background-color: #F5F0EB;
+  color: #2C2724;
+}
+
+section.light h1 {
+  color: #1C1917;
+}
+
+section.light h2 {
+  color: var(--accent-dim);
+}
+
+section.light h3 {
+  color: #867E76;
+}
+
+section.light p {
+  color: #4A4540;
+}
+
+section.light code {
+  background-color: #E8E0D8;
+  color: var(--accent-dim);
+}
+
+section.light pre {
+  background-color: #1C1917;
+  border-color: transparent;
+}
+
+section.light pre code {
+  color: var(--ink-secondary);
+}
+
+section.light blockquote {
+  background-color: rgba(196, 122, 90, 0.08);
+  border: none !important;
+}
+
+section.light table th {
+  background-color: #2C2724;
+  color: var(--ink-primary);
+}
+
+section.light table td {
+  border-bottom-color: #D8D0C8;
+}
+
+section.light::after {
+  color: #B8AFA6;
+}
+
+section.light ul > li::marker,
+section.light ol > li::marker {
+  color: var(--accent-dim);
+}
+
+/* ============================================
+   SECTION DIVIDER — use class "divider"
+   ============================================ */
+
+section.divider {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: flex-start;
+  background-color: var(--bg-surface);
+  padding: 60px 80px;
+}
+
+section.divider h1 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 2.4em;
+  font-weight: 800;
+  color: var(--ink-primary);
+  letter-spacing: -0.04em;
+}
+
+section.divider h2 {
+  font-family: 'Hanken Grotesk', sans-serif;
+  font-weight: 400;
+  font-size: 1em;
+  color: var(--ink-muted);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ============================================
+   ACCENT SLIDE — use class "accent"
+   Terracotta background for impact moments
+   ============================================ */
+
+section.accent {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: flex-start;
+  background-color: var(--accent);
+  color: #1C1917;
+  padding: 60px 88px;
+}
+
+section.accent h1 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 2em;
+  font-weight: 800;
+  color: #1C1917;
+  max-width: 75%;
+  line-height: 1.15;
+}
+
+section.accent p {
+  color: rgba(28, 25, 23, 0.7);
+  max-width: 60ch;
+}
+
+section.accent::after {
+  color: rgba(28, 25, 23, 0.3);
+}
+
+/* ============================================
+   TWO-COLUMN HELPER — use class "cols"
+   ============================================ */
+
+section.cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr;
+  gap: 0 52px;
+  align-items: start;
+}
+
+section.cols h1,
+section.cols h2 {
+  grid-column: 1 / -1;
+}
