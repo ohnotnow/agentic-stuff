@@ -21,6 +21,8 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 - `golang` -- Conventions and patterns for Go CLI/TUI projects. Covers project layout, SQLite storage, Bubble Tea TUIs, embedded web UIs, flag parsing, migrations, error handling, and testing.
 - `grounded-recommendation` -- Makes the agent investigate before recommending. Present findings first, then a recommendation with explicit uncertainty.
 - `larastan` -- Installs and runs PHPStan + Larastan, separates framework false positives from real defects, and iterates through analysis levels.
+- `marp-presentation` -- Guided workflow for creating Marp slide decks. Asks about audience and source material, picks from three bundled themes, and handles setup, compilation, and preview. Turns notes, CSVs, or just a topic into polished slides.
+- `marp-theme-creator` -- Creates custom Marp presentation themes from a vibe or description. Walks through palette, font, and layout decisions, then generates production-ready CSS with a themed sample deck. Detects the `i-impeccable` skill for enhanced design thinking.
 - `laravel-cloud` -- Deploy, update, and tear down demo apps on Laravel Cloud using the `cloud` CLI.
 - `modern-livewire` -- How we write Livewire components: principles, patterns, form state, testing. Covers everything from `findOrNew`+`fill`+`save` to named modals and `wire:model` behaviour.
 - `quality-gate` -- Runs review agents (test quality, complexity, security, Livewire/Flux patterns) after feature work. Confirms before running due to token cost.
