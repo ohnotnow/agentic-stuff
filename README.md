@@ -36,6 +36,7 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 ## Agents
 
 - `ait-audit.md` -- Reviews open `ait` issues against the codebase and flags work that looks done but hasn't been closed.
+- `fresh-eyes.md` -- Fresh pair of eyes for when you're stuck or looping. Suggests one or two things to try rather than editing code directly.
 - `humaniser.md` -- Removes common AI-writing patterns from text files like READMEs and docs.
 - `laravel-owasp-reporter.md` -- OWASP-aligned security sweep of a Laravel app. Reports actual exploitable findings with concrete fixes.
 - `livewire-flux-reviewer.md` -- Reviews Livewire/Flux code for simplification opportunities. Quick wins, things worth considering, and what looks good. References `flux-ui` and `modern-livewire` skills for pattern details.
