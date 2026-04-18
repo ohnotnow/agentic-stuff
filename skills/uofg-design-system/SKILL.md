@@ -196,6 +196,10 @@ The design system takes WCAG compliance seriously:
 - Responsive reflow: no two-dimensional scrolling at ≥320px width.
 - Spacing: consistent spacing aids cognitive accessibility and visual processing.
 
+## Creative projects with UofG foundations
+
+For projects that need UofG brand recognition but more visual flair than strict brand compliance allows (e.g. public-facing slideshows, infographics, or content shared beyond the university), consider using the `i-impeccable` skill with its **brand-creative** mode. Run `/i-impeccable teach` — it will detect this UofG skill and offer three modes: pure brand, brand-creative, or unconstrained. Brand-creative locks in the UofG palette, Noto Sans, and accessibility requirements as constraints, but applies Impeccable's creative thinking to layout, motion, typography pairing, and surface treatments.
+
 ## Quick start
 
 When building a UofG-compliant page, start with:
