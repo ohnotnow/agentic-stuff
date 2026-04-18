@@ -120,7 +120,7 @@ Check if a `LICENSE` file exists in the project root.
 If no LICENSE exists:
 
 1. Gather candidate names for attribution:
-   - Check the user's memory files for a stored license attribution name.
+   - Check the user's memory files or use the user-memories MCP (if available) for a stored license attribution name.
    - Run `git config user.name` for their git identity.
    - Extract the GitHub username or org name from the repo URL (the owner portion of `owner/repo`).
 2. **If a stored name is found in memory**: Ask with a light touch: "Shall I add an MIT License attributed to **[Name]**? (Or would you prefer a different name for this one?)"
