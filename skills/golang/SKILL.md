@@ -283,6 +283,72 @@ var (
 - Check `m.err` first — early return if in error state.
 - Status/feedback messages are transient — clear on next keypress.
 
+### Multi-column layouts — avoid the lipgloss Width() footgun
+
+When building side-by-side panes (e.g. a list column + preview column), do
+**not** nest styled strings inside a block that has `Width()` set:
+
+```go
+// BROKEN: lipgloss miscounts visible width of the nested styles
+// and wraps the row, eating a visible line.
+row := "▸ " + styleSubtle.Render(date) + " " + label
+leftBox := lipgloss.NewStyle().Width(leftWidth).Render(row)
+```
+
+The inner `styleSubtle.Render` emits ANSI resets that confuse the outer
+`Width()`'s visible-width calculation. It decides the row is over-budget and
+wraps it, which renders as a blank leading line that looks like your content
+has disappeared.
+
+Instead, pre-pad each row to its exact visible width yourself, then join the
+columns with `lipgloss.JoinHorizontal`:
+
+```go
+func padToWidth(s string, w int) string {
+    vw := lipgloss.Width(s)
+    if vw >= w {
+        return s
+    }
+    return s + strings.Repeat(" ", w-vw)
+}
+
+// Build each column as pre-padded lines, then join — no outer Width() wrap.
+leftCol  := strings.Join(leftLines, "\n")
+rightCol := strings.Join(rightLines, "\n")
+view := lipgloss.JoinHorizontal(lipgloss.Top, leftCol, " │ ", rightCol)
+```
+
+`lipgloss.Width(s)` is ANSI-aware and measures correctly, so use it for the
+visible-width check. The outer layout is then just text, and JoinHorizontal
+aligns by the tallest block.
+
+### Shelling out to $EDITOR or other external programs
+
+When the TUI needs to suspend itself and hand the terminal over to another
+program (an editor, `less`, `git diff`, etc.), use `tea.ExecProcess`. It
+releases the alt-screen, runs the command inheriting stdin/stdout/stderr, then
+resumes the TUI and fires a completion message:
+
+```go
+type editorFinishedMsg struct{ err error }
+
+func openEditorCmd(path string) tea.Cmd {
+    editor := os.Getenv("EDITOR")
+    if editor == "" {
+        editor = "vi"
+    }
+    c := exec.Command(editor, path)
+    return tea.ExecProcess(c, func(err error) tea.Msg {
+        return editorFinishedMsg{err: err}
+    })
+}
+```
+
+In your `Update`, handle `editorFinishedMsg` to reload whatever the editor
+might have changed (e.g. re-read the file from disk, refresh a list). Don't
+try to run the editor inline with `exec.Command(...).Run()` — the alt-screen
+and bubbletea input handling will fight you.
+
 ---
 
 ## Embedded Web UI
