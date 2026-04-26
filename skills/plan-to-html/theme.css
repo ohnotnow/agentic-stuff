@@ -1,0 +1,397 @@
+/*
+ * plan-to-html — University of Glasgow theme
+ *
+ * Standalone stylesheet. Override or replace freely; the generator inlines
+ * whatever CSS file it is pointed at. Tokens are based on
+ * https://design.gla.ac.uk
+ */
+
+:root {
+  /* Brand */
+  --uofg-university-blue: #011451;
+  --uofg-blue: #005398;
+  --uofg-blue-80: #344374;
+  --uofg-blue-20: #CCD0DC;
+  --uofg-blue-10: #E6E7EE;
+  --uofg-highlight: #FFDD00;
+
+  /* Vanilla */
+  --uofg-dark-grey-3: #323232;
+  --uofg-dark-grey-1: #666666;
+  --uofg-mid-grey-3: #757575;
+  --uofg-light-grey-1: #F5F5F5;
+  --uofg-light-grey-2: #E6E6E6;
+  --uofg-light-grey-3: #CCCCCC;
+  --uofg-white: #FFFFFF;
+
+  /* Type */
+  --font-sans: 'Noto Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+
+  /* Layout */
+  --measure: 72ch;
+  --radius: 6px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--uofg-dark-grey-3);
+  background: var(--uofg-light-grey-1);
+}
+
+/* ---------- Header band ---------- */
+
+.plan-header {
+  background:
+    linear-gradient(135deg, var(--uofg-university-blue) 0%, var(--uofg-blue) 100%);
+  color: var(--uofg-white);
+  padding: 3.25rem 1.5rem 2.75rem;
+  border-bottom: 4px solid var(--uofg-highlight);
+}
+
+.plan-header__inner {
+  max-width: var(--measure);
+  margin: 0 auto;
+}
+
+.plan-header__title {
+  font-size: clamp(1.75rem, 3.2vw, 2.5rem);
+  line-height: 1.15;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+  letter-spacing: -0.01em;
+}
+
+.plan-header__meta {
+  font-size: 0.95rem;
+  color: var(--uofg-blue-20);
+  margin: 0;
+}
+
+.plan-header__meta span + span::before {
+  content: "·";
+  margin: 0 0.55rem;
+  color: var(--uofg-blue-20);
+  opacity: 0.6;
+}
+
+/* ---------- Content ---------- */
+
+.plan-main {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 2.75rem 1.5rem 4rem;
+  background: var(--uofg-white);
+}
+
+@media (min-width: 768px) {
+  .plan-main {
+    margin: -1.5rem auto 0;
+    padding: 3rem 3rem 4rem;
+    border-radius: var(--radius);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(1, 20, 81, 0.06);
+  }
+}
+
+/* ---------- Background accordion ---------- */
+
+.plan-context {
+  margin: 0 0 2rem;
+  border: 1px solid var(--uofg-light-grey-2);
+  border-left: 3px solid var(--uofg-blue);
+  border-radius: var(--radius);
+  background: var(--uofg-light-grey-1);
+  overflow: hidden;
+}
+
+.plan-context > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 0.85rem 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-weight: 600;
+  color: var(--uofg-university-blue);
+  user-select: none;
+  outline: none;
+}
+
+.plan-context > summary::-webkit-details-marker { display: none; }
+
+.plan-context > summary::after {
+  content: "";
+  width: 0.55rem;
+  height: 0.55rem;
+  border-right: 2px solid var(--uofg-blue);
+  border-bottom: 2px solid var(--uofg-blue);
+  transform: rotate(45deg);
+  transition: transform var(--uofg-transition-fast, 150ms ease);
+  margin-left: 0.5rem;
+}
+
+.plan-context[open] > summary::after {
+  transform: rotate(-135deg);
+}
+
+.plan-context > summary:focus-visible {
+  outline: 3px solid var(--uofg-highlight);
+  outline-offset: -3px;
+}
+
+.plan-context__body {
+  padding: 0.25rem 1.1rem 1rem;
+  border-top: 1px solid var(--uofg-light-grey-2);
+  background: var(--uofg-white);
+}
+
+.plan-context__body > :first-child { margin-top: 0.9rem; }
+.plan-context__body > :last-child  { margin-bottom: 0; }
+
+/* Headings */
+
+.plan-main h1,
+.plan-main h2,
+.plan-main h3,
+.plan-main h4,
+.plan-main h5,
+.plan-main h6 {
+  color: var(--uofg-university-blue);
+  line-height: 1.25;
+  font-weight: 700;
+  margin: 2.25rem 0 0.75rem;
+}
+
+.plan-main > h1:first-child,
+.plan-main > h2:first-child {
+  margin-top: 0;
+}
+
+.plan-main h1 { font-size: 1.85rem; }
+.plan-main h2 {
+  font-size: 1.45rem;
+  padding: 0.15rem 0 0.15rem 0.95rem;
+  border-left: 6px solid var(--uofg-university-blue);
+}
+.plan-main h3 {
+  font-size: 1.15rem;
+  color: var(--uofg-blue);
+}
+.plan-main h4 {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--uofg-dark-grey-1);
+}
+
+/* Paragraphs */
+
+.plan-main p {
+  margin: 0 0 1.1rem;
+}
+
+/* Links */
+
+.plan-main a {
+  color: var(--uofg-blue);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.plan-main a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Lists */
+
+.plan-main ul,
+.plan-main ol {
+  margin: 0 0 1.1rem;
+  padding-left: 1.4rem;
+}
+
+.plan-main li {
+  margin-bottom: 0.4rem;
+}
+
+.plan-main li > ul,
+.plan-main li > ol {
+  margin-top: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+/* GitHub-style task lists — checkbox replaces the bullet */
+.plan-main ul.task-list {
+  list-style: none;
+  padding-left: 0.25rem;
+}
+
+.plan-main ul.task-list ul.task-list {
+  padding-left: 1.25rem;
+}
+
+.plan-main li.task-list-item {
+  padding-left: 0;
+}
+
+.plan-main li.task-list-item input[type="checkbox"] {
+  margin-right: 0.55rem;
+  transform: translateY(1px);
+}
+
+/* Code */
+
+.plan-main code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--uofg-light-grey-1);
+  padding: 0.12em 0.4em;
+  border-radius: 4px;
+  color: var(--uofg-university-blue);
+}
+
+.plan-main pre {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.55;
+  background: var(--uofg-light-grey-1);
+  border: 1px solid var(--uofg-light-grey-2);
+  border-left: 3px solid var(--uofg-blue);
+  border-radius: var(--radius);
+  padding: 1rem 1.15rem;
+  overflow-x: auto;
+  margin: 1.2rem 0 1.4rem;
+}
+
+.plan-main pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+
+/* Blockquote */
+
+.plan-main blockquote {
+  margin: 1.4rem 0;
+  padding: 0.6rem 1.2rem;
+  border-left: 4px solid var(--uofg-blue);
+  background: var(--uofg-blue-10);
+  color: var(--uofg-dark-grey-3);
+  font-style: italic;
+}
+
+.plan-main blockquote p:last-child { margin-bottom: 0; }
+
+/* Tables */
+
+.plan-main table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.4rem 0 1.6rem;
+  font-size: 0.95rem;
+}
+
+.plan-main th {
+  text-align: left;
+  background: var(--uofg-blue);
+  color: var(--uofg-white);
+  font-weight: 600;
+  padding: 0.65rem 0.85rem;
+}
+
+.plan-main td {
+  padding: 0.6rem 0.85rem;
+  border-bottom: 1px solid var(--uofg-light-grey-2);
+  vertical-align: top;
+}
+
+.plan-main tbody tr:nth-child(even) {
+  background: var(--uofg-light-grey-1);
+}
+
+/* Horizontal rule */
+
+.plan-main hr {
+  border: none;
+  border-top: 1px solid var(--uofg-light-grey-2);
+  margin: 2.25rem 0;
+}
+
+/* If a thematic break sits immediately before a heading, the heading's own
+   styling already provides a section break — hide the redundant rule. */
+.plan-main hr:has(+ h1),
+.plan-main hr:has(+ h2),
+.plan-main hr:has(+ h3) {
+  display: none;
+}
+
+/* Images */
+
+.plan-main img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+}
+
+/* Footer */
+
+.plan-footer {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 3rem;
+  font-size: 0.8rem;
+  color: var(--uofg-mid-grey-3);
+  text-align: center;
+}
+
+.plan-footer a { color: inherit; }
+
+/* ---------- Print ---------- */
+
+@media print {
+  body {
+    background: var(--uofg-white);
+    font-size: 11pt;
+    line-height: 1.45;
+  }
+
+  .plan-header {
+    background: var(--uofg-white);
+    color: var(--uofg-university-blue);
+    border-bottom: 2px solid var(--uofg-university-blue);
+    padding: 1rem 0 1rem;
+  }
+
+  .plan-header__meta {
+    color: var(--uofg-dark-grey-1);
+  }
+
+  .plan-main {
+    box-shadow: none;
+    margin: 0;
+    padding: 1rem 0;
+    max-width: none;
+    border-radius: 0;
+  }
+
+  .plan-main h1,
+  .plan-main h2 { page-break-after: avoid; }
+
+  .plan-main pre,
+  .plan-main blockquote,
+  .plan-main table { page-break-inside: avoid; }
+
+  .plan-main a { color: inherit; text-decoration: underline; }
+
+  .plan-footer { display: none; }
+}
