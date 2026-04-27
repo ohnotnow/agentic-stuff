@@ -29,6 +29,7 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 - `laravel-cloud` -- Deploy, update, and tear down demo apps on Laravel Cloud using the `cloud` CLI.
 - `modern-livewire` -- How we write Livewire components: principles, patterns, form state, testing. Covers everything from `findOrNew`+`fill`+`save` to named modals and `wire:model` behaviour.
 - `plan-to-html` -- Converts markdown plans, design docs, and issue writeups into self-contained HTML documents for sharing with non-technical stakeholders. Includes a stylesheet you can customise, optional author/title metadata, print-friendly output, and an optional Background preamble for context.
+- `practical-laravel-api` -- Conventions for practical, consumer-friendly Laravel JSON APIs with Sanctum. Covers self-describing response shapes, loud query failures, slugs, date windows, filtering, Scramble docs, and tests for API contracts.
 - `quality-gate` -- Runs review agents (test quality, complexity, security, Livewire/Flux patterns) after feature work. Confirms before running due to token cost.
 - `ui-to-flux` -- Migration skill for converting older Laravel apps (Bulma, Bootstrap, Tailwind) to Flux UI. References `flux-ui` and `modern-livewire` for target patterns rather than duplicating them.
 - `readme` -- Generates a README from the actual codebase so claims stay grounded.
