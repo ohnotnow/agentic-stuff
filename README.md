@@ -14,6 +14,7 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 
 - `ait` -- Local-first [issue tracker for coding agents](https://github.com/ohnotnow/agent-issue-tracker). Tracks tasks, models dependencies, and helps agents pick up where they left off after session loss.
 - `ait-recap` -- Generates a friendly markdown recap of recent `ait` activity for the current project or across a directory of projects. Handy for weekly status updates, "what shipped recently?" questions, and quick memory refreshers.
+- `ant` -- Local-first notebook for the *why* behind project work. Captures decisions, alternatives rejected, pivots, and foundation context as a sibling to `ait`'s task tracking.
 - `changelog` -- Analyses git tags and diffs to draft `CHANGELOG.md` entries in Keep a Changelog format. Proposes changes for review rather than writing them directly.
 - `conversation-to-html` -- Turns Claude Code or Codex session logs into single-file HTML transcripts you can share or present.
 - `feature-workflow` -- Streamlined workflow for building features with `ait` issue tracking. Handles orientation, planning (via plan mode), issue creation (via `plan-to-ait`), implementation with acceptance criteria checking, and optional quality gate at the end.
