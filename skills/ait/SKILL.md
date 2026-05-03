@@ -62,7 +62,7 @@ ait update <id> --priority P0          # Change priority
 ```bash
 ait close <id>                # Close a single issue
 ait close <id> --cascade      # Close an epic and all its descendants
-ait close <id> --reason "Done — merged in PR #42"  # Add a note then close
+ait close <id> --note "Done — merged in PR #42"    # Add a closing note then close (--reason is an alias)
 ait cancel <id>               # Cancel an issue
 ait reopen <id>               # Reopen a closed or cancelled issue
 ```
@@ -188,6 +188,23 @@ By default all commands return JSON — compact and token-efficient for agents.
 - `--tree` shows parent-child hierarchy with tree connectors
 - `--human` and `--tree` are mutually exclusive
 - All display modes support the same filters (`--type`, `--status`, `--priority`)
+
+### Mutating commands return slim refs
+
+`create`, `update`, `close`, `cancel`, `reopen`, `claim`, `unclaim` return a
+slim ref `{id, title, status, type, priority}` — enough to chain into the next
+command without burning context on a full record echo. `dep add`, `dep remove`,
+and `note add` return a slim ack `{ok: true, ...ids}`. Pass `--long` on any of
+these to get the full record back when you actually need it (e.g. confirming
+a description was set, or reading `claimed_by` after a claim).
+
+### `list` and `hidden_count`
+
+By default `ait list` excludes closed and cancelled issues. The response
+includes a `hidden_count` field telling you how many issues are being filtered
+out, so an empty-looking response when the project is full of closed work is
+never a surprise. Pass `--all` to see everything; the `hidden_count` field is
+omitted when nothing is hidden.
 
 ## Initialisation
 
