@@ -4,7 +4,7 @@ description: >
   Users conventions and patterns for Go CLI/TUI projects. Use when working on a Go
   project
 allowed-tools: "Read,Write,Edit,Bash,Glob,Grep"
-version: "0.3.0"
+version: "0.4.0"
 author: "ohnotnow <https://github.com/ohnotnow>"
 license: "MIT"
 ---
@@ -14,6 +14,32 @@ license: "MIT"
 Standards for building small, focused Go tools — single self-contained binaries
 that are easy to share and cross-compile. These are opinionated defaults, not
 laws. Scale up or down based on the project.
+
+## Conditional sections
+
+This skill is split across files. SKILL.md (this file) covers conventions that
+apply to any Go CLI. Two satellite files cover situational topics — only read
+them when relevant:
+
+- **`TUI.md`** — Bubble Tea, lipgloss, huh, theming, the `Width()` footgun,
+  shelling out to `$EDITOR`.
+  Read when: `go.mod` imports `github.com/charmbracelet/...`, **or** the user's
+  request mentions a TUI / Bubble Tea / interactive terminal UI / list / form /
+  picker, **or** you're starting a new project and the user has described
+  something interactive.
+- **`WEB.md`** — embedded web UI conventions (`serve` subcommand, `go:embed`,
+  `http.Handler` patterns, JSON API).
+  Read when: the project has a `serve` subcommand or imports `net/http` for
+  serving (not just fetching), **or** the user's request mentions a web
+  dashboard, browser UI, or `serve` command.
+
+Don't load these defensively — the savings only work if you actually skip
+them when they don't apply. If a session shifts direction (a CLI gains a TUI,
+a tool grows a `serve` command), pull the satellite file in mid-session.
+
+Reusable code lives under `templates/` (e.g. `templates/theme/nord.go` for
+Nord-themed lipgloss + huh styles) and is referenced from the satellite that
+covers it.
 
 ## Project Layout
 
@@ -206,227 +232,6 @@ func runMigrations(ctx context.Context, db *sql.DB) error {
 
 ---
 
-## TUI (Bubble Tea)
-
-For interactive terminal UIs, use the Charmbracelet stack.
-
-### Dependencies
-```
-github.com/charmbracelet/bubbletea    # TUI framework (Elm architecture)
-github.com/charmbracelet/lipgloss     # Styling
-github.com/charmbracelet/huh          # Forms (input, textarea, select)
-github.com/charmbracelet/bubbles      # Widgets (table, etc.) — as needed
-```
-
-Use `huh` whenever the TUI needs user input beyond single keypresses (adding
-items, editing fields, etc.). It handles focus, validation, and tab-navigation
-so you don't have to.
-
-### Model structure
-Single model struct, mode-based dispatch:
-
-```go
-type mode int
-
-const (
-    modeTable mode = iota
-    modeAdd
-    modeEdit
-    modeConfirmDelete
-    modeFilter
-)
-
-type model struct {
-    mode    mode
-    store   *Store
-    items   []Item
-    cursor  int
-    status  string    // Transient feedback ("Item added.", "Error: ...")
-    err     string    // Fatal error (shown instead of UI)
-    filter  string    // Current search/filter text
-    form    *huh.Form // Active form (nil when not in form mode)
-    // ... mode-specific state
-}
-```
-
-### Keyboard navigation — think vim
-The goal is always: in and out, done. Single-key actions for core functions, no
-modifier combos required. Cursor keys work, but power users shouldn't need them.
-
-**Standard keybindings to follow where applicable:**
-- `q` / `ctrl+c` — quit
-- `j` / `k` / `↑` / `↓` — navigate list
-- `/` — search/filter mode (incremental, like vim)
-- `1`-`9` — jump directly to item by index
-- `a` — add new item
-- `e` / `Enter` — edit selected item
-- `d` — mark done / toggle completion
-- `x` — delete (with confirmation)
-- `Esc` — cancel current mode, return to main view
-
-Not every app needs all of these. But when a function maps to one of these keys,
-use the standard binding. Consistency across tools is the point.
-
-### Styling
-Define lipgloss styles as package-level variables. Reuse across the View function:
-
-```go
-var (
-    styleTitle  = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("205"))
-    styleSubtle = lipgloss.NewStyle().Foreground(lipgloss.Color("241"))
-    styleError  = lipgloss.NewStyle().Foreground(lipgloss.Color("196"))
-)
-```
-
-### View rendering
-- Use `strings.Builder` for efficient rendering.
-- Check `m.err` first — early return if in error state.
-- Status/feedback messages are transient — clear on next keypress.
-
-### Multi-column layouts — avoid the lipgloss Width() footgun
-
-When building side-by-side panes (e.g. a list column + preview column), do
-**not** nest styled strings inside a block that has `Width()` set:
-
-```go
-// BROKEN: lipgloss miscounts visible width of the nested styles
-// and wraps the row, eating a visible line.
-row := "▸ " + styleSubtle.Render(date) + " " + label
-leftBox := lipgloss.NewStyle().Width(leftWidth).Render(row)
-```
-
-The inner `styleSubtle.Render` emits ANSI resets that confuse the outer
-`Width()`'s visible-width calculation. It decides the row is over-budget and
-wraps it, which renders as a blank leading line that looks like your content
-has disappeared.
-
-Instead, pre-pad each row to its exact visible width yourself, then join the
-columns with `lipgloss.JoinHorizontal`:
-
-```go
-func padToWidth(s string, w int) string {
-    vw := lipgloss.Width(s)
-    if vw >= w {
-        return s
-    }
-    return s + strings.Repeat(" ", w-vw)
-}
-
-// Build each column as pre-padded lines, then join — no outer Width() wrap.
-leftCol  := strings.Join(leftLines, "\n")
-rightCol := strings.Join(rightLines, "\n")
-view := lipgloss.JoinHorizontal(lipgloss.Top, leftCol, " │ ", rightCol)
-```
-
-`lipgloss.Width(s)` is ANSI-aware and measures correctly, so use it for the
-visible-width check. The outer layout is then just text, and JoinHorizontal
-aligns by the tallest block.
-
-### Shelling out to $EDITOR or other external programs
-
-When the TUI needs to suspend itself and hand the terminal over to another
-program (an editor, `less`, `git diff`, etc.), use `tea.ExecProcess`. It
-releases the alt-screen, runs the command inheriting stdin/stdout/stderr, then
-resumes the TUI and fires a completion message:
-
-```go
-type editorFinishedMsg struct{ err error }
-
-func openEditorCmd(path string) tea.Cmd {
-    editor := os.Getenv("EDITOR")
-    if editor == "" {
-        editor = "vi"
-    }
-    c := exec.Command(editor, path)
-    return tea.ExecProcess(c, func(err error) tea.Msg {
-        return editorFinishedMsg{err: err}
-    })
-}
-```
-
-In your `Update`, handle `editorFinishedMsg` to reload whatever the editor
-might have changed (e.g. re-read the file from disk, refresh a list). Don't
-try to run the editor inline with `exec.Command(...).Run()` — the alt-screen
-and bubbletea input handling will fight you.
-
----
-
-## Embedded Web UI
-
-Some CLI tools benefit from a `serve` command that launches a local web UI —
-for browsing data at a glance, sharing with non-terminal users, or when the
-dataset is better suited to a grid/card layout than a terminal table. The key
-principle: the web UI ships inside the binary. No external files, no npm, no
-build step for the frontend.
-
-### Embedding static files
-
-Use `go:embed` to bake HTML/CSS/JS into the binary:
-
-```go
-package web
-
-import "embed"
-
-//go:embed static/index.html
-var indexHTML []byte
-```
-
-Keep the frontend as a single `index.html` file with inline CSS and JS. This
-keeps embedding trivial and avoids needing a static file server for multiple
-assets. For anything beyond a simple dashboard, a single HTML file with vanilla
-JS is still preferable to introducing a JS build pipeline.
-
-### HTTP routing
-
-Implement `http.Handler` directly — no framework needed. A switch on
-`r.URL.Path` (or `r.URL.Path` + `r.Method` for REST-ish APIs) is fine:
-
-```go
-type Server struct {
-    db *db.DB
-}
-
-func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-    switch {
-    case r.URL.Path == "/" || r.URL.Path == "/index.html":
-        w.Header().Set("Content-Type", "text/html")
-        w.Write(indexHTML)
-    case r.URL.Path == "/api/items" && r.Method == http.MethodGet:
-        s.handleListItems(w, r)
-    case r.URL.Path == "/api/items" && r.Method == http.MethodPost:
-        s.handleCreateItem(w, r)
-    default:
-        http.NotFound(w, r)
-    }
-}
-```
-
-### JSON API conventions
-
-- Request bodies: JSON (`json.NewDecoder(r.Body)`)
-- Responses: JSON with `Content-Type: application/json`
-- Query parameters for filtering/searching (`r.URL.Query().Get("q")`)
-- Error responses: appropriate HTTP status codes (400, 404, 409) with a JSON
-  body: `{"error": "message"}`
-- No CORS headers needed — the frontend is served from the same origin
-
-### The `serve` command
-
-Add it as a subcommand with an optional port flag (default 8080):
-
-```go
-case "serve":
-    fs := flag.NewFlagSet("serve", flag.ContinueOnError)
-    port := fs.String("port", "8080", "port to listen on")
-    fs.Parse(args)
-    srv := &web.Server{DB: database}
-    fmt.Printf("Listening on http://localhost:%s\n", *port)
-    http.ListenAndServe(":"+*port, srv)
-```
-
----
-
 ## Configuration
 
 - **Project-scoped tools** (end user is an agent or the tool is per-repo):
@@ -574,7 +379,7 @@ GOOS=windows GOARCH=amd64 go build -o <name>.exe .
 ## Out of Scope
 
 This skill does not cover:
-- Standalone web services / HTTP APIs (embedded web UIs for CLI tools are covered)
+- Standalone web services / HTTP APIs (embedded web UIs for CLI tools are covered in WEB.md)
 - Multi-package library design
 - Anything requiring CGo
 - JS build pipelines or frontend frameworks (keep embedded UIs as vanilla HTML/JS)
