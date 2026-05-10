@@ -24,6 +24,22 @@ CONTENT_TYPES = {
     "commands": REPO_DIR / "commands",
 }
 
+TYPE_LETTER = {"skills": "s", "agents": "a", "commands": "c"}
+
+
+USAGE = """\
+Usage:
+  ./sync                          # configured full sync (uses sync.yaml targets)
+  ./sync pick --to PATH           # interactive multi-select copy into PATH/<type>/
+  ./sync preset NAME --to PATH    # copy a named bundle into PATH/<type>/
+
+Flags (any mode):
+  --dry-run    preview only
+  --force      overwrite without prompting
+
+PATH is the base — items land in PATH/skills/<name>, PATH/agents/<name>, etc.
+"""
+
 
 def load_config() -> dict:
     if not CONFIG_FILE.exists():
@@ -165,9 +181,167 @@ def sync_target(
                 skipped.append((dest, item))
 
 
+def collect_all_items() -> list[tuple[str, str, Path]]:
+    """List every (type, name, src) triple available in the repo."""
+    items: list[tuple[str, str, Path]] = []
+    for content_type, repo_subdir in CONTENT_TYPES.items():
+        if not repo_subdir.exists():
+            continue
+        for item in sorted(repo_subdir.iterdir()):
+            if item.name.startswith("."):
+                continue
+            items.append((content_type, item.name, item))
+    return items
+
+
+def apply_picks(
+    chosen: list[tuple[str, str, Path]],
+    to: Path,
+    force: bool,
+    dry_run: bool = False,
+) -> None:
+    if not chosen:
+        print("Nothing to copy.")
+        return
+
+    if dry_run:
+        print(f"\nDry run — would copy {len(chosen)} item(s) to {to}:\n")
+        for ct, name, _ in chosen:
+            dest = to / ct / name
+            exists = "exists" if dest.exists() else "new"
+            print(f"  {ct}/{name} → {dest} ({exists})")
+        return
+
+    print(f"\nCopying {len(chosen)} item(s) to {to}:\n")
+    skipped: list[tuple[Path, Path]] = []
+    for ct, name, src in chosen:
+        dest = to / ct / name
+        status = sync_item(src, dest, force=force)
+        icon = "✓" if status == "synced" else ("→" if status == "unchanged" else "⊘")
+        print(f"  {icon} {ct}/{name} → {status}")
+        if "skipped" in status:
+            skipped.append((dest, src))
+
+    if skipped:
+        print("\n⚠  Skipped (destination newer than repo):")
+        for dest, src in skipped:
+            print(f"  {dest}")
+            print(f"    ← repo: {src}")
+
+    print("\nDone.")
+
+
+FZF_PREVIEW = (
+    "if [ -d {2} ]; then "
+    "cat {2}/SKILL.md 2>/dev/null | head -80; "
+    "else cat {2} 2>/dev/null | head -80; fi"
+)
+
+
+def picker_mode(to: Path, force: bool, dry_run: bool) -> None:
+    if not shutil.which("fzf"):
+        print(
+            "pick mode needs fzf on PATH.\n"
+            "Install it (https://github.com/junegunn/fzf) "
+            "or use `./sync preset NAME --to PATH` instead."
+        )
+        sys.exit(1)
+
+    items = collect_all_items()
+    if not items:
+        print("No items found in repo.")
+        return
+
+    items_by_line: dict[str, tuple[str, str, Path]] = {}
+    fzf_lines: list[str] = []
+    for ct, name, src in items:
+        line = f"[{TYPE_LETTER[ct]}] {name}\t{src}"
+        items_by_line[line] = (ct, name, src)
+        fzf_lines.append(line)
+
+    result = subprocess.run(
+        [
+            "fzf",
+            "--multi",
+            "--delimiter=\t",
+            "--with-nth=1",
+            "--preview", FZF_PREVIEW,
+            "--preview-window=right:60%:wrap",
+            "--header=Tab: select  Enter: copy  Esc: cancel",
+            "--prompt=skills/agents/commands> ",
+        ],
+        input="\n".join(fzf_lines),
+        stdout=subprocess.PIPE,
+        text=True,
+    )
+
+    if result.returncode == 130 or not result.stdout.strip():
+        print("Cancelled.")
+        return
+    if result.returncode not in (0, 1):
+        print(f"fzf exited with {result.returncode}")
+        return
+
+    chosen = [items_by_line[line] for line in result.stdout.splitlines() if line in items_by_line]
+    apply_picks(chosen, to, force, dry_run=dry_run)
+
+
+def preset_mode(
+    name: str, to: Path, force: bool, dry_run: bool, config: dict
+) -> None:
+    presets = config.get("presets") or {}
+    if name not in presets:
+        available = ", ".join(sorted(presets)) or "(none defined)"
+        print(f"Preset '{name}' not found. Available: {available}")
+        sys.exit(1)
+
+    preset = presets[name] or {}
+    chosen: list[tuple[str, str, Path]] = []
+    for ct, repo_subdir in CONTENT_TYPES.items():
+        names = preset.get(ct) or []
+        for n in names:
+            src = repo_subdir / n
+            if not src.exists():
+                print(f"  ⚠ {ct}/{n} listed in preset '{name}' but not found in repo")
+                continue
+            chosen.append((ct, n, src))
+
+    apply_picks(chosen, to, force, dry_run=dry_run)
+
+
 def main() -> None:
-    force = "--force" in sys.argv
-    dry_run = "--dry-run" in sys.argv
+    args = sys.argv[1:]
+
+    if "-h" in args or "--help" in args:
+        print(USAGE)
+        return
+
+    force = "--force" in args
+    dry_run = "--dry-run" in args
+    args = [a for a in args if a not in ("--force", "--dry-run")]
+
+    to: Path | None = None
+    if "--to" in args:
+        i = args.index("--to")
+        if i + 1 >= len(args):
+            print("--to requires a path")
+            sys.exit(1)
+        to = expand_path(args[i + 1])
+        args = args[:i] + args[i + 2 :]
+
+    if args and args[0] == "pick":
+        if to is None:
+            print("Usage: ./sync pick --to PATH")
+            sys.exit(1)
+        picker_mode(to, force, dry_run)
+        return
+
+    if args and args[0] == "preset":
+        if len(args) < 2 or to is None:
+            print("Usage: ./sync preset NAME --to PATH")
+            sys.exit(1)
+        preset_mode(args[1], to, force, dry_run, load_config())
+        return
 
     if dry_run:
         print("Dry run — showing what would be synced:\n")

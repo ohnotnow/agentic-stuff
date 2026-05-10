@@ -28,3 +28,21 @@ targets:
   cursor:
     enabled: false
     skills: ~/.cursor/skills-cursor/
+
+# Presets — named bundles for `./sync preset NAME --to PATH`.
+# Items land in PATH/skills/<name>, PATH/agents/<name>, PATH/commands/<name>.
+# Typical use: drop a project-shaped set of skills into a fresh repo's
+# .claude/ directory without polluting your global ~/.claude/ install.
+#
+# Example:
+#   ./sync preset go --to ~/code/new-thing/.claude/
+#
+# Or wire it into a shell function:
+#   gopick() { /path/to/agentic-stuff/sync preset go --to "$PWD/.claude/"; }
+presets:
+  go:
+    skills: [golang, github-create, changelog]
+    agents: [test-debug]
+  laravel:
+    skills: [flux-ui, modern-livewire, larastan, practical-laravel-api]
+    agents: [livewire-flux-reviewer, test-quality-checker, laravel-owasp-reporter]

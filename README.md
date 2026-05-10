@@ -85,3 +85,53 @@ targets:
 ./sync --dry-run   # preview only
 ./sync --force     # overwrite everything without asking
 ```
+
+### Project-local skills with `pick` and `preset`
+
+The default `./sync` is a full reconcile against your global tool config. But quite often you want the opposite — a fresh project where only a *handful* of skills/agents are relevant, dropped into the project's own `./.claude/` directory. Two modes for that:
+
+```
+./sync pick --to ~/code/my-project/.claude/           # interactive fuzzy picker
+./sync preset go --to ~/code/my-project/.claude/      # named bundle from sync.yaml
+```
+
+Both treat `--to` as a base path — items land in `PATH/skills/<name>`, `PATH/agents/<name>`, etc. Neither touches `sync.yaml`'s `targets` block, so global syncs are unaffected.
+
+#### `pick` — fuzzy picker with preview
+
+Opens an [fzf](https://github.com/junegunn/fzf) multi-select across every available skill, agent and command. Type to filter, Tab to toggle, Enter to copy. The preview pane on the right shows each skill's `SKILL.md` (or the file itself for agents/commands), so you can browse and pick in one motion instead of remembering what each name does.
+
+Items are tagged so the filter doubles as a scope:
+- `[s]` skills
+- `[a]` agents
+- `[c]` commands
+
+Typing `s golang` finds the Go skill; typing `[a]` shows all agents.
+
+Requires `fzf` on PATH. If you don't have it, install via [the fzf docs](https://github.com/junegunn/fzf#installation) or use `preset` mode below.
+
+#### `preset` — named bundles for shell aliases
+
+For the "every Go project gets these three skills" case, declare a bundle in `sync.yaml`:
+
+```yaml
+presets:
+  go:
+    skills: [golang, github-create, changelog]
+    agents: [test-debug]
+  laravel:
+    skills: [flux-ui, modern-livewire, larastan]
+    agents: [livewire-flux-reviewer]
+```
+
+Then a one-line shell function gets you a zero-friction alias:
+
+```bash
+gopick() { /path/to/agentic-stuff/sync preset go --to "$PWD/.claude/"; }
+```
+
+`cd` into a fresh repo, type `gopick`, done.
+
+`--dry-run` previews either mode without writing anything; `--force` skips the "destination is newer than repo source" prompts.
+
+`--dry-run` and `--force` work for both modes.
