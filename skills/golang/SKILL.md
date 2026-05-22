@@ -39,7 +39,9 @@ a tool grows a `serve` command), pull the satellite file in mid-session.
 
 Reusable code lives under `templates/` (e.g. `templates/theme/nord.go` for
 Nord-themed lipgloss + huh styles) and is referenced from the satellite that
-covers it.
+covers it.  There is also an example of a straightforward golang GitHub action to build
+and publish a release in `templates/release.yml` taken from a project called 'agent-issue-tracker' 
+that creates the `ait` binary.
 
 ## Project Layout
 
