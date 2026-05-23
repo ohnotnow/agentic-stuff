@@ -17,6 +17,7 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 - `ant` -- Local-first [notebook for the *why*](https://github.com/ohnotnow/agent-note-tracker) behind project work. Captures decisions, alternatives rejected, pivots, and foundation context as a sibling to `ait`'s task tracking.
 - `audience-credibility` -- Defensive review pass for audience-facing deliverables. Verifies named places, institutions, personas, and other local details before writing, then checks finished copy and visuals for recognisable AI-generated tells.
 - `changelog` -- Analyses git tags and diffs to draft `CHANGELOG.md` entries in Keep a Changelog format. Proposes changes for review rather than writing them directly.
+- `conversation-to-ait` -- Synthesises a feature discussion into a reviewed markdown brief, then hands it to the `plan-to-ait` agent to create `ait` issues.
 - `conversation-to-html` -- Turns Claude Code or Codex session logs into single-file HTML transcripts you can share or present.
 - `feature-workflow` -- Streamlined workflow for building features with `ait` issue tracking. Handles orientation, planning (via plan mode), issue creation (via `plan-to-ait`), implementation with acceptance criteria checking, and optional quality gate at the end.
 - `flux-ui` -- Flux UI v2 component reference for Laravel/Livewire. Covers syntax, patterns, common mistakes, and modal/form/table patterns.
