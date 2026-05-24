@@ -4,7 +4,7 @@ description: >
   Users conventions and patterns for Go CLI/TUI projects. Use when working on a Go
   project
 allowed-tools: "Read,Write,Edit,Bash,Glob,Grep"
-version: "0.4.0"
+version: "0.5.0"
 author: "ohnotnow <https://github.com/ohnotnow>"
 license: "MIT"
 ---
@@ -32,6 +32,13 @@ them when relevant:
   Read when: the project has a `serve` subcommand or imports `net/http` for
   serving (not just fetching), **or** the user's request mentions a web
   dashboard, browser UI, or `serve` command.
+- **`PKGSITE.md`** — the official pkg.go.dev API (v1beta) for querying
+  module/package metadata, versions, exported symbols, importers, and
+  vulnerabilities.
+  Read when: you need to look up the latest tagged version of a third-party
+  module, check known vulnerabilities, list a package's exports, find what
+  imports a package, or search the public Go ecosystem — **or** the user
+  mentions pkg.go.dev, `pkgsite-cli`, or the v1beta API.
 
 Don't load these defensively — the savings only work if you actually skip
 them when they don't apply. If a session shifts direction (a CLI gains a TUI,
