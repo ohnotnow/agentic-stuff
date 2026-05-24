@@ -1,6 +1,6 @@
 ---
 name: grounded-recommendation
-description: "Structured process for giving implementation recommendations and technical advice. Use when the user asks for a recommendation, opinion, or advice on an implementation approach — or when you are about to volunteer one — especially when multiple valid approaches exist, when the decision involves trade-offs, or when the answer depends on how the code actually works. Triggers: 'what do you recommend', 'what's your thinking', 'how should we', 'what approach', 'which option', any request for technical guidance, or when you find yourself forming an opinion about which option is best while summarising alternatives."
+description: "Structured process for technical recommendations and implementation advice. Use when the user asks for a recommendation, opinion, or approach ('what do you recommend', 'how should we', 'which option', 'what's your thinking'), or when you catch yourself about to volunteer an opinion on which option is best — especially with trade-offs or multiple valid approaches."
 ---
 
 # Grounded Recommendation
