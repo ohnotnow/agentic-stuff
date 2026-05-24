@@ -16,6 +16,15 @@ For ready-to-use CSS custom properties or a Tailwind config, read the appropriat
 - `references/tailwind-config.js` — Tailwind CSS configuration (v3)
 - `references/flux-uofg-guide.md` — Integration guide for **Flux UI v2** (Caleb Porzio's component library for Laravel/Livewire, Tailwind v4). Covers theme CSS, component mapping, and dark mode. Read this if the project uses Flux, Livewire, or mentions `flux:` components
 
+## Real world examples
+
+Screenshots of some pages from the UofG website:
+
+- references/home-page.png
+- references/international-students.png
+- references/library.png
+- references/research-units.png
+
 ## Colours
 
 University blue is the primary brand colour. It should always be treated as the primary brand colour across all digital products.
