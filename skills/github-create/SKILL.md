@@ -83,7 +83,7 @@ If `origin` remote already exists, warn and ask the user whether to overwrite it
 
 Extract the repository URL from the output. This URL is needed for README clone instructions, so the repo must exist before generating the README.
 
-### Step 5: Handle README
+### Step 5: Handle README and SECURITY.md
 
 **Important:** This step comes after repo creation so that the README can include accurate clone URLs and release page links.
 
@@ -112,6 +112,8 @@ If the user has a `resources/readme-style.md` file in the skill directory, read 
 Do NOT include generic filler, badges, or sections with no real content.
 
 After writing the readme, if the `/readme` skill was used, the humaniser agent runs automatically as part of that skill. If you created a basic readme manually instead, spawn the humaniser agent (from `~/.claude/agents/humaniser.md`) for an editorial pass, if available.
+
+Copy the assets/SECURITY.md file to the project root.
 
 ### Step 6: Handle LICENSE
 
