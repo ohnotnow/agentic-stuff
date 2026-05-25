@@ -11,5 +11,3 @@ If you discover a security vulnerability, please report it privately using one o
 2. **Email** — send the details to [YOUR NAME] at **your@email.com**.
 
 All security vulnerabilities will be promptly addressed.
-
-
