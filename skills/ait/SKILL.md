@@ -56,7 +56,13 @@ ait update <id> --status in_progress   # Start working
 ait update <id> --status open          # Back to open
 ait update <id> --title "New title"    # Change title
 ait update <id> --priority P0          # Change priority
+ait update <id> --status in_progress --claim <agent-name>   # Claim and update in one step
 ```
+`--claim <agent-name>` folds a claim into the same update, so you can claim and
+start an issue in a single call instead of running `claim` then `update`. It
+uses the same rules as the `claim` command: it fails with a conflict if the
+issue is already claimed. `--claim` on its own is a valid update (no other field
+required).
 
 ### Close / Cancel / Reopen
 ```bash
@@ -64,8 +70,11 @@ ait close <id>                # Close a single issue
 ait close <id> --cascade      # Close an epic and all its descendants
 ait close <id> --note "Done — merged in PR #42"    # Add a closing note then close (--reason is an alias)
 ait cancel <id>               # Cancel an issue
+ait cancel <id> --note "Superseded by new approach" # Add a note then cancel (--reason is an alias)
 ait reopen <id>               # Reopen a closed or cancelled issue
 ```
+`--note` on `close` and `cancel` attaches the note before the status change and
+returns a single issue ref (it does not echo a separate note ack).
 
 ### Dependencies
 ```bash
@@ -133,6 +142,10 @@ ait unclaim <id>               # Release the claim
 If another agent already holds the claim, `claim` returns a conflict error with
 the current holder's name.
 
+To claim and update in one step, use `ait update <id> --claim <agent-name>`
+(see **Update Issues** above) — handy when you want to claim an issue and mark
+it `in_progress` together.
+
 The agent-name parameter is for you to have a little creative fun if you want to.  You're free to use your real name, or pick a name that amuses and delights you or a project-specific name for your 'agentic persona'.  If the user seems like a terribly serious person - maybe steer away from 'plush-plush-tooshie-shake' though ;-)  It's important to pick one name and stick with it though!
 
 ## Issue Types & Hierarchy
@@ -172,7 +185,7 @@ three-tier setup: `proj-abc` (initiative) -> `proj-abc.1` (epic) -> `proj-abc.1.
 1. **Start of session**: `ait log --last 3` for recent context, then `ait ready` to see what is unblocked
 2. **Pick work**: `ait claim <id> <your-name>` to claim an issue
 3. **Check context**: `ait show <id>` for full details and notes. If the issue belongs to an initiative, read the initiative description to understand the strategic intent.
-4. **Mark in progress**: `ait update <id> --status in_progress`
+4. **Mark in progress**: `ait update <id> --status in_progress` (tip: steps 2 and 4 can be combined with `ait update <id> --status in_progress --claim <your-name>`)
 5. **Do the work**: implement, test, iterate
 6. **Leave notes**: `ait note add <id> "what was done / what remains"`
 7. **Close**: `ait close <id>` (or `--cascade` for an epic and its children)
