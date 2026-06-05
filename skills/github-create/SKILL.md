@@ -240,6 +240,10 @@ git push origin HEAD
 
 If any git command is denied by the user's permissions, list the files that need committing and provide the commands for the user to run themselves. Then carry on with any remaining non-git steps. Do not retry denied commands or try to work around the restriction.
 
+### Step 10a. Moat repo fixer
+
+If you have the `moat-repo-fixer` skill - offer to invoke it.  It helps apply best practices and protections against supply-chain attacks to GitHub repositories.
+
 ### Step 11: Done
 
 Report the repository URL and confirm everything is set up. Keep it brief.
