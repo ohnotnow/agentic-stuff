@@ -5,12 +5,14 @@ description: Walk a developer through upgrading a production Laravel app from Li
 
 # Livewire v3 → v4 Upgrade
 
-> **Draft v2.** Ground-truthed on two production apps: a modern one (Laravel 13, Flux Pro
-> 2.14, class components, full-page routes, Pest - full upgrade completed and verified)
-> and a long-lived hybrid (Laravel 12, Flux 2.4, 120 components, PHPUnit, much churn -
-> Phases 0-2 plus legacy-binding remediation completed; stopped before the composer
-> bump). Steps marked **[extrapolated]** have not yet been exercised on a real app -
-> treat them with extra care and update this skill when you learn something.
+> **Draft v3.** Ground-truthed on three production apps: two modern ones (both Laravel 13,
+> Flux Pro 2.14, class components, full-page routes, Pest - full upgrades completed and
+> browser-verified; the second also applied the build-time `route:cache` fix *before* the
+> bump rather than discovering it in aftercare) and a long-lived hybrid (Laravel 12,
+> Flux 2.4, 120 components, PHPUnit, much churn - Phases 0-2 plus legacy-binding
+> remediation completed; stopped before the composer bump). Steps marked
+> **[extrapolated]** have not yet been exercised on a real app - treat them with extra
+> care and update this skill when you learn something.
 
 This skill walks an upgrade in phases. Do not skip the audit phase - it is what tells you
 whether you're in 20-minute-upgrade territory or two-day-migration territory. The official
@@ -37,8 +39,13 @@ upgrade surface:
    (`@extends('components.layouts.app')`) leaves `$slot` undefined - that's pre-existing
    breakage, not something the upgrade caused or will fix.
 
-Check: `grep -rn "Route::get.*Component\|Route::livewire" routes/` (**beware: matches
-commented-out routes** - eyeball the hits) and `grep -rn "@extends" resources/views/ | head`.
+Check: `grep -rn "use App\\\\Livewire" routes/` (full-page routes import their component
+classes, so this is the reliable tell) plus `grep -rn "Route::livewire" routes/` and
+`grep -rn "@extends" resources/views/ | head`. **Do not rely on grepping for the literal
+word `Component` in routes** - real apps write `Route::get('/', HomePage::class)` with
+concrete class names, which returns nothing and nearly misclassifies a fully modern app
+as hybrid (field-confirmed false negative). When in doubt, read `routes/web.php` - it's
+one file. Beware commented-out routes in any grep hits - eyeball them.
 
 Then gather context the docs can't give you:
 
@@ -315,6 +322,15 @@ upgrade notes too - "fixed by upgrade" is information, not luck.
 - Re-run `php artisan boost:install` so generated guidelines pick up the livewire/v4
   rules instead of coaching future agents in v3 idioms. (Composer's post-update hooks
   may have already done this - verify the version line in CLAUDE.md rather than assume.)
+  `--no-interaction` works fine. Field note: recent Boost versions also drop a batch of
+  new skill directories into `.claude/skills/`, `.agents/skills/` and `.cursor/skills/` -
+  flag them to the user to review/keep/bin rather than silently committing them.
+- The build-time `route:cache` problem (next bullet) is *statically findable in Phase 0* -
+  if you spot it during the audit, fix it before the bump rather than leaving it for
+  aftercare. Field-confirmed: the move-to-app-start fix is a two-line diff, independent
+  of the composer bump, and a good use of the time while waiting for the user to run it.
+  Tell-tale that the build genuinely lacks `APP_KEY`: a Dockerfile line symlinking `.env`
+  to `/run/secrets/.env` (dangling at build time).
 - **Check the deploy pipeline for build-time `route:cache` - field-confirmed 404 source.**
   v4's routes embed a hash derived from `APP_KEY` *at route-registration time*. If the
   Dockerfile or CI runs `route:cache` during image build - where secrets don't exist and
@@ -355,7 +371,10 @@ upgrade notes too - "fixed by upgrade" is information, not luck.
   variables. Tell the user about any container you leave running.
 - **Expect house-style permission hooks** - blocked composer commands, blocked
   raw-database test assertions. They are conventions doing their job, not obstacles:
-  ask the user, never route around them.
+  ask the user, never route around them. Also seen: a TDD hook rejecting a Write that
+  contains two tests at once. The Phase 2 safety-net tests aren't really TDD (they're
+  green-on-arrival regression pins), but don't argue with the hook - write one test,
+  run it, then Edit the second in. Same outcome, no friction.
 
 ## Things this skill does not yet know
 
