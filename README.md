@@ -19,6 +19,7 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 - `changelog` -- Analyses git tags and diffs to draft `CHANGELOG.md` entries in Keep a Changelog format. Proposes changes for review rather than writing them directly.
 - `conversation-to-ait` -- Synthesises a feature discussion into a reviewed markdown brief, then hands it to the `plan-to-ait` agent to create `ait` issues.
 - `conversation-to-html` -- Turns Claude Code or Codex session logs into single-file HTML transcripts you can share or present.
+- `cruft-or-keep` -- Conversational second pair of eyes for reachable-but-dormant code. Builds evidence-grounded case files for suspect jobs, mailables, listeners, routes, commands, and asks the developer `cruft or keep?` rather than deleting anything.
 - `feature-workflow` -- Streamlined workflow for building features with `ait` issue tracking. Handles orientation, planning (via plan mode), issue creation (via `plan-to-ait`), implementation with acceptance criteria checking, and optional quality gate at the end.
 - `flux-ui` -- Flux UI v2 component reference for Laravel/Livewire. Covers syntax, patterns, common mistakes, and modal/form/table patterns.
 - `github-create` -- Creates a new GitHub repo from the current project, pushes code, and sorts out the README, licence, and metadata.
