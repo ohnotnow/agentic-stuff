@@ -1,6 +1,6 @@
 ---
 name: quality-gate
-description: Run a suite of review agents against the current codebase after completing feature work. Covers test quality, code complexity, security, and Livewire/Flux patterns. Always confirms before running due to token cost.
+description: One-stop code review after feature work, or for a whole codebase. Runs deterministic checks (section ordering, arch conventions) free of charge, then fresh-eyes Opus reviewer agents. Covers team conventions, test quality, complexity, security, and Livewire/Flux patterns. Always confirms before spending agent tokens.
 triggers:
   - /quality-gate
   - /review
@@ -10,50 +10,98 @@ triggers:
 
 # Quality Gate
 
-Run independent review agents for a fresh-eyes assessment of recently completed work. Each agent has its own context and reports back without making changes.
+One entry point for post-work review. The developer should never have to
+remember which reviewer exists - picking them is this skill's job.
 
-**Important:** These agents consume significant tokens. Always confirm with the user before launching them.
+Two scopes:
 
-## Available Reviewers
+- **Recent work** (default, the common case): commits since the merge-base
+  with master/main, plus unstaged and untracked changes.
+- **Whole codebase** (explicit opt-in, e.g. "review the whole app"): for
+  legacy or inherited apps. Delegated - see below.
+
+Reviewers always receive **file lists, never diffs**. A diff tells a reviewer
+where to look; only the whole file tells them what's actually there.
+
+## Tier zero - deterministic checks (run these before any agent)
+
+Lint what's lintable; spend judgement tokens on judgement.
+
+1. **Section ordering**:
+   `php ~/.claude/skills/quality-gate/scripts/section-order-check.php <repo-path>`
+   Report-only; exit 1 means violations - put them straight in the final
+   report. If it dies on an unloadable class, that IS a finding (a class that
+   can't load is the most urgent thing a review can surface).
+2. **Arch conventions**: check `tests/` for `TeamConventionsTest.php`. If
+   missing, offer to install the canonical copy from
+   `~/.claude/skills/quality-gate/arch/TeamConventionsTest.php` into
+   `tests/Feature/` - **ask first, never install silently**. On a legacy app,
+   adopt with `ignoring()` on current offenders and burn the list down. If
+   already installed it runs with the app's own suite; nothing extra to do.
+
+## Reviewer roster
 
 | Agent | What it checks | When to run |
 |-------|---------------|-------------|
-| `test-quality-checker` | Test robustness, weak assertions, missing edge cases | Always for Laravel work |
-| `phpmetrics-check` | Code complexity hotspots, maintainability index | Always for Laravel work |
-| `laravel-owasp-reporter` | Security: broken access control, mass assignment, IDOR, secrets | Always for Laravel work |
-| `livewire-flux-reviewer` | Livewire/Flux modernisation opportunities | When significant Livewire/Flux code was written or modified |
+| `laravel-conventions-reviewer` | Readable model helpers, fat models, DB:: query building, enums, duplicate-purpose methods | Always for Laravel work |
+| `test-quality-checker` | Weak assertions, tautological tests, unit-vs-feature, proliferation, missing edge cases | Always for Laravel work |
+| `phpmetrics-check` | Complexity hotspots, maintainability | Always for Laravel work |
+| `laravel-owasp-reporter` | Broken access control, mass assignment, IDOR, secrets | API or auth-touching work |
+| `livewire-flux-reviewer` | Livewire/Flux modernisation | When Livewire/Flux code changed |
 
-## Process
+## Confirm before spending
 
-### 1. Confirm scope and budget
+Tier zero is free - run it without asking. Opus reviewers are not. Before
+launching any, tell the user what tier zero found, which reviewers fit this
+scope, and ask. If the work was trivial (config change, copy tweak), don't
+suggest reviewers at all.
 
-Before running anything, tell the user what you'd recommend and ask:
+## Briefing
 
-> "The feature work looks substantial enough for a quality gate. I'd suggest running [list relevant agents]. These run in parallel but do burn through tokens - want to go ahead now, or save it for later?"
+Every reviewer prompt = the briefing block from
+`~/.claude/skills/quality-gate/briefing.md` (verbatim - each rule exists
+because of an observed failure mode) + the file list. The briefing governs
+what reviewers read and how much they report; their own agent definitions
+govern report format.
 
-If the work was trivial (a config change, a one-liner fix, a copy tweak), don't suggest it at all.
+## Recent-work mode (the common case)
 
-### 2. Launch agents in parallel
+Launch the selected reviewers **in parallel from the main conversation**, each
+with briefing + file list. When reports come back, triage with your
+implementation context - you were there:
 
-All four agents are independent - launch them simultaneously in a single message. Each gets its own context and explores the codebase fresh.
+- **Agree and fix**: genuine issues - fix now
+- **Acknowledge but defer**: valid but not now - record as ait issues
+- **Dismiss with reasoning**: deliberate choices the reviewer couldn't know -
+  explain to the user so they can confirm
 
-### 3. Triage the findings
+Present one consolidated summary, severity first, never four raw reports.
 
-When the agents report back, **apply your context**. You were there for the implementation - you know why certain decisions were made. For each finding:
+## Whole-codebase mode (delegated)
 
-- **Agree and fix**: Genuine issues - security problems, weak tests, unnecessary complexity
-- **Acknowledge but defer**: Valid points that aren't worth addressing right now (note them as ait issues for later)
-- **Dismiss with reasoning**: Things the agent flagged that were deliberate choices - explain why to the user so they can confirm
+There is no implementation context to lose on a legacy codebase, and the
+chunk-review noise would swamp the main conversation - so delegate the lot.
+Confirm the token budget with the user first; this is the expensive path.
 
-Present a consolidated summary rather than dumping four raw reports. Group by severity, lead with anything that needs immediate attention.
+Launch ONE general-purpose orchestrator agent instructed to:
 
-## Selecting Agents
+1. **Chunk by model orbit, deterministically** (a bare "pick the central
+   files" judgement call produced unreproducible chunks in the pilot): the
+   model + its factory + its policy, then the components/controllers/jobs
+   that reference it ranked by reference count (`grep -c`), capped at ~8 app
+   files, plus the main feature tests for those files (~4). Always include
+   the routes files as shared context in every orbit - they kill false
+   positives about authorisation. Files with no model affinity form a final
+   misc chunk. Record what was cut from each orbit.
+2. **Spawn reviewer agents per chunk** (subagent nesting is supported; the
+   orchestrator at depth 1 spawns reviewers at depth 2). Same briefing rules.
+3. **Consolidate and record findings as ait issues in the target repo** - one
+   epic per review run, one task per actionable finding, each description
+   carrying file:line and the before/after sketch. The backlog is the
+   deliverable; return only a summary to the main conversation.
 
-Not every review needs all four agents. Use judgement:
+## Rinse and repeat
 
-- **Small feature, no Livewire**: test-quality-checker + phpmetrics-check
-- **API work**: test-quality-checker + laravel-owasp-reporter
-- **Livewire-heavy feature**: all four
-- **Refactoring only**: phpmetrics-check (complexity) + test-quality-checker (tests still passing for the right reasons)
-
-Always let the user make the final call on which to run.
+On a grotty codebase, don't aim for one exhaustive pass. Cap the findings
+(worst offenders first - the section checker's `--cap` does this natively),
+fix, re-run, repeat until the developer says it's up to snuff.

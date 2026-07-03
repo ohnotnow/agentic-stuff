@@ -4,6 +4,10 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 
 ---
 
+> **Heads up (3rd July 2026):** `quality-gate` has grown into a two-tier review stack: free deterministic checks first (a section-order checker for Eloquent models and Livewire components in `skills/quality-gate/scripts/`, plus a drop-in Pest architecture test in `skills/quality-gate/arch/`), then the reviewer agents, all briefed via `skills/quality-gate/briefing.md` with whole-file reading rules. There's a new `laravel-conventions-reviewer` agent, and `test-quality-checker` now also hunts tautological tests, unit-tests-that-should-be-feature-tests, and test proliferation. The section order, arch rules, and conventions checklist encode *our* house style — read through and tweak them to yours before adopting.
+
+---
+
 > **Heads up (5th April 2026):** The Livewire/Flux skills and agents have been reorganised. `frontend-fluxui` is now `flux-ui`, `livewire-principles` is now `modern-livewire`, and the `livewire-flux-simplifier` agent has been replaced by `livewire-flux-reviewer`. There are also three new skills: `feature-workflow` (ait-driven feature development), `ui-to-flux` (migration helper), and `quality-gate` (post-feature review).
 >
 > If you've been using `./sync`, run `./migrate` to clean up the old names and pull in the new ones. If you copied files manually, have a read through the migrate script to see what's changed — it's short and commented.
@@ -37,7 +41,7 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 - `modern-livewire` -- How we write Livewire components: principles, patterns, form state, testing. Covers everything from `findOrNew`+`fill`+`save` to named modals and `wire:model` behaviour.
 - `plan-to-html` -- Converts markdown plans, design docs, and issue writeups into self-contained HTML documents for sharing with non-technical stakeholders. Includes a stylesheet you can customise, optional author/title metadata, print-friendly output, and an optional Background preamble for context.
 - `practical-laravel-api` -- Conventions for practical, consumer-friendly Laravel JSON APIs with Sanctum. Covers self-describing response shapes, loud query failures, slugs, date windows, filtering, Scramble docs, and tests for API contracts.
-- `quality-gate` -- Runs review agents (test quality, complexity, security, Livewire/Flux patterns) after feature work. Confirms before running due to token cost.
+- `quality-gate` -- One-stop post-feature review: free deterministic checks first (model/Livewire section-order script, drop-in Pest arch test), then fresh-eyes review agents. Two scopes — recent work, or a whole legacy codebase chunked by model orbit and delegated to a sub-orchestrator. Confirms before spending agent tokens.
 - `ui-to-flux` -- Migration skill for converting older Laravel apps (Bulma, Bootstrap, Tailwind) to Flux UI. References `flux-ui` and `modern-livewire` for target patterns rather than duplicating them.
 - `ui-migration-screenshots` -- Captures full-page reference screenshots of existing app UIs before or during frontend migrations. Uses Playwright for authenticated, role-gated, and interactive flows so rebuilt pages can keep a familiar 1:1 mapping.
 - `readme` -- Generates a README from the actual codebase so claims stay grounded.
@@ -51,13 +55,14 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 - `ait-audit.md` -- Reviews open `ait` issues against the codebase and flags work that looks done but hasn't been closed.
 - `fresh-eyes.md` -- Fresh pair of eyes for when you're stuck or looping. Suggests one or two things to try rather than editing code directly.
 - `humaniser.md` -- Removes common AI-writing patterns from text files like READMEs and docs.
+- `laravel-conventions-reviewer.md` -- Reviews Laravel code against team conventions: readable model helpers over raw column checks, fat models, Eloquent over query-building, enums over strings, duplicate-purpose methods. Seeded with real before/after examples — swap in your own house style before adopting.
 - `laravel-owasp-reporter.md` -- OWASP-aligned security sweep of a Laravel app. Reports actual exploitable findings with concrete fixes.
 - `livewire-flux-reviewer.md` -- Reviews Livewire/Flux code for simplification opportunities. Quick wins, things worth considering, and what looks good. References `flux-ui` and `modern-livewire` skills for pattern details.
 - `phpmetrics-check.md` -- Runs phpmetrics on a PHP/Laravel codebase, flags complexity hotspots, and compares against a saved baseline.
 - `plan-reconciler.md` -- Reconciles a plan document against the conversation that produced it. Reports what was captured, missed, glossed over, or drifted without editing the plan.
 - `plan-to-ait.md` -- Turns approved plans into `ait` epics and issues that a fresh coding agent can execute without context.
 - `test-debug.md` -- Debugging assistant for stubborn failing tests. Uses `dump()` instrumentation rather than speculative rewrites.
-- `test-quality-checker.md` -- Reviews Laravel tests for false-confidence patterns and coverage gaps.
+- `test-quality-checker.md` -- Reviews Laravel tests for false-confidence patterns and coverage gaps: tautologies, weak assertions, missing control records, unit tests that should be feature tests.
 
 ## Syncing to your tools
 

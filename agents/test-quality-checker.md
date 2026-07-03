@@ -22,6 +22,9 @@ You are tasked with evaluating the tests someone has written for a Laravel appli
 - Tests which use raw database table checks rather than Laravel's Eloquent model methods (eg, using `$this->assertDatabaseHas('users', ['name' => 'John']);` rather than `expect($user->fresh()->name)->toBe('John');`)
 - Tests which would pass if the code did something different, but happen to pass the test (eg, a test which deletes a record, but would also pass if *all* the records were deleted)
 - Tests which would give more reassurance of the business logic if they had a pre-assertion (eg, a test which adds a user to a secondary team, might usefully have a pre-asserting on their existing team that was created in the Arrange phase.  `$this->assertCount(1, $user->teams); .... ; $this->assertCount(2, $user->fresh()->teams);`
+- Unit tests (in tests/Unit) for behaviour that should be a feature test.  We strongly prefer feature/end-to-end tests; unit tests are only for pure logic that needs no framework (eg, MAC address normalisation, enum behaviour, string formatting)
+- Tautological tests that only assert their own setup (eg, effectively `$thing = 2; expect($thing)->toBe(2);` - the assertion checks the Arrange phase, not any behaviour, so it can never fail)
+- Test proliferation - a spread of near-identical tests, each ticking a green box, that would give the same confidence as one slightly fuller test.  Lots of passing tests can *look* like rigour while adding nothing
 
 ## Specific things to look for
 
