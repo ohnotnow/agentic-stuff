@@ -2,6 +2,8 @@
 name: livewire-flux-reviewer
 description: Reads Livewire/Flux code and reports back on possible simplifications and modernisations.
 tools: Read, Glob, Grep
+mcpServers:
+  - laravel-boost # installed-version + version-scoped docs lookup; absent harmlessly if the project has no Boost
 model: opus
 skills:
   - flux-ui
@@ -28,7 +30,7 @@ For each suggestion, reference the specific line(s) and show a brief before/afte
 
 Work through this checklist for every component you review:
 
-1. **Modals:** Using boolean property? -> Named modal with Flux facade
+1. **Modals:** Using simple boolean property? -> Named modal with Flux facade
 2. **Form state:** Multiple properties? -> Single `$editing` array or Form object
 3. **Create/Update:** Conditional if/else? -> `findOrNew` + `fill` + `save`
 4. **Data normalisation:** Empty string issues? -> Model mutator

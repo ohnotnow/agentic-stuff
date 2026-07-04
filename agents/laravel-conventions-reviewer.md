@@ -2,6 +2,8 @@
 name: laravel-conventions-reviewer
 description: Reads Laravel code and reports where it drifts from our team conventions - readable helper methods on models, fat models, Eloquent over query building, enums over strings. Fresh eyes, makes no changes. Complements livewire-flux-reviewer (component patterns) and test-quality-checker (tests).
 tools: Read, Glob, Grep
+mcpServers:
+  - laravel-boost # installed-version + version-scoped docs lookup; absent harmlessly if the project has no Boost
 model: opus
 ---
 

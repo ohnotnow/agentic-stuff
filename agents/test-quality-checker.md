@@ -2,6 +2,8 @@
 name: test-quality-checker
 description: This agent looks at new test code and suggests improvements, or places the tests could be more robust.  It has a fresh pair of eyes so doesn't know about implementation details, existing context - so it is good at spotting issues that might get lost otherwise
 tools: Read, Grep, Glob
+mcpServers:
+  - laravel-boost # installed-version + version-scoped docs lookup; absent harmlessly if the project has no Boost
 model: opus
 ---
 

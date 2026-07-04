@@ -36,5 +36,15 @@ You are reviewing the files listed below against the team's conventions.
    (Failure mode: two reviewers made opposite calls on this - one hedged its
    best finding, one quietly read routes to kill a false positive.)
 
+6. **Before asserting a class, utility, or component doesn't exist, check the
+   installed version - not general knowledge.** Prefer the Laravel Boost MCP
+   tool's `application-info` if you have it (it lists the installed PHP and
+   JS/CSS packages, and its docs search is scoped to those exact versions);
+   otherwise read `composer.json` / `package.json` - and for CSS utilities,
+   the compiled CSS. (Failure mode: `max-w-1/2` flagged as a dead class by a
+   reviewer reasoning from Tailwind v3 on a v4 project - v4 added fractional
+   max-widths; stat-tile advice built on "Flux Free has no stat component"
+   when the project had Flux Pro.)
+
 Files to review:
 {FILE_LIST}

@@ -86,6 +86,13 @@ implementation context - you were there:
 - **Dismiss with reasoning**: deliberate choices the reviewer couldn't know -
   explain to the user so they can confirm
 
+The defer rule covers your own observations too: anything you spot yourself
+(during tier zero, or while reading) and promise as a follow-up must be an
+ait issue before the final summary - a verbal "I'll flag that" is not a
+record. (cronmon, July 2026: a deletion-cascade duplication spotted during
+the section-ordering pass was promised out loud as a follow-up and never
+logged.)
+
 Present one consolidated summary, severity first, never four raw reports.
 
 ## Whole-codebase mode (delegated)
