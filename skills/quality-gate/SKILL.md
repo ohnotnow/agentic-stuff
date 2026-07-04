@@ -5,7 +5,7 @@ triggers:
   - /quality-gate
   - /review
   - run the quality gate
-  - fresh eyes
+  - code review
 ---
 
 # Quality Gate
@@ -48,6 +48,17 @@ Lint what's lintable; spend judgement tokens on judgement.
 | `phpmetrics-check` | Complexity hotspots, maintainability | Always for Laravel work |
 | `laravel-owasp-reporter` | Broken access control, mass assignment, IDOR, secrets | API or auth-touching work |
 | `livewire-flux-reviewer` | Livewire/Flux modernisation | When Livewire/Flux code changed |
+
+> **Scoping note — don't route Blade views only to `livewire-flux-reviewer`.**
+> The "raw column check → model helper" convention (`@if ($job->alerting_since)`
+> → `@if ($job->isAlerting())`) applies to templates too, but the flux reviewer
+> is framed for Livewire/Flux modernisation and won't wear that lens. Give
+> `laravel-conventions-reviewer` the relevant Blade views — component views, the
+> layout, and mail/markdown templates (easy to forget) — alongside the PHP, in
+> both recent-work file lists and whole-codebase chunks. (cronmon, July 2026:
+> the conventions reviewer got zero blades and the awol email template was in no
+> reviewer's list at all — a view-level de-duplication went uncaught until the
+> developer spotted it by eye.)
 
 ## Confirm before spending
 

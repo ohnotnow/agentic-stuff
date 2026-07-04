@@ -37,7 +37,7 @@ Work through this checklist for every file you review. The before/after examples
 Column access wrapped in logic belongs behind a named helper on the model that says what the check *means*:
 
 ```php
-// before - in a command, controller, or component
+// before - in a command, controller, component, or Blade view
 if ($server->alerting_since === null) {
 
 // after - helper on the Server model
@@ -45,6 +45,8 @@ if ($server->isntAlerting()) {
 ```
 
 The same applies to raw column *mutations* scattered outside the model (`$server->alerting_since = now(); $server->save();` in a command should be `$server->markAsAlerting()`).
+
+This extends to **Blade views** — `@if ($server->alerting_since)` in a template should read `@if ($server->isAlerting())`. Flag truthiness checks (and mutations) in views the same as in PHP, but leave genuine value-reads that need the column itself (`{{ $server->alerting_since->diffForHumans() }}`).
 
 ### 2. Behaviour that belongs on the model
 
