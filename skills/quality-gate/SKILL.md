@@ -124,7 +124,27 @@ On a grotty codebase, don't aim for one exhaustive pass. Cap the findings
 (worst offenders first - the section checker's `--cap` does this natively),
 fix, re-run, repeat until the developer says it's up to snuff.
 
-When a coherent set of fixes is in place and you feel like it's a good place to commit the work 
-that has been done - give your summary as you would normally, but suggest committing the work
-and offer a helpful git commit message following the Conventional Commits spec.
+## Suggesting a commit
+
+Applies in both modes - after the recent-work summary, or at a natural stop
+point in a rinse-and-repeat loop. When a coherent set of fixes is in place
+and it feels like a good place to commit the work that has been done - give
+your summary as you would normally, then suggest committing the work with a
+message following the Conventional Commits spec. How to make the commit
+depends on what's available (`command -v agent-commit`):
+
+- **`agent-commit` on the PATH**: use it.
+  `agent-commit -m "type(scope): summary" <file> [<file>...]` naming every
+  changed file explicitly - it previews without committing anything and
+  prints a confirm token; re-run with `--yes TOKEN` to make the commit. If
+  it refuses with a token mismatch, the tree changed since the preview -
+  re-run the preview and read it again, don't fight it.
+- **No `agent-commit`**: offer the message and ask before committing - do
+  not assume the developer's permission setup allows you to run git
+  commands, and don't go probing their settings to find out. If they say go
+  ahead (or standing instructions already permit it), commit directly.
+
+Either way: explicit file paths only, staging just the files this review's
+fixes touched. Never `git add .`, `-A`, or a directory - messy working
+trees carry stray files that must not ride along.
 
