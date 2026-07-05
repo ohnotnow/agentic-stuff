@@ -1,6 +1,6 @@
 ---
 name: quality-gate
-description: One-stop code review after feature work, or for a whole codebase. Runs deterministic checks (section ordering, arch conventions) free of charge, then fresh-eyes Opus reviewer agents. Covers team conventions, test quality, complexity, security, and Livewire/Flux patterns. Always confirms before spending agent tokens.
+description: One-stop code review after feature work, or for a whole codebase. Runs deterministic checks (section ordering, arch conventions) free of charge, then fresh-eyes reviewer agents. Covers team conventions, test quality, complexity, security, and Livewire/Flux patterns.
 triggers:
   - /quality-gate
   - /review
@@ -123,3 +123,8 @@ Launch ONE general-purpose orchestrator agent instructed to:
 On a grotty codebase, don't aim for one exhaustive pass. Cap the findings
 (worst offenders first - the section checker's `--cap` does this natively),
 fix, re-run, repeat until the developer says it's up to snuff.
+
+When a coherent set of fixes is in place and you feel like it's a good place to commit the work 
+that has been done - give your summary as you would normally, but suggest committing the work
+and offer a helpful git commit message following the Conventional Commits spec.
+
