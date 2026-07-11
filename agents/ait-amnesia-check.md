@@ -2,6 +2,7 @@
 name: ait-amnesia-check
 description: Fresh-eyes amnesia test for newly created ait issues. Give it a handful of issue IDs; with no conversation context it demonstrates, cold, what it would build from each spec — restated goal, files, first failing test — marking every guess and dead end. It never gives a verdict; the caller diffs its demonstration against the real intent to find what the issues failed to convey. Read-only towards the codebase.
 tools: Bash, Read, Glob, Grep
+model: opus
 skills:
   - ait
 ---
