@@ -4,6 +4,10 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 
 ---
 
+> **Heads up (11th July 2026):** The plan-to-ait pipeline has been restructured for stronger main agents. The issue-crafting knowledge (epic/issue templates, testing modes, the amnesia test) now lives in a new `ait-crafting` skill, so the main agent can create issues straight from a feature conversation; the `plan-to-ait` agent is now a thin shell that loads that skill. There's also a new `ait-amnesia-check` agent — a fresh-context checker that *demonstrates* what it would build from newly created issues (never a verdict), so the caller can diff its reading against the real intent. The `conversation-to-ait` skill has been absorbed into `ait-crafting` and removed — if you'd previously synced it, delete it from your tool config (e.g. `rm -rf ~/.claude/skills/conversation-to-ait`).
+
+---
+
 > **Heads up (3rd July 2026):** `quality-gate` has grown into a two-tier review stack: free deterministic checks first (a section-order checker for Eloquent models and Livewire components in `skills/quality-gate/scripts/`, plus a drop-in Pest architecture test in `skills/quality-gate/arch/`), then the reviewer agents, all briefed via `skills/quality-gate/briefing.md` with whole-file reading rules. There's a new `laravel-conventions-reviewer` agent, and `test-quality-checker` now also hunts tautological tests, unit-tests-that-should-be-feature-tests, and test proliferation. The section order, arch rules, and conventions checklist encode *our* house style — read through and tweak them to yours before adopting.
 
 ---
@@ -17,13 +21,14 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 ## Skills
 
 - `ait` -- Local-first [issue tracker for coding agents](https://github.com/ohnotnow/agent-issue-tracker). Tracks tasks, models dependencies, and helps agents pick up where they left off after session loss.
+- `ait-crafting` -- Turns a settled feature discussion or plan document into consultant-ready `ait` issues: an initiative/epic vision document plus implementation specs a fresh agent could pick up cold. Includes a "does this capture it?" review gate for conversation-sourced work, and pairs with the `ait-amnesia-check` agent for a fresh-eyes conveyance check. Also the knowledge base for the `plan-to-ait` agent.
 - `ait-recap` -- Generates a friendly markdown recap of recent `ait` activity for the current project or across a directory of projects. Handy for weekly status updates, "what shipped recently?" questions, and quick memory refreshers.
 - `ant` -- Local-first [notebook for the *why*](https://github.com/ohnotnow/agent-note-tracker) behind project work. Captures decisions, alternatives rejected, pivots, and foundation context as a sibling to `ait`'s task tracking.
 - `audience-credibility` -- Defensive review pass for audience-facing deliverables. Verifies named places, institutions, personas, and other local details before writing, then checks finished copy and visuals for recognisable AI-generated tells.
 - `changelog` -- Analyses git tags and diffs to draft `CHANGELOG.md` entries in Keep a Changelog format. Proposes changes for review rather than writing them directly.
-- `conversation-to-ait` -- Synthesises a feature discussion into a reviewed markdown brief, then hands it to the `plan-to-ait` agent to create `ait` issues.
 - `conversation-to-html` -- Turns Claude Code or Codex session logs into single-file HTML transcripts you can share or present.
 - `cruft-or-keep` -- Conversational second pair of eyes for reachable-but-dormant code. Builds evidence-grounded case files for suspect jobs, mailables, listeners, routes, commands, and asks the developer `cruft or keep?` rather than deleting anything.
+- `expand-issue` -- Fleshes out a terse "note to self" `ait` issue into a proper plan. Explores the codebase to work out what past-you meant, makes reasonable assumptions (and lists them for correction), and produces a plan document ready for `plan-to-ait`. Handy for drive-by brain dumps you want to pick up properly the next day.
 - `feature-workflow` -- Streamlined workflow for building features with `ait` issue tracking. Handles orientation, planning (via plan mode), issue creation (via `plan-to-ait`), implementation with acceptance criteria checking, and optional quality gate at the end.
 - `flux-ui` -- Flux UI v2 component reference for Laravel/Livewire. Covers syntax, patterns, common mistakes, and modal/form/table patterns.
 - `github-create` -- Creates a new GitHub repo from the current project, pushes code, and sorts out the README, licence, and metadata.
@@ -52,6 +57,7 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 
 ## Agents
 
+- `ait-amnesia-check.md` -- Fresh-eyes amnesia test for newly created `ait` issues. With no conversation context it demonstrates what it would build from each spec — restated goal, files, first failing test, every guess and dead end marked — so the caller can diff its reading against the real intent. Never gives a verdict.
 - `ait-audit.md` -- Reviews open `ait` issues against the codebase and flags work that looks done but hasn't been closed.
 - `fresh-eyes.md` -- Fresh pair of eyes for when you're stuck or looping. Suggests one or two things to try rather than editing code directly.
 - `humaniser.md` -- Removes common AI-writing patterns from text files like READMEs and docs.
@@ -60,7 +66,7 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 - `livewire-flux-reviewer.md` -- Reviews Livewire/Flux code for simplification opportunities. Quick wins, things worth considering, and what looks good. References `flux-ui` and `modern-livewire` skills for pattern details.
 - `phpmetrics-check.md` -- Runs phpmetrics on a PHP/Laravel codebase, flags complexity hotspots, and compares against a saved baseline.
 - `plan-reconciler.md` -- Reconciles a plan document against the conversation that produced it. Reports what was captured, missed, glossed over, or drifted without editing the plan.
-- `plan-to-ait.md` -- Turns approved plans into `ait` epics and issues that a fresh coding agent can execute without context.
+- `plan-to-ait.md` -- Turns approved plan documents into `ait` epics and issues that a fresh coding agent can execute without context. Now a thin shell around the `ait-crafting` skill, which holds the templates and quality bar.
 - `test-debug.md` -- Debugging assistant for stubborn failing tests. Uses `dump()` instrumentation rather than speculative rewrites.
 - `test-quality-checker.md` -- Reviews Laravel tests for false-confidence patterns and coverage gaps: tautologies, weak assertions, missing control records, unit tests that should be feature tests.
 
