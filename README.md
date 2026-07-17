@@ -78,7 +78,7 @@ Different AI coding tools (Claude Code, Codex, Gemini, Cursor, etc.) each have t
 2. Enable the tools you use and adjust paths if needed (`sync.yaml` is gitignored).
 3. Run `./sync` (requires [uv](https://docs.astral.sh/uv/)).
 
-If a destination file is **newer** than the repo source, the script will warn you and offer a diff before overwriting — handy if you've been editing skills in-place. Skipped files are listed at the end for easy copy-back.
+If a destination file is **newer** than the repo source *and actually differs*, the script will warn you and offer a diff before overwriting — handy if you've been editing skills in-place. Identical files are left alone whatever their timestamps say. Skipped files are listed at the end for easy copy-back.
 
 To skip specific items entirely (e.g. you have your own `readme` skill), add an `ignore` block globally or per-target in `sync.yaml`:
 
@@ -101,6 +101,18 @@ targets:
 ./sync --dry-run   # preview only
 ./sync --force     # overwrite everything without asking
 ```
+
+### Pulling in sibling repos with `sources`
+
+Not everything lives in this repo — some tools ship as standalone repos that carry their own skills and agents alongside their code. Rather than remembering a separate install step for each, `sync.yaml` can list extra source directories and `./sync` treats their contents as if they lived here:
+
+```yaml
+sources:
+  - ~/code/ux-agent/claude
+  - ~/code/a11y-agent/claude
+```
+
+Each entry points at a directory that itself contains `skills/`, `agents/` and/or `commands/`. Every mode sees the merged set — the full sync, `--dry-run`, `pick`, and `preset` bundles can all draw from sources. On a name collision the first provider wins (this repo beats sources, earlier sources beat later ones) and the shadowed copy is reported, so nothing disappears quietly. `ignore` blocks apply to sourced items like anything else.
 
 ### Project-local skills with `pick` and `preset`
 
@@ -151,3 +163,10 @@ gopick() { /path/to/agentic-stuff/sync preset go --to "$PWD/.claude/"; }
 `--dry-run` previews either mode without writing anything; `--force` skips the "destination is newer than repo source" prompts.
 
 `--dry-run` and `--force` work for both modes.
+
+## You might also be interested in
+
+Two standalone repos that pair well with this collection — the `quality-gate` skill knows how to call on both, and the `sources:` block above will sync their skills and agents alongside these:
+
+- [a11y-agent](https://github.com/ohnotnow/a11y-agent) — a deterministic accessibility CLI (axe scan, keyboard tab-order walk, screen-reader transcript) with its own Claude Code skill and background checker agent. Makes the a11y audit nobody gets time for nearly free.
+- [ux-agent](https://github.com/ohnotnow/ux-agent) — skills that drive a real browser against your local app to produce bug-reproduction videos, user-guide videos that re-film themselves, and cold UX journey reports from a code-blind probe agent.

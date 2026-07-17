@@ -24,14 +24,13 @@ Read project context in parallel:
 ```
 README.md
 TECHNICAL_OVERVIEW.md (if exists)
-CLAUDE.md (if exists)
 ```
 
 Then check ait:
 
 ```bash
 ait ready
-aitlist --all | head -20
+ait list --all | head -20
 ```
 
 **Report briefly** (2-3 sentences max):

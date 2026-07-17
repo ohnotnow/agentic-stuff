@@ -7,6 +7,16 @@
 #   skills: [readme]
 #   agents: [humaniser]
 
+# Extra source repos to sync alongside this one. Each entry points at a
+# directory that itself contains skills/ and/or agents/ and/or commands/
+# (e.g. the claude/ dir of a sibling repo). All modes see the merged set —
+# full sync, --dry-run, pick, and presets. On a name collision the first
+# provider wins (this repo beats sources, earlier sources beat later ones)
+# and the shadowed copy is reported. Ignores apply to sourced items too.
+# sources:
+#   - ~/code/ux-agent/claude
+#   - ~/code/a11y-agent/claude
+
 targets:
   claude:
     enabled: true

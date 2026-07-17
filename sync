@@ -5,6 +5,7 @@
 # ///
 """Sync skills, agents and commands to local AI tool config directories."""
 
+import filecmp
 import os
 import shutil
 import subprocess
@@ -17,12 +18,9 @@ REPO_DIR = Path(__file__).resolve().parent
 CONFIG_FILE = REPO_DIR / "sync.yaml"
 EXAMPLE_FILE = REPO_DIR / "sync.yaml.example"
 
-# Maps config keys to repo subdirectories
-CONTENT_TYPES = {
-    "skills": REPO_DIR / "skills",
-    "agents": REPO_DIR / "agents",
-    "commands": REPO_DIR / "commands",
-}
+# Content types synced. Each is a subdirectory of the same name inside
+# every source root (this repo, plus any `sources:` entries in sync.yaml).
+CONTENT_TYPES = ("skills", "agents", "commands")
 
 TYPE_LETTER = {"skills": "s", "agents": "a", "commands": "c"}
 
@@ -50,8 +48,55 @@ def load_config() -> dict:
         return yaml.safe_load(f)
 
 
+def load_config_optional() -> dict:
+    """Like load_config, but an absent sync.yaml just means defaults."""
+    if not CONFIG_FILE.exists():
+        return {}
+    with open(CONFIG_FILE) as f:
+        return yaml.safe_load(f) or {}
+
+
 def expand_path(p: str) -> Path:
     return Path(os.path.expanduser(p))
+
+
+def source_roots(config: dict) -> list[Path]:
+    """This repo first, then any extra `sources:` roots from sync.yaml."""
+    roots = [REPO_DIR]
+    for entry in config.get("sources") or []:
+        root = expand_path(entry)
+        if not root.is_dir():
+            print(f"⚠  source '{entry}' not found — skipping")
+            continue
+        roots.append(root)
+    return roots
+
+
+def collect_items(config: dict) -> dict[str, dict[str, Path]]:
+    """Map content type -> {name: source path} across all source roots.
+
+    The first root to provide a name wins (so this repo's own copy beats
+    an external source's); shadowed duplicates are reported so collisions
+    stay visible.
+    """
+    items: dict[str, dict[str, Path]] = {ct: {} for ct in CONTENT_TYPES}
+    for root in source_roots(config):
+        for content_type in CONTENT_TYPES:
+            subdir = root / content_type
+            if not subdir.is_dir():
+                continue
+            for item in sorted(subdir.iterdir()):
+                if item.name.startswith("."):
+                    continue
+                existing = items[content_type].get(item.name)
+                if existing is not None:
+                    print(
+                        f"⚠  {content_type}/{item.name}: using {existing}, "
+                        f"ignoring the copy in {root}"
+                    )
+                    continue
+                items[content_type][item.name] = item
+    return items
 
 
 def newest_mtime(path: Path) -> float:
@@ -104,16 +149,15 @@ def ignored_names(config: dict, global_config: dict, content_type: str) -> set[s
 def _sync_file(src: Path, dest: Path, force: bool = False) -> str:
     """Sync a single file. Returns a status string."""
     if dest.exists():
-        src_mtime = src.stat().st_mtime
-        dest_mtime = dest.stat().st_mtime
+        # Same content means nothing to do, whatever the mtimes say —
+        # only prompt when the newer destination genuinely differs.
+        if filecmp.cmp(src, dest, shallow=False):
+            return "unchanged"
 
-        if dest_mtime > src_mtime and not force:
+        if dest.stat().st_mtime > src.stat().st_mtime and not force:
             print(f"  ⚠  {dest} is NEWER than repo source")
             if not ask_user("Overwrite with older repo version?", src, dest):
                 return "skipped (dest newer)"
-
-        if src_mtime <= dest_mtime and not force:
-            return "unchanged"
 
     dest.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(src, dest)
@@ -147,11 +191,16 @@ def sync_item(src: Path, dest: Path, force: bool = False) -> str:
 
 
 def sync_target(
-    name: str, config: dict, global_config: dict, skipped: list, force: bool = False
+    name: str,
+    config: dict,
+    global_config: dict,
+    items: dict[str, dict[str, Path]],
+    skipped: list,
+    force: bool = False,
 ) -> None:
     print(f"\n📁 {name}")
 
-    for content_type, repo_subdir in CONTENT_TYPES.items():
+    for content_type in CONTENT_TYPES:
         dest_base_str = config.get(content_type)
         if not dest_base_str:
             continue
@@ -159,39 +208,20 @@ def sync_target(
         dest_base = expand_path(dest_base_str)
         dest_base.mkdir(parents=True, exist_ok=True)
 
-        if not repo_subdir.exists():
-            continue
-
         ignores = ignored_names(config, global_config, content_type)
-        items = sorted(repo_subdir.iterdir())
-        for item in items:
-            if item.name.startswith("."):
+        for item_name, src in sorted(items[content_type].items()):
+            if item_name in ignores:
+                print(f"  ⊘ {content_type}/{item_name} → ignored")
                 continue
-            if item.name in ignores:
-                print(f"  ⊘ {content_type}/{item.name} → ignored")
-                continue
-            dest = dest_base / item.name
-            status = sync_item(item, dest, force=force)
+            dest = dest_base / item_name
+            status = sync_item(src, dest, force=force)
             if status == "unchanged":
-                print(f"  → {content_type}/{item.name} unchanged")
+                print(f"  → {content_type}/{item_name} unchanged")
                 continue
             icon = "✓" if status == "synced" else "⊘"
-            print(f"  {icon} {content_type}/{item.name} → {status}")
+            print(f"  {icon} {content_type}/{item_name} → {status}")
             if "skipped" in status:
-                skipped.append((dest, item))
-
-
-def collect_all_items() -> list[tuple[str, str, Path]]:
-    """List every (type, name, src) triple available in the repo."""
-    items: list[tuple[str, str, Path]] = []
-    for content_type, repo_subdir in CONTENT_TYPES.items():
-        if not repo_subdir.exists():
-            continue
-        for item in sorted(repo_subdir.iterdir()):
-            if item.name.startswith("."):
-                continue
-            items.append((content_type, item.name, item))
-    return items
+                skipped.append((dest, src))
 
 
 def apply_picks(
@@ -238,7 +268,9 @@ FZF_PREVIEW = (
 )
 
 
-def picker_mode(to: Path, force: bool, dry_run: bool) -> None:
+def picker_mode(
+    items_map: dict[str, dict[str, Path]], to: Path, force: bool, dry_run: bool
+) -> None:
     if not shutil.which("fzf"):
         print(
             "pick mode needs fzf on PATH.\n"
@@ -247,9 +279,13 @@ def picker_mode(to: Path, force: bool, dry_run: bool) -> None:
         )
         sys.exit(1)
 
-    items = collect_all_items()
+    items = [
+        (ct, name, src)
+        for ct in CONTENT_TYPES
+        for name, src in sorted(items_map[ct].items())
+    ]
     if not items:
-        print("No items found in repo.")
+        print("No items found in repo or sources.")
         return
 
     items_by_line: dict[str, tuple[str, str, Path]] = {}
@@ -287,7 +323,12 @@ def picker_mode(to: Path, force: bool, dry_run: bool) -> None:
 
 
 def preset_mode(
-    name: str, to: Path, force: bool, dry_run: bool, config: dict
+    name: str,
+    to: Path,
+    force: bool,
+    dry_run: bool,
+    config: dict,
+    items: dict[str, dict[str, Path]],
 ) -> None:
     presets = config.get("presets") or {}
     if name not in presets:
@@ -297,14 +338,19 @@ def preset_mode(
 
     preset = presets[name] or {}
     chosen: list[tuple[str, str, Path]] = []
-    for ct, repo_subdir in CONTENT_TYPES.items():
+    for ct in CONTENT_TYPES:
         names = preset.get(ct) or []
         for n in names:
-            src = repo_subdir / n
-            if not src.exists():
-                print(f"  ⚠ {ct}/{n} listed in preset '{name}' but not found in repo")
+            # Presets list agents/commands by bare name; the files are .md.
+            key = n if n in items[ct] else f"{n}.md"
+            src = items[ct].get(key)
+            if src is None:
+                print(
+                    f"  ⚠ {ct}/{n} listed in preset '{name}' "
+                    "but not found in repo or sources"
+                )
                 continue
-            chosen.append((ct, n, src))
+            chosen.append((ct, key, src))
 
     apply_picks(chosen, to, force, dry_run=dry_run)
 
@@ -333,40 +379,41 @@ def main() -> None:
         if to is None:
             print("Usage: ./sync pick --to PATH")
             sys.exit(1)
-        picker_mode(to, force, dry_run)
+        picker_mode(collect_items(load_config_optional()), to, force, dry_run)
         return
 
     if args and args[0] == "preset":
         if len(args) < 2 or to is None:
             print("Usage: ./sync preset NAME --to PATH")
             sys.exit(1)
-        preset_mode(args[1], to, force, dry_run, load_config())
+        config = load_config()
+        preset_mode(args[1], to, force, dry_run, config, collect_items(config))
         return
 
     if dry_run:
         print("Dry run — showing what would be synced:\n")
         config = load_config()
+        items = collect_items(config)
         for name, target in config.get("targets", {}).items():
             if not target.get("enabled", False):
                 continue
             print(f"📁 {name}")
-            for content_type, repo_subdir in CONTENT_TYPES.items():
+            for content_type in CONTENT_TYPES:
                 dest_str = target.get(content_type)
-                if not dest_str or not repo_subdir.exists():
+                if not dest_str:
                     continue
                 ignores = ignored_names(target, config, content_type)
-                for item in sorted(repo_subdir.iterdir()):
-                    if item.name.startswith("."):
+                for item_name, src in sorted(items[content_type].items()):
+                    if item_name in ignores:
+                        print(f"  {content_type}/{item_name} → ignored")
                         continue
-                    if item.name in ignores:
-                        print(f"  {content_type}/{item.name} → ignored")
-                        continue
-                    dest = expand_path(dest_str) / item.name
+                    dest = expand_path(dest_str) / item_name
                     exists = "exists" if dest.exists() else "new"
-                    print(f"  {content_type}/{item.name} → {dest} ({exists})")
+                    print(f"  {content_type}/{item_name} → {dest} ({exists})")
         return
 
     config = load_config()
+    items = collect_items(config)
     targets = config.get("targets", {})
 
     if not targets:
@@ -384,7 +431,7 @@ def main() -> None:
 
     skipped: list[tuple[Path, Path]] = []
     for name, target in enabled.items():
-        sync_target(name, target, config, skipped, force=force)
+        sync_target(name, target, config, items, skipped, force=force)
 
     if skipped:
         print("\n⚠  Skipped (destination newer than repo):")

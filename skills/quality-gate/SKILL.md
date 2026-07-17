@@ -1,11 +1,13 @@
 ---
 name: quality-gate
-description: One-stop code review after feature work, or for a whole codebase. Runs deterministic checks (section ordering, arch conventions) free of charge, then fresh-eyes reviewer agents. Covers team conventions, test quality, complexity, security, and Livewire/Flux patterns.
+description: One-stop review after feature work, or for a whole codebase. Runs deterministic checks (section ordering, arch conventions) free of charge, then fresh-eyes reviewer agents. Covers team conventions, test quality, complexity, security, and Livewire/Flux patterns - plus runtime checks (a11y, cold UX probe) when UI changed. Also has a quick mid-session sanity-check mode ("this seem ok?").
 triggers:
   - /quality-gate
   - /review
   - run the quality gate
   - code review
+  - this seem ok
+  - quick sanity check
 ---
 
 # Quality Gate
@@ -20,8 +22,15 @@ Two scopes:
 - **Whole codebase** (explicit opt-in, e.g. "review the whole app"): for
   legacy or inherited apps. Delegated - see below.
 
-Reviewers always receive **file lists, never diffs**. A diff tells a reviewer
-where to look; only the whole file tells them what's actually there.
+And two depths for recent work:
+
+- **Quick check** ("this seem ok?", mid-feature): tier zero plus a
+  background a11y pass - see its section below.
+- **Full gate** ("I think I'm done"): tier zero, then the reviewer roster.
+
+Code reviewers always receive **file lists, never diffs**. A diff tells a
+reviewer where to look; only the whole file tells them what's actually
+there. (The runtime checkers are the exception - see the roster note.)
 
 ## Tier zero - deterministic checks (run these before any agent)
 
@@ -39,6 +48,21 @@ Lint what's lintable; spend judgement tokens on judgement.
    adopt with `ignoring()` on current offenders and burn the list down. If
    already installed it runs with the app's own suite; nothing extra to do.
 
+## Quick check - mid-session "this seem ok?"
+
+For a cheap sanity check mid-feature - asked for casually, or wanted for
+your own peace of mind before building on top of the work:
+
+1. Tier zero, as above - free, always.
+2. UI changed and the app running locally? Spawn the `a11y-checker` agent
+   in the background (quick mode) on the page(s) just touched, and keep
+   working while it runs.
+
+No Opus reviewers and no confirmation ceremony - the spend is small and
+the point is not breaking stride. Triage findings with the same three
+outcomes as the full gate; anything deferred still becomes an ait issue,
+not a verbal "I'll flag that".
+
 ## Reviewer roster
 
 | Agent | What it checks | When to run |
@@ -48,6 +72,8 @@ Lint what's lintable; spend judgement tokens on judgement.
 | `phpmetrics-check` | Complexity hotspots, maintainability | Always for Laravel work |
 | `laravel-owasp-reporter` | Broken access control, mass assignment, IDOR, secrets | API or auth-touching work |
 | `livewire-flux-reviewer` | Livewire/Flux modernisation | When Livewire/Flux code changed |
+| `a11y-checker` | Runtime accessibility on the running page: axe scan, tab-order walk, virtual screen reader | UI changed and the app runs locally |
+| `ux-journey` probe | Context-free agent attempts the real task the feature enables, cold; reports friction, wrong turns, dead ends | User-facing flow changed - opt-in, ask first |
 
 > **Scoping note — don't route Blade views only to `livewire-flux-reviewer`.**
 > The "raw column check → model helper" convention (`@if ($job->alerting_since)`
@@ -60,11 +86,25 @@ Lint what's lintable; spend judgement tokens on judgement.
 > reviewer's list at all — a view-level de-duplication went uncaught until the
 > developer spotted it by eye.)
 
+> **The runtime rows are different animals.** They exercise the running
+> app, not the code, so neither takes the briefing block or a file list.
+> `a11y-checker` gets the app's base URL and the pages to check; its
+> findings come back for the same triage. The probe is launched through
+> the `ux-journey` skill, which owns its rules - and its briefing must be
+> the genuine task the feature enables ("create a silenced cronjob for
+> team X"), never "go poke at the app": a probe without a real task
+> manufactures findings to justify itself. It also needs a persona and
+> login agreed with the developer and costs ~100k subagent tokens, so it
+> sits behind the same confirm-before-spending gate as the Opus reviewers.
+> If either isn't installed (they come from the a11y-agent and ux-agent
+> repos), say so rather than silently skipping the coverage.
+
 ## Confirm before spending
 
-Tier zero is free - run it without asking. Opus reviewers are not. Before
-launching any, tell the user what tier zero found, which reviewers fit this
-scope, and ask. If the work was trivial (config change, copy tweak), don't
+Tier zero is free - run it without asking. A background `a11y-checker`
+run is cheap - spawn it freely on a quick check. Opus reviewers and the
+UX probe are not. Before launching any, tell the user what tier zero
+found, which reviewers fit this scope, and ask. If the work was trivial (config change, copy tweak), don't
 suggest reviewers at all.
 
 ## Briefing
@@ -124,27 +164,7 @@ On a grotty codebase, don't aim for one exhaustive pass. Cap the findings
 (worst offenders first - the section checker's `--cap` does this natively),
 fix, re-run, repeat until the developer says it's up to snuff.
 
-## Suggesting a commit
-
-Applies in both modes - after the recent-work summary, or at a natural stop
-point in a rinse-and-repeat loop. When a coherent set of fixes is in place
-and it feels like a good place to commit the work that has been done - give
-your summary as you would normally, then suggest committing the work with a
-message following the Conventional Commits spec. How to make the commit
-depends on what's available (`command -v agent-commit`):
-
-- **`agent-commit` on the PATH**: use it.
-  `agent-commit -m "type(scope): summary" <file> [<file>...]` naming every
-  changed file explicitly - it previews without committing anything and
-  prints a confirm token; re-run with `--yes TOKEN` to make the commit. If
-  it refuses with a token mismatch, the tree changed since the preview -
-  re-run the preview and read it again, don't fight it.
-- **No `agent-commit`**: offer the message and ask before committing - do
-  not assume the developer's permission setup allows you to run git
-  commands, and don't go probing their settings to find out. If they say go
-  ahead (or standing instructions already permit it), commit directly.
-
-Either way: explicit file paths only, staging just the files this review's
-fixes touched. Never `git add .`, `-A`, or a directory - messy working
-trees carry stray files that must not ride along.
+When a coherent set of fixes is in place and you feel like it's a good place to commit the work 
+that has been done - give your summary as you would normally, but suggest committing the work
+and offer a helpful git commit message following the Conventional Commits spec.
 
