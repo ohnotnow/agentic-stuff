@@ -54,6 +54,7 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 - `uofg-design-system` -- University of Glasgow web design system. Brand tokens, layout rules, and component patterns for HTML, CSS, React, Tailwind, and FluxUI.
 - `shell-function` -- Creates a shell function (bash, zsh, fish, etc.) that does what you describe.
 - `sop-creator` -- Writes Standard Operating Procedure documents from user outlines. Asks minimal clarifying questions, then generates a clean Markdown SOP with purpose, prerequisites, procedure, and verification steps.
+- `swift` -- Conventions and patterns for native macOS Swift apps. Young sibling of `golang`: XcodeGen workflow, sandbox-first permissions posture, fixture-backed testing, headless verification tricks, and a growing list of hard-won AppKit/SwiftUI gotchas.
 
 ## Agents
 
