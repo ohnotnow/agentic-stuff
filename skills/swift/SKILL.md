@@ -134,6 +134,17 @@ Symptom → fix.
   constants trip strict concurrency (`Name` isn't `Sendable`); isolate them
   with `@MainActor` — both AppKit call sites and SwiftUI `body` are main-actor
   anyway.
+- **A sprite atlas (or any repeatedly drawn image) re-decodes its PNG on
+  every draw** — `kCGImageSourceShouldCache` / `ShouldCacheImmediately` do
+  *not* make the decode stick: the CGImage stays backed by the compressed PNG
+  provider and the decoded pixels live in an evictable system cache, so each
+  redraw can trigger a full decode plus colour-match (`NSImage.cacheMode =
+  .never` guarantees it). Diagnostic tell: CPU tracks the animation frame
+  rate, and `/usr/bin/sample` shows `png_read_filter_row_paeth_neon` /
+  `CGSImageDataLock` under `CALayer _display`. Fix: at load time, draw the
+  image once into an owned `CGContext` (sRGB, premultiplied BGRA,
+  `byteOrder32Little`) and keep `context.makeImage()` — nothing PNG-backed
+  survives to draw time. Cost is width×height×4 bytes of resident memory.
 
 ## Out of scope (so far)
 
