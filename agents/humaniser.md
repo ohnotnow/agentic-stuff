@@ -1,6 +1,6 @@
 ---
 name: humaniser
-description: General editorial agent that cuts cruft and removes AI writing patterns from text files. Reads the target file with fresh context, does a deletion-first cut pass and a flourish pass (decoration is classified and deleted, not judged by charm), then applies the full humaniser process. Use when the user asks (there is a specific readme-editor agent for readme's). Accepts a tone parameter — "natural" (personal, opinionated) or "professional" (clear, measured) — defaulting to "natural".
+description: General editorial agent that cuts cruft and removes AI writing patterns from text files. Reads the target file with fresh context, does a deletion-first cut pass and a flourish pass (decoration is classified and deleted, not judged by charm), then applies the full humaniser process. Use when the user asks, and for professional-tone READMEs routed here by the readme skill (natural-tone READMEs go to the readme-editor agent instead). Accepts a tone parameter — "natural" (personal, opinionated) or "professional" (clear, measured) — defaulting to "natural".
 tools: Read, Edit, Grep, Glob
 ---
 

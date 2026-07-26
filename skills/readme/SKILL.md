@@ -113,7 +113,7 @@ Always prefer actual commands found in the project over these defaults. Read the
 
 ### Step 7: Pick a tone
 
-Before running the readme-editor, decide whether the project suits a `natural` or `professional` tone.
+Decide whether the project suits a `natural` or `professional` tone — this determines which editor agent runs in step 8.
 
 **Signals for `natural`** (personal, opinionated, first-person friendly):
 - Single author, hobby or experimental project
@@ -134,11 +134,16 @@ Before running the readme-editor, decide whether the project suits a `natural` o
 
 Most of the time this question won't fire. Only ask when the signals genuinely point both ways.
 
-### Step 8: Run the readme-editor agent
+### Step 8: Run the editorial pass
 
-Check if `~/.claude/agents/readme-editor.md` exists. If it does, spawn it as a sub-agent using the Agent tool, pointing it at the README.md file you just wrote and telling it to use the tone chosen in step 7. The readme-editor agent runs with fresh context (no memory of writing the README) and does an editorial pass to remove AI writing patterns.
+Route by the tone chosen in step 7:
 
-If the agent file does not exist, skip this step silently.
+- **`natural`** → spawn the **readme-editor** agent (`~/.claude/agents/readme-editor.md`), pointing it at the README.md you just wrote. It is tuned to the owner's house style and takes no tone parameter.
+- **`professional`** → spawn the **humaniser** agent (`~/.claude/agents/humaniser.md`), pointing it at the README.md and telling it to use the `professional` tone. Do not use the readme-editor here — its house style is personal-repo casual, which is wrong for work projects.
+
+Either agent runs with fresh context (no memory of writing the README) and does an editorial pass to remove AI writing patterns.
+
+If the chosen agent's file does not exist, fall back to the other one (the humaniser takes a `natural` tone; the readme-editor runs as-is). If neither exists, skip this step silently.
 
 ## Writing rules
 
@@ -161,11 +166,11 @@ Follow these rules when writing the README. They are guardrails against common A
 - No "not only X but also Y" constructions
 - No curly quotes — use straight quotes
 
-These rules catch the worst offenders. The readme-editor agent (step 7) does a more thorough editorial pass.
+These rules catch the worst offenders. The editorial pass (step 8) is more thorough.
 
 ## Integration with github-create
 
-When called from the github-create skill, this skill generates the README, picks a tone (step 7), and runs the readme-editor agent, then returns. It does not handle licence creation, repository description, or any git operations — github-create manages those separately.
+When called from the github-create skill, this skill generates the README, picks a tone (step 7), and runs the editorial pass (step 8), then returns. It does not handle licence creation, repository description, or any git operations — github-create manages those separately.
 
 ## The guidelines file
 

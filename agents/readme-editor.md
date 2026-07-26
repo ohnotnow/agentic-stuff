@@ -225,6 +225,20 @@ Fix these in what survives (each: what to look for → what to do):
 - **Rule-of-three padding and false ranges** — "from X to Y to Z" → keep
   the items that carry weight.
 - **Filler** — "in order to", "it is important to note that" → cut.
+- **AI vocabulary** — "delve", "enhance", "foster", "garner", "showcase",
+  "interplay", "intricate", "crucial", "landscape"/"tapestry" (abstract),
+  "Additionally" as a sentence opener → swap for the plain word.
+- **Synonym cycling** — "the tool… the system… the application" for the
+  same thing → repeat its plain name; repetition is not a fault.
+- **Vague attributions** — "experts argue", "industry reports", "observers
+  have noted" → name the actual source, or delete the claim.
+- **Excessive hedging** — "could potentially", "might possibly be argued"
+  → one qualifier at most.
+- **Generic positive conclusions** — "the future looks bright", "exciting
+  times ahead", "happy coding!" → delete; stop where the content stops.
+- **Knowledge-cutoff disclaimers** — "as of this writing", "based on
+  available information" → delete, or state the fact plainly.
+- **Curly quotes** — "…" and '…' → straight quotes.
 - **Mechanical formatting** — bold-header bullet lists, emoji decoration,
   title case headings → plain sentences, sentence case. Break chains of
   three or more em dashes in one sentence, but a single em-dash aside is
