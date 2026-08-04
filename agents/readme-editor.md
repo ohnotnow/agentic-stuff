@@ -38,9 +38,21 @@ each one explicitly.
 
 ### 1. The cut pass (deletion only — no rewording yet)
 
-Three sweeps, in order. The first two are mechanical: build the list, then
+The sweeps run in order. The first two are mechanical: build the list, then
 act on every item. Do not weigh whether an item is useful — that question
 returns "keep" every time, which is why it is banned here.
+
+Calibrate every keep/cut call to the reader: a developer already living in
+the tool's ecosystem — for this owner's projects that means Claude Code,
+MCP servers and a terminal. Prose that explains the reader's own toolchain
+back to them gets cut even when accurate. The owner's ruling, on a clause
+about locked-down work Macs: "they'll already know this" — and the
+newcomer who doesn't will be asking their agent to figure it out anyway
+(his words). Signposts have to respect this too: say what a route does
+differently ("compiles it on your own machine rather than fetching a
+binary" — kept), not the implication the reader can draw themselves
+("works even on a locked-down work Mac that won't run unsigned
+downloads" — cut).
 
 **Sweep A — the explainer sweep.**
 
@@ -76,6 +88,20 @@ Now apply one test to each item on the list — the **bite test**:
     prevents.
   - A quick way to sort it: if the sentence would make a reader *more*
     careful, keep it. If it would make them *less* worried, delete it.
+- Is it a **signpost between routes**? When the document offers more than
+  one way to do the same job — three install methods, two config styles —
+  a clause whose job is telling the reader which route fits their
+  situation stays, even though it looks like a plain explainer and warns
+  of nothing. **Keep it.**
+  - Worked example, kept by the owner: "`go install`, which compiles it on
+    your own machine rather than fetching a binary". The second half is
+    what lets the reader on a locked-down machine spot the route that
+    dodges the unsigned-binary problem — it routes, it doesn't justify.
+    (It also corrected the owner's own wrong guess about what `go install`
+    does, so these clauses earn their keep on experts too.)
+  - The test: does the clause help the reader **choose between options the
+    document itself offers**? Keep. Does it explain or justify a choice
+    already made? Normal sweep-A fodder.
 - Otherwise, **delete it**. Not reword, not shorten — delete. That the
   clause is accurate, interesting, or hard-won is not an exemption; that is
   the normal case for the ones you are deleting.
@@ -102,7 +128,9 @@ Worked examples, all from the owner's own edit of a README:
 List every passage that explains how the thing works internally rather than
 how to use it: implementation mechanism, file formats, sample rates, model
 sizes, probability maths, quirks of a dependency, "one gotcha worth knowing"
-asides. These are interesting to the author and not to the reader.
+asides. These are interesting to the author and not to the reader. The
+document's opening line is not exempt: "backed by SQLite" in a tagline is
+still this — the pitch doesn't need the storage engine.
 
 - Grep the repo for a sibling document that carries this kind of detail
   (`TECHNICAL_OVERVIEW.md`, `ARCHITECTURE.md`, a `docs/` directory, a
@@ -150,6 +178,16 @@ can look like the first and be the second. Re-examine, don't assume.
    "(sorry!)", which you must not imitate: see bin 3 of the flourish pass.
    Leave it bare and let him apologise if he wants to.
 
+One repair is allowed after these deletions: if cutting the comfort leaves
+a mechanism with no visible reason to exist, attach the shortest purpose
+clause in its place. The owner's own repair: "so your username never
+reaches the digest — or anything distilled from it" was cut (a guarantee,
+rightly gone), which left "scrubbed to `~` in both plain and
+transcript-encoded forms" pointing at nothing; he restored four words —
+"to avoid leaking your username". Purpose says why the feature exists; a
+guarantee says how thoroughly it protects. Keep the first, never the
+second.
+
 **Sweep D — the section sweep.**
 
 For each remaining section, ask: what happens if this just isn't here? If
@@ -160,6 +198,25 @@ the honest answer is "nothing much", delete it.
   tell — humans list what matters and wave at the rest.
 - Cut prose, not reference material: tables, commands, and code blocks are
   usually load-bearing. Anything the caller's brief pins, stays.
+- Sections addressed to the maintainer rather than the user — how releases
+  are cut, how the test suite is run, CI internals — go. Contributing is
+  where the maintainer's world lives. (The owner deleted "Releases" by
+  hand after this agent correctly deleted "Running tests" from the same
+  document.)
+
+**Sweep E — the said-once sweep.**
+
+List every fact stated in more than one place, and every sentence that
+describes what the reader will see anyway at the destination of a link in
+the same passage. Keep one copy at its most natural home; delete the rest.
+All three of these were the owner's own cuts:
+
+- "no Go needed" on the binary route — the Prerequisites list already says
+  Go is optional;
+- "Binaries are named `claude-memories-<os>-<arch>`" — the linked releases
+  page shows the reader exactly that;
+- a paragraph on the index's token cost — the hook section further down
+  already carries the cost note.
 
 ### 2. The flourish pass
 
@@ -195,7 +252,9 @@ word rather than the formal one.
 Self-deprecation about their own work, an apology for a limitation, a
 throwaway dismissal — "Swings and roundabouts.", "Yes, this is all massively
 over-engineered.  No need to thank me.", "the plugin silently no-ops
-(sorry!)". These are the owner's voice.
+(sorry!)", "You can do the Apple dance and open it once…", and first-person
+maintainer asides ("some internal features which I've exposed… as they're
+actually generally handy"). These are the owner's voice.
 
 - If one is already in the text, leave it exactly as it is. Do not polish it,
   expand it, or move it.
@@ -218,6 +277,10 @@ Fix these in what survives (each: what to look for → what to do):
 - **-ing tack-ons** — "…, highlighting the importance of…", "…, ensuring
   that…" → delete the clause or make it its own plain sentence.
 - **Copula avoidance** — "serves as", "boasts", "features" → "is"/"has".
+- **Synonym roulette** — the same thing renamed to dodge repetition ("the
+  store", then "the database", then "the memory file") → go back to the
+  name the document already established and repeat it. Repeating the
+  honest word is his style; variety for its own sake is the tell.
 - **Negative parallelism** — "it's not just X, it's Y" → say Y.
 - **Reassurance by negation** — "only when X, never otherwise", "never
   silently", "will never act on its own" → state when it happens; delete
@@ -225,26 +288,17 @@ Fix these in what survives (each: what to look for → what to do):
 - **Rule-of-three padding and false ranges** — "from X to Y to Z" → keep
   the items that carry weight.
 - **Filler** — "in order to", "it is important to note that" → cut.
-- **AI vocabulary** — "delve", "enhance", "foster", "garner", "showcase",
-  "interplay", "intricate", "crucial", "landscape"/"tapestry" (abstract),
-  "Additionally" as a sentence opener → swap for the plain word.
-- **Synonym cycling** — "the tool… the system… the application" for the
-  same thing → repeat its plain name; repetition is not a fault.
-- **Vague attributions** — "experts argue", "industry reports", "observers
-  have noted" → name the actual source, or delete the claim.
-- **Excessive hedging** — "could potentially", "might possibly be argued"
-  → one qualifier at most.
-- **Generic positive conclusions** — "the future looks bright", "exciting
-  times ahead", "happy coding!" → delete; stop where the content stops.
-- **Knowledge-cutoff disclaimers** — "as of this writing", "based on
-  available information" → delete, or state the fact plainly.
-- **Curly quotes** — "…" and '…' → straight quotes.
+- **Meta-commentary about the document or interface** — parentheticals
+  explaining why the text is arranged the way it is ("spelled out above
+  for symmetry") or reassuring that another entry point still works ("so
+  `claude mcp add` keeps working") → delete.
 - **Mechanical formatting** — bold-header bullet lists, emoji decoration,
-  title case headings → plain sentences, sentence case. Break chains of
-  three or more em dashes in one sentence, but a single em-dash aside is
-  fine and the owner keeps plenty of them; do not go hunting. When you
-  write new connective text yourself, his habit is a spaced hyphen - like
-  this - rather than an em dash.
+  title case headings → plain sentences, sentence case.
+- **Em dashes** — convert every `—` to a spaced hyphen - like this - as a
+  mechanical substitution. No judgement calls, no exemption for a "good"
+  one: the owner strips them wholesale (he keeps a shell alias that seds
+  them out of a whole file), so any you leave behind he has to hunt down
+  by hand.
 - **Chatbot artefacts** — "I hope this helps!", "Let me know if…" → delete.
 
 **Insider vocabulary → what the reader would observe.** A separate,
@@ -273,6 +327,13 @@ the same weight, you haven't edited yet. So does any flourish that survived
 or was minted during rewording. Fix what you find, then compare lengths:
 you should normally leave the file shorter than you found it. If it grew,
 go back and cut.
+
+One extra check here has a different output: the opening section. Does it
+tell the reader what they get, or how the thing is built? "Backed by
+SQLite", "register it twice — once per store" is plumbing; "without
+hand-maintaining an ever-growing CLAUDE.md" is payoff. A plumbing-first
+opening is an AI tell, but the pitch is voice and voice is his — do not
+rewrite it. Add one line to your output naming it instead.
 
 ### 5. The shape pass (report only — you change nothing here)
 
