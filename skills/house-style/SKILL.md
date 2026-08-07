@@ -60,6 +60,14 @@ looks genuinely broken. Encode whichever they choose.
 - If they have no editor agent, create one from
   `references/seed-agent.md` (ask what to name it), then continue — the
   first coaching session both creates and tunes it.
+- Convention: a personal style file at `~/.claude/house-style-user.md`
+  (`references/example-user.md` shows the shape) carries the user's
+  standing taste — locale, punctuation habits, register. Fold its rules
+  into any agent you create, and treat it as ground truth when reading
+  diffs. It lives outside this skill's directory on purpose: the skill may
+  be synced to other people, and the taste must not travel with it. Agents
+  never read it at run time — bake the rules in, so each agent stays
+  self-contained and controlled runs stay attributable to one file.
 
 ## Read the diff as taste data
 
@@ -81,6 +89,13 @@ taste. Look for:
 
 Then read the agent's current prompt and ask of each observation: would the
 agent, as instructed today, have done this? The gaps are the lesson list.
+
+While you read the prompt, treat unsourced taste-claims already in it as
+suspect: "the owner keeps plenty of them" may have been minted by whichever
+model drafted the rule, not learned from any diff. Field example: an agent
+confidently protected single em dashes as the owner's taste; the owner's
+actual habit was a shell alias that strips every one. A rule that cites no
+diff gets checked against one before it survives the session.
 
 ## Discuss, then encode — one lesson at a time
 
@@ -167,6 +182,10 @@ The prompt edit is a hypothesis until a fresh agent run confirms it.
 - Remind the user to sync the agent if it's distributed from a repo.
 - Remind the user which `../` copies exist (their edit, any kept agent
   runs, the brief) so they can tidy or keep them deliberately.
+- If a lesson from this session is about the user rather than about one
+  document type — a punctuation habit, a locale, a register preference —
+  offer to add it to `~/.claude/house-style-user.md` as well as the agent
+  under coaching: that is how the next agent inherits it.
 - Offer to note genuinely unresolved divergences somewhere durable
   (their tracker or notes tool) rather than leaving them as loose ends.
 - This is a coaching loop, not a one-shot: each future hand-edit of an

@@ -118,7 +118,12 @@ Symptom → fix.
   `.canJoinAllSpaces` floating panel out of full-screen Spaces** — it
   gatecrashes anyway. The only working fix is active self-suppression: watch
   Space changes, detect a covering full-screen window via CGWindowList
-  geometry, and `orderOut` yourself.
+  geometry, and `orderOut` yourself. Geometry test that works for "fullscreen
+  window": full display width, bottom at display bottom, top within ~40pt of
+  display top (the tolerance covers notched MacBooks, where fullscreen content
+  sits below the camera housing). Known accepted limitation: a maximised
+  window with the Dock auto-hidden is geometrically indistinguishable from
+  notched fullscreen.
 - **`NSWorkspace.activeSpaceDidChangeNotification` fires mid-transition** —
   CGWindowList still shows the departing Space's windows at notification time.
   Treat the notification as a trigger to start converging, not a reliable read
