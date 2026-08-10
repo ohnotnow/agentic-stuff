@@ -57,6 +57,7 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 - `shell-function` -- Creates a shell function (bash, zsh, fish, etc.) that does what you describe.
 - `sop-creator` -- Writes Standard Operating Procedure documents from user outlines. Asks minimal clarifying questions, then generates a clean Markdown SOP with purpose, prerequisites, procedure, and verification steps.
 - `swift` -- Conventions and patterns for native macOS Swift apps. Young sibling of `golang`: XcodeGen workflow, sandbox-first permissions posture, fixture-backed testing, headless verification tricks, and a growing list of hard-won AppKit/SwiftUI gotchas.
+- `wut` -- Ask the model to rewrite it's response in a more human-friendly and less jargon-laden way.
 
 ## Agents
 
