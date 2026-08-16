@@ -1,6 +1,6 @@
 ---
 name: ant
-description: Local-first notebook for *why* — design decisions, alternatives rejected, pivots taken, the conversational nuance that gets lost when an issue closes. Sibling to ait. Use when the user asks to record/note a decision, after a load-bearing choice between options, after a library swap or refactor of direction, or to recall prior decisions in an area.
+description: Local-first notebook for *why* — design decisions, alternatives rejected, pivots taken, the conversational nuance that gets lost when an issue closes. Sibling to ait. You must use this when the user asks to record/note a decision, after a load-bearing choice between options, after a library swap or refactor of direction, or to recall prior decisions in an area.
 ---
 
 # AIT (`ant`) — Agent Notebook Tool
