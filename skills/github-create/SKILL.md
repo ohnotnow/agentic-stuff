@@ -21,7 +21,7 @@ Both failure modes arise from acting *unilaterally* on identity decisions. The c
 
 ## Prerequisites
 
-- `gh` CLI installed and authenticated (`gh auth status`)
+- `gh` CLI installed and authenticated (`agent-github auth-status` if the wrapper is installed, otherwise `gh auth status`)
 - `git` initialised in the current directory
 - Current directory has at least one commit
 
@@ -46,11 +46,14 @@ On the native path, respect the user's git permissions. If `git add` or `git com
 Check prerequisites and wrapper availability:
 
 ```bash
-gh auth status
+command -v agent-commit agent-github
 git rev-parse --is-inside-work-tree
 git log --oneline -1
-command -v agent-commit agent-github
 ```
+
+For the auth check, use `agent-github auth-status` if the wrapper is present, otherwise `gh auth status`. The wrapper subcommand takes no arguments and forwards none, so gh's `--show-token` can never be reached through it.
+
+Check remotes now rather than discovering them at publish time: `agent-github check-remote` if the wrapper is present, otherwise `git remote -v`. check-remote exits 0 when there are no remotes and publish can proceed; otherwise it lists each remote with a verdict, including a `fix: git remote remove NAME` line when a remote's GitHub repository returns 404. Show that output to the user and let them decide - a 404 cannot distinguish a deleted repository from lost access, so never remove a remote yourself. If an older installed wrapper refuses with "unknown command", fall back to `git remote -v`.
 
 If not in a git repo, offer to run `git init` and create an initial commit.
 
@@ -266,13 +269,19 @@ If creation fails because the name is taken, ask the user for an alternative nam
 
 If you have the `moat-repo-fixer` skill - offer to invoke it.  It helps apply best practices and protections against supply-chain attacks to GitHub repositories.
 
-If moat isn't available and a `SECURITY.md` was added in Step 7, enable private vulnerability reporting so the Security-tab route it describes actually works. It is off by default, and it is a public-repo feature - skip this if the repo was published private:
+If moat isn't available and a `SECURITY.md` was added in Step 7, enable private vulnerability reporting so the Security-tab route it describes actually works. It is off by default, and it is a public-repo feature - skip this if the repo was published private. With the wrapper (exit 0 covers already-enabled; the PUT is idempotent):
+
+```bash
+agent-github enable-vuln-reporting --repo <owner>/<repo>
+```
+
+Without the wrapper, or if an older installed copy refuses with "unknown command":
 
 ```bash
 gh api -X PUT repos/<owner>/<repo>/private-vulnerability-reporting
 ```
 
-If that command is denied, tell the user they can enable it themselves in the repo's Settings under Code security, or run the command above.
+If both routes are denied, tell the user they can enable it themselves in the repo's Settings under Code security, or run the gh command above.
 
 ### Step 12: Done
 
