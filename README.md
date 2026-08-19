@@ -4,6 +4,10 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 
 ---
 
+> **Heads up (19th August 2026):** The marp-* skills have moved to their own project in [marp-themes](https://github.com/UoGSoE/marp-themes).
+
+---
+
 > **Heads up (11th July 2026):** The plan-to-ait pipeline has been restructured for stronger main agents. The issue-crafting knowledge (epic/issue templates, testing modes, the amnesia test) now lives in a new `ait-crafting` skill, so the main agent can create issues straight from a feature conversation; the `plan-to-ait` agent is now a thin shell that loads that skill. There's also a new `ait-amnesia-check` agent — a fresh-context checker that *demonstrates* what it would build from newly created issues (never a verdict), so the caller can diff its reading against the real intent. The `conversation-to-ait` skill has been absorbed into `ait-crafting` and removed — if you'd previously synced it, delete it from your tool config (e.g. `rm -rf ~/.claude/skills/conversation-to-ait`).
 
 ---
