@@ -23,6 +23,10 @@ parameters:
 
     # Start at 1, bump progressively
     level: 1
+
+    # Without this, casts declared in the Laravel 11+ casts() METHOD are
+    # invisible (enums come back as the raw column type) - see common-fixes.md
+    parseModelCastsMethod: true
 ```
 
 ## ignoreErrors — Laravel magic patterns
@@ -48,7 +52,7 @@ When using `->map()`, `->filter()` etc, PHPStan loses the concrete model type an
 
 ### Eloquent casts (Carbon, enums)
 
-PHPStan doesn't recognise the `casts()` method, so it thinks date columns are strings and enum columns are string/int.
+With `parseModelCastsMethod: true` set (see base config), casts declared in the `casts()` method resolve properly and this noise largely disappears. Add these ignores only if cast noise remains, e.g. surfaced through closures that lose the concrete model type.
 
 ```yaml
         - identifier: method.nonObject
@@ -134,6 +138,8 @@ parameters:
         - app/
 
     level: 5
+
+    parseModelCastsMethod: true
 
     ignoreErrors:
         # Eloquent Model properties in closures

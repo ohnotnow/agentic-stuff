@@ -2,6 +2,37 @@
 
 Detailed examples of fixes for errors that surface at each level. These are all patterns encountered in real Laravel projects.
 
+## Casts declared in the `casts()` method are invisible by default (any level)
+
+**What happens:** A cast declared in the Laravel 11+ `casts()` *method* (rather than the `protected $casts` property) is not seen by Larastan in its default configuration. The attribute is typed as the raw column type instead, so an enum-cast attribute is `string`, and `$model->status->value` errors with `property.nonObject` ("Cannot access property $value on string"). Enum comparisons can also produce bogus `identical.alwaysFalse` errors.
+
+Easy to misdiagnose because *some* casts appear to work: boolean and datetime attributes come back correctly typed. That information comes from Larastan's migration parsing and its built-in timestamp handling, not from `casts()`. Only casts that *transform* the column type (enums, custom cast classes) expose the gap.
+
+**Root cause** (verified on larastan 3.10.0 / phpstan 2.2.8 / Laravel 13.26 by reading `vendor/larastan/larastan/src/Properties/ModelCastHelper.php` and the framework's `HasAttributes` trait):
+
+1. Larastan discovers casts by instantiating the model with `newInstanceWithoutConstructor()` and calling `getCasts()` on it.
+2. Since Laravel 11 (where the `casts()` method was introduced), the framework merges `casts()` into `$this->casts` inside `initializeHasAttributes()`, a trait initializer run by the Model **constructor**. `getCasts()` itself only reads `$this->casts`.
+3. The constructor was skipped, so the merge never ran: `getCasts()` returns only the `$casts` property, and anything declared in the `casts()` method is lost.
+4. Larastan's static fallback reads the *declared return type* of `casts()`, and the conventional signatures (`: array`, `@return array<string, string>`) are not constant arrays, so it learns nothing from them either.
+
+**Fix:** enable Larastan's AST parsing of the `casts()` method body:
+
+```yaml
+parameters:
+    parseModelCastsMethod: true
+```
+
+Verified: with the flag on, the enum-cast attribute types as the enum, and `->value` narrows to the literal union of the case values. The flag is documented in Larastan's docs/custom-config-parameters.md and is off by default because parsing the model source file is slower. This is a deliberate, documented trade-off upstream, not a bug to report.
+
+**Fallback** if the flag can't be used for some reason: a targeted `@property` on the model class docblock (never a global ignore):
+
+```php
+/** @property ActivityAction $action */
+class Activity extends Model
+```
+
+**Not chased:** whether upstream would consider flipping the default, and whether the dead runtime path (point 1 above can never see `casts()` on Laravel 11+) is known to the Larastan maintainers in those terms.
+
 ## Level 5 fixes
 
 ### Enum comparisons through collections (`identical.alwaysFalse` / `notIdentical.alwaysTrue`)

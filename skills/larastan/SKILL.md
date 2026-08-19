@@ -31,6 +31,8 @@ Check if `phpstan.neon` exists in the project root.
 
 The template includes `ignoreErrors` rules for known Laravel magic patterns. See the reference file for the full template with explanations.
 
+Always set `parseModelCastsMethod: true` in `parameters` (the template includes it). Without it, casts declared in the Laravel 11+ `casts()` *method* are invisible to Larastan (enum casts especially), and the attribute is typed as the raw column type. See "Casts declared in the casts() method" in [references/common-fixes.md](references/common-fixes.md) for the mechanism and how this was verified.
+
 ### 3. Fix annotation-based errors first
 
 Before running the main analysis, some Laravel magic patterns are best fixed with lightweight PHPDoc annotations rather than ignored. These annotations also help IDEs, so they have value beyond PHPStan:
@@ -76,6 +78,14 @@ Categorise each error into one of three buckets — not two:
 **The distinction between the first two buckets is critical.** A global ignore that's too broad will hide real bugs. When in doubt, use an inline ignore — it's more work per occurrence but much safer.
 
 See [references/global-vs-inline-decision-guide.md](references/global-vs-inline-decision-guide.md) for a detailed breakdown of which patterns are safe to ignore globally and which need per-line treatment.
+
+**When unsure which bucket an error belongs in, probe rather than reasoning from memory.** Add a temporary `\PHPStan\dumpType($model->attribute);` on the line in question and analyse just that file:
+
+```bash
+./vendor/bin/phpstan analyse app/Path/To/File.php --memory-limit=2G
+```
+
+The `Dumped type:` pseudo-error shows exactly what PHPStan believes the type is, which settles "false positive or real bug?" empirically. Remove the probe line afterwards. This is how the `casts()` method blind spot in common-fixes was diagnosed: the enum-cast attribute dumped as `string` while a boolean cast dumped as `bool`, which pointed at the enum path specifically rather than casts in general.
 
 Common real issues by level:
 
