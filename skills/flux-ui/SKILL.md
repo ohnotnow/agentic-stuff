@@ -1,11 +1,15 @@
 ---
 name: flux-ui
-description: Flux UI v2 component reference for Laravel/Livewire. Use when building interfaces with Flux components - covers syntax, patterns, common mistakes, and modal/form/table patterns.
+description: Flux UI v2 component reference and design-taste guide for Laravel/Livewire. You MUST use this skill whenever creating or editing any Blade template, Livewire view, or interface that uses Flux components (flux:*) - do not write Flux markup without it. Covers syntax, patterns, common mistakes, page layout taste, and modal/form/table patterns.
 ---
 
 # Flux UI v2 Quick Reference
 
 > Flux is a component library for Livewire built with Tailwind CSS v4.
+
+**Building a full page or layout?** Read [design-taste.md](design-taste.md) first - it
+covers page archetypes (settings, dashboards, tables, feeds, auth) and the judgement
+calls this reference can't: when cards earn their place, vertical rhythm, restraint.
 
 ## Core Principles
 
@@ -37,6 +41,9 @@ Components mix and match. A `<flux:button>` works standalone OR inside other com
 <flux:text>Some help text</flux:text>
 <flux:link href="/profile">Profile</flux:link>
 ```
+
+For a title with a subtitle, use `flux:heading` + `flux:text class="mt-2"`. Avoid
+`flux:subheading` - the Flux v2 docs and demo pages never use it.
 
 ### Button Variants - Less is More
 Most buttons should be unstyled. Only the primary action gets `variant="primary"`:
@@ -82,6 +89,11 @@ In Flux v2, modals can be triggered by a `<flux:modal.trigger>` component with t
     </div>
 </flux:modal>
 ```
+
+**Carve-out**: `flux:modal.trigger` is for modals whose content is already present. When
+the server must load data before the modal opens (e.g. an edit flyout that hydrates a
+model), `wire:click="editUser(...)"` + `Flux::modal('edit-user')->show()` in the action
+is the correct pattern - do not "fix" it into a trigger, you'll break the data loading.
 
 ### Colours - Use Sparingly
 Badges, callouts etc have colour options - but only use them when genuinely needed to draw attention. Default/neutral is usually fine.
@@ -250,7 +262,7 @@ Icons come from Heroicons - you can get the list of valid icons from [heroicon-l
 ## Key Reminders
 
 1. **Use Flux components** - `<flux:text>` not `<p>`, `<flux:link>` not `<a>`
-2. **You handle spacing** - use Tailwind gap/margin between components (prefer 6 for vertical spacing, 4 for horizontal, and 2 for grouped items)
+2. **You handle spacing** - use Tailwind gap/margin between components (prefer 6 for vertical spacing, 4 for horizontal, and 2 for grouped items). Between *sections*, give it more room to breathe - a `my-8` subtle separator or spacer div (see design-taste.md)
 3. **Don't over-style** - Flux handles visual styling, avoid adding colour classes
 4. **Button restraint** - most buttons are unstyled, only primary action gets `variant="primary"`. There is no need to use other variants unless specifically asked by the user.
 5. **Flyout modals** - use `variant="flyout"` by default
