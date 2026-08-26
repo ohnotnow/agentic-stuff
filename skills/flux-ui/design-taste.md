@@ -69,6 +69,10 @@ Destructive item last, `variant="danger"`, inside the menu - never a bare red bu
 the row. On cards/tiles the button is absolutely positioned top-right with the content
 padded to leave room for it.
 
+A menu item can open a confirm modal directly - `flux:modal.trigger` wraps
+`flux:menu.item` and works (verified): the classic shape is a danger "Delete..." item
+triggering the delete-confirmation modal.
+
 When one of the actions is a CSRF form POST (impersonate, logout), don't lose the form in
 the refactor - wrap that item in its form inside the menu, with the item as the submit
 button (this is how the official demos do logout):
@@ -96,11 +100,43 @@ table columns drop one by one (`max-md:hidden` per column), a toolbar Export but
 becomes an ellipsis dropdown on mobile, breadcrumbs vanish on small screens. Decide what
 mobile users lose; don't let flexbox decide.
 
+### Mobile filter disclosure (field-tested)
+
+When a filter toolbar has more than a search box, don't let it stack into a ragged column
+on mobile. Keep the search box always visible and tuck the rest behind an icon toggle:
+
+```blade
+<div class="mt-4 flex flex-wrap items-center gap-2"
+     x-data="{ showFilters: @js($typeFilter !== '' || $teamFilter !== '') }">
+    <flux:input size="sm" class="flex-1 md:flex-none max-w-96" icon="magnifying-glass" ... />
+    <flux:toggle x-model="showFilters" icon="funnel" tooltip="Show filters" size="sm" class="md:hidden" />
+    <div class="basis-full md:hidden" x-show="showFilters"></div>
+
+    <flux:select size="sm" class="w-fit" x-bind:class="showFilters ? '' : 'max-md:hidden'">...</flux:select>
+    {{-- remaining selects the same; a flux:spacer gets max-md:hidden --}}
+</div>
+```
+
+The judgement calls baked into that snippet:
+
+- **Seed the Alpine state from the active filters** so a shared filtered URL opens with
+  its filters visible rather than invisibly applied.
+- **The `basis-full` line-break div** puts revealed controls on their own rows below; the
+  search row doesn't move a pixel when toggling (no jank). `x-show` stops it adding a
+  phantom flex row-gap while collapsed.
+- A growing search input competes with `flux:spacer` for free space: `flex-1
+  md:flex-none` gives mobile flexibility with a fixed desktop cap.
+- This is pure view state: bind the toggle with Alpine `x-model`, not `wire:model` - no
+  server roundtrip, and the state survives Livewire morphs.
+
 ### Accessibility hygiene (non-negotiable)
 
 The demos are quietly rigorous and so are we: `aria-label` on every icon-only button and
 navbar item, labelled `flux:progress` bars, `alt=""` on decorative images, `sr-only` h1
-when there's no visible page title, `tabular-nums` on changing counts.
+when there's no visible page title, `tabular-nums` on changing counts. Note that the
+`tooltip` prop is NOT an accessible name - it only wraps the button in a `flux:tooltip`
+(verified in the vendor stub), so icon-only buttons need an explicit `aria-label` even
+when they have a tooltip.
 
 ---
 
@@ -148,8 +184,11 @@ two-column split: fixed-width intro on the left, controls on the right.
 The one page family where cards earn their keep, and prominence is graded:
 
 - **Stat tiles**: `flux:card variant="soft"` (or a plain div with `bg-zinc-50
-  dark:bg-zinc-700 rounded-lg px-6 py-4`). Anatomy is always the same regardless of
-  container: muted label, big value, trend line.
+  dark:bg-zinc-700 rounded-lg px-6 py-4` - drop to `p-4` when the grid runs five-up).
+  Anatomy is always the same regardless of container: muted label (`flux:text
+  class="font-medium"`), big value (`flux:heading size="xl" class="mt-1 tabular-nums"`),
+  trend line. Semantic state (overdue, failing) colours the **value text** -
+  `text-red-600 dark:text-red-400` - never the tile background; tiles stay neutral.
 
   ```blade
   <flux:text class="font-medium">Visitors</flux:text>
@@ -190,6 +229,10 @@ The one page family where cards earn their keep, and prominence is graded:
 
 - Status as `flux:badge size="sm" inset="top bottom"` with semantic colours; money/key
   figures in `variant="strong"` cells; customer as avatar + name.
+- Badge the exceptional value only. A count column where every zero wears a green badge
+  is decoration, not information - render zero as plain muted text (`<span
+  class="text-zinc-400">0</span>`) and badge just the non-zero case.
+- Numeric columns get `align="end"`.
 - Leading checkbox column for bulk selection; trailing cell holds the ellipsis dropdown.
 - Columns drop with `max-md:hidden` as the screen narrows.
 - `flux:pagination` directly after the table.

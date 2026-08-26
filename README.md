@@ -174,7 +174,8 @@ gopick() { /path/to/agentic-stuff/sync preset go --to "$PWD/.claude/"; }
 
 ## You might also be interested in
 
-Two standalone repos that pair well with this collection — the `quality-gate` skill knows how to call on both, and the `sources:` block above will sync their skills and agents alongside these:
+Standalone repos and tools that pair well with this collection - the `quality-gate` skill knows how to call on the first two, and the `sources:` block above will sync their skills and agents alongside these:
 
 - [a11y-agent](https://github.com/ohnotnow/a11y-agent) — a deterministic accessibility CLI (axe scan, keyboard tab-order walk, screen-reader transcript) with its own Claude Code skill and background checker agent. Makes the a11y audit nobody gets time for nearly free.
 - [ux-agent](https://github.com/ohnotnow/ux-agent) — skills that drive a real browser against your local app to produce bug-reproduction videos, user-guide videos that re-film themselves, and cold UX journey reports from a code-blind probe agent.
+- [playwright-cli](https://github.com/microsoft/playwright-cli) - Microsoft's browser-automation CLI, a good add-on for any UI/browser work. It ships its own Claude Code skill (installed via `playwright-cli install --skills`), and the `flux-ui` skill here leans on it to verify rendered pages rather than trusting that compiling Blade means correct pixels.

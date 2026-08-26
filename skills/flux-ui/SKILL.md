@@ -98,6 +98,30 @@ is the correct pattern - do not "fix" it into a trigger, you'll break the data l
 ### Colours - Use Sparingly
 Badges, callouts etc have colour options - but only use them when genuinely needed to draw attention. Default/neutral is usually fine.
 
+### Sizing Inputs - max-w-*, not w-*
+`flux:input`'s wrapper carries its own `w-full`; an added `w-72` lands beside it and can
+lose the stylesheet-order tie - silently full width, no error. Use `max-w-72` / `max-w-96`
+(this is what the official docs do). For a search box that shares a row on mobile but sits
+at a fixed width on desktop: `class="flex-1 md:flex-none max-w-96"`.
+
+### Alpine Bindings - Spell Out x-bind
+On a Blade component tag, `:class` (or any `:attr`) is Blade prop-binding - the value is
+evaluated as **PHP** and crashes on Alpine expressions. Always write the long form:
+
+```blade
+{{-- WRONG: Blade evaluates this as PHP --}}
+<flux:select :class="showFilters ? '' : 'max-md:hidden'">
+
+{{-- CORRECT --}}
+<flux:select x-bind:class="showFilters ? '' : 'max-md:hidden'">
+```
+
+### Headings Need level to Be Headings
+`flux:heading` without a `level` prop renders a styled **div**, not a heading element. A
+page can look perfectly structured and still have no document outline at all (invisible
+to screen readers). Give the page title `level="1"` and section headings `level="2"` -
+`size` controls the look, `level` the semantics, independently.
+
 ---
 
 ## Component Naming Patterns
@@ -187,6 +211,28 @@ This covers the display of the label, description and also error messages for th
 </flux:select>
 ```
 
+In a toolbar row, `class="w-fit"` on a native select shrink-wraps it to its options -
+better than magic widths when option text varies (team names, statuses).
+
+---
+
+## Toggle Component
+
+`flux:toggle` (added mid-2026, so check it exists in the installed version) is a compact
+button-shaped on/off control. Use it for icon-sized settings and modes; use `flux:switch`
+when the setting needs a visible label:
+
+```blade
+<flux:toggle wire:model.live="fastMode" icon="bolt" tooltip="Fast mode" />
+```
+
+- On icon-only toggles the `tooltip` prop also supplies the accessible name.
+- It renders the same `ui-switch` element as `flux:switch`, so Alpine `x-model` binds
+  directly - prefer that over `wire:model` for pure view state (no server roundtrip):
+  `<flux:toggle x-model="showFilters" icon="funnel" tooltip="Show filters" />`
+- Other props: `on:icon`/`off:icon`, `label`/`on:label`/`off:label`, `size="sm|xs"`,
+  `variant="outline|filled|ghost|subtle"`.
+
 ---
 
 ## Modal Patterns
@@ -269,3 +315,9 @@ Icons come from Heroicons - you can get the list of valid icons from [heroicon-l
 6. **wire:key in loops** - always add for Livewire compatibility
 7. **Consult docs** - when unsure or trying to use a component you haven't read recently, use the laravel boost `search-docs` tool before guessing - it will save the user time and money
 8. **Icon names** - If you are not 100% about a name - consult the list. Invalid names will cause Flux to crash.
+9. **Verify rendered output** - don't just eyeball the Blade. If a browser tool is on tap
+   (e.g. [playwright-cli](https://github.com/microsoft/playwright-cli) - load its skill
+   rather than guessing CLI syntax), log in and screenshot at desktop AND mobile widths.
+   Two bug classes only pixels reveal: layout you didn't predict (wrapping, flex fights,
+   clipped placeholders), and new Tailwind classes silently absent until a Vite
+   build/watcher runs.
