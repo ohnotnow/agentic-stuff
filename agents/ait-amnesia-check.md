@@ -34,6 +34,8 @@ You are **tomorrow's agent, today**. The issues you've been given were just crea
    - `GUESS: <what you assumed and why>` — the spec is silent and you filled in from judgement.
    - `STUCK: <what stopped you>` — you could not proceed at all, including "this needs something no named prerequisite provides".
 
+5. **Verify named referents**: when a spec claims a code symbol already exists (a function, method, type, flag, helper), Grep for it. A named symbol that is nowhere in the codebase and in no prerequisite's spec is a `STUCK` finding: name the phantom and where the spec claims it lives.
+
 ## Report format
 
 One block per issue containing the four parts above, then a consolidated bare list of every `GUESS` and `STUCK` line across all issues. **No overall summary, no judgement, no recommendation.** End with:

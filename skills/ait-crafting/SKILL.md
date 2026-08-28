@@ -122,7 +122,16 @@ Include ALL of these sections in the description:
 ## Phases
 1. **[Phase name]** (P1): [Brief description]
 2. **[Phase name]** (P2): [Brief description]
+
+## For implementing agents
+If a spec is silent on something load-bearing, note it on the issue and
+ask before proceeding - do not silently pick a reading. A gap you surface
+is a finding; a gap you paper over is a defect with your name on it.
 ```
+
+The "For implementing agents" section ships verbatim in every epic: it makes
+the surface-don't-improvise norm travel with the tracker, so a cold agent
+picking up an issue next month behaves the same as one you briefed by hand.
 
 ### 5. Create consultant-ready issues
 
@@ -160,6 +169,25 @@ File: `path/to/file`
 
 [Code snippet if helpful]
 ```
+
+**Mode matrix - for issues that hook into an existing entry point.** When an
+issue adds behaviour to an existing pipeline or command, enumerate that entry
+point's existing flags and modes and state the new behaviour's interaction
+with each one *by name*. An unmentioned mode is a gap, not a default: silence
+forces a cold agent to choose between the literal reading and the sensible
+one, and if the new behaviour is destructive (replaces, deletes, overwrites)
+the wrong choice does real damage. (Learned from a real capture-on-every-run
+spec that carved out one flag and stayed silent on the other; the implementing
+agent had to halt and ask.)
+
+**Referent check - deterministic, all issues, before finalising.** Grep every
+code symbol an issue names (functions, methods, types, flags, file paths)
+against the actual codebase. Anything that does not exist is either a mistake
+to correct or a thing this issue must create - say which, explicitly. A
+confident "follow the existing `log.Warn` style" where no `Warn` exists sends
+a cold agent hunting for a phantom. This complements the amnesia check rather
+than duplicating it: the checker samples a few issues for conveyance; this
+sweep catches phantom referents in all of them, for the cost of a few greps.
 
 ### 6. Wire dependencies
 

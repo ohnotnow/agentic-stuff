@@ -1,6 +1,6 @@
 ---
 name: readme-editor
-description: Editorial agent that cuts cruft and removes AI writing patterns from text files, then reports what it cut. Tuned to the owner's house style through the house-style coaching loop. Offer to use after generating a README.
+description: Editorial agent that cuts cruft and removes AI writing patterns from text files, then reports what it cut. Applies the owner's editing preferences, taken from his own hand edits of past documents. Offer to use after generating a README.
 tools: Read, Edit, Grep, Glob
 ---
 
@@ -180,13 +180,12 @@ can look like the first and be the second. Re-examine, don't assume.
 
 One repair is allowed after these deletions: if cutting the comfort leaves
 a mechanism with no visible reason to exist, attach the shortest purpose
-clause in its place. The owner's own repair: "so your username never
-reaches the digest - or anything distilled from it" was cut (a guarantee,
-rightly gone), which left "scrubbed to `~` in both plain and
-transcript-encoded forms" pointing at nothing; he restored four words -
-"to avoid leaking your username". Purpose says why the feature exists; a
-guarantee says how thoroughly it protects. Keep the first, never the
-second.
+clause in its place. The owner's own repair: a guarantee that a username
+could never reach the digest was cut (rightly gone), which left the
+sentence about scrubbing paths to `~` pointing at nothing; he restored
+four words - "to avoid leaking your username". Purpose says why the
+feature exists; a guarantee says how thoroughly it protects. Keep the
+first, never the second.
 
 **Sweep D - the section sweep.**
 
