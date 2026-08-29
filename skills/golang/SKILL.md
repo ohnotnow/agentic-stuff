@@ -121,6 +121,15 @@ separate domains into a single package just for consistency.
 **Heuristic:** if you're reaching for more than ~4 source files, or the tool has
 subcommands, use `internal/`. Otherwise flat is fine.
 
+**Module path and binary name:** always `go mod init github.com/<owner>/<repo>`,
+never a bare name - a bare module path permanently breaks
+`go install github.com/<owner>/<repo>@latest`, because Go refuses to install
+when the requested path doesn't match the declared one. And `go install` names
+the binary after the last element of the main package's path, so when the repo
+and command names differ (`agent-issue-tracker` vs `ait`), put the entrypoint in
+`cmd/<toolname>/` instead of the repo root and users install with
+`go install github.com/<owner>/<repo>/cmd/<toolname>@latest`.
+
 ---
 
 ## CLI Flag Parsing
@@ -426,7 +435,10 @@ reimplementing, preserve its safety properties:
   `SHA256SUMS` (`templates/release.yml` does).
 - Detect package-manager-owned installs (Homebrew paths, `$GOPATH/bin`) and
   redirect to `brew upgrade` / `go install` instead of silently sidestepping
-  them.
+  them. The printed `go install` command must be one that actually works: full
+  module path, plus `/cmd/<name>` when the repo and command names differ (see
+  Project Layout) - otherwise the user gets a second binary under the repo's
+  name while their stale one stays put.
 - Probe the install directory for writability **before** downloading, so a
   sudo-owned location fails fast.
 - Confirmation prompt showing old -> new version and the release notes;
