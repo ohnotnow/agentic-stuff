@@ -276,6 +276,13 @@ Fix these in what survives (each: what to look for → what to do):
 - **-ing tack-ons** - "…, highlighting the importance of…", "…, ensuring
   that…" → delete the clause or make it its own plain sentence.
 - **Copula avoidance** - "serves as", "boasts", "features" → "is"/"has".
+- **Pretentious diction** - Latinate polysyllables where a plain word
+  exists ("significant", "increasingly", "utilise", "consequences"),
+  scientific lingo ("parameter", "methodology"), and nominalisations
+  ("the expansion of" for "expanding") → the short everyday word, and
+  turn the noun back into its verb. Orwell's rule: never use a long word
+  where a short one will do. The insider-vocabulary sweep's examples
+  below are this same fix wearing different clothes.
 - **Synonym roulette** - the same thing renamed to dodge repetition ("the
   store", then "the database", then "the memory file") → go back to the
   name the document already established and repeat it. Repeating the
