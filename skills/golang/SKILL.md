@@ -4,7 +4,7 @@ description: >
   Users conventions and patterns for Go CLI/TUI projects. Use when working on a Go
   project
 allowed-tools: "Read,Write,Edit,Bash,Glob,Grep"
-version: "0.5.0"
+version: "0.6.0"
 author: "ohnotnow <https://github.com/ohnotnow>"
 license: "MIT"
 ---
@@ -382,6 +382,60 @@ GOOS=linux GOARCH=amd64 go build -o <name>-linux .
 GOOS=darwin GOARCH=arm64 go build -o <name>-macos .
 GOOS=windows GOARCH=amd64 go build -o <name>.exe .
 ```
+
+---
+
+## Versioning and Self-Update
+
+### `version` / `--version` - every tool gets this
+
+Declare package-level vars stamped at release time via ldflags:
+
+```go
+var (
+    Version = "dev" // overwritten by -ldflags at release
+    RepoURL = "https://github.com/<owner>/<repo>"
+)
+```
+
+`templates/release.yml` shows the stamping (`-X <module>/internal/<name>.Version=${VERSION}`).
+The `version` command prints the version; on a release build it may also check
+GitHub's `/releases/latest` with a short timeout (~5s) and mention when a newer
+release exists. A `"dev"` build skips the check - there is nothing meaningful
+to compare.
+
+### `self-update` - a judgement call, so ask the owner
+
+Not every tool earns it:
+
+- **Toy / personal tools** (live only on the owner's machines, updated by
+  `git pull && go build`): skip it. `version` alone is enough.
+- **Production / system tools** (installed on other hosts, run from cron, used
+  by other people): add it.
+
+If it isn't obvious which kind the project is, **ask the owner** rather than
+defaulting either way.
+
+The reference implementation is `internal/ait/cmd_self_update.go` in
+[agent-issue-tracker](https://github.com/ohnotnow/agent-issue-tracker). If
+reimplementing, preserve its safety properties:
+
+- `"dev"` builds refuse to self-update (never clobber a hand-built binary).
+- Download the release's `SHA256SUMS`, verify the binary's checksum before any
+  swap. The release workflow must publish per-platform assets plus
+  `SHA256SUMS` (`templates/release.yml` does).
+- Detect package-manager-owned installs (Homebrew paths, `$GOPATH/bin`) and
+  redirect to `brew upgrade` / `go install` instead of silently sidestepping
+  them.
+- Probe the install directory for writability **before** downloading, so a
+  sudo-owned location fails fast.
+- Confirmation prompt showing old -> new version and the release notes;
+  `--yes`/`-y` skips it. `--check` reports without downloading and exits
+  0 = current, 1 = newer available, 2 = lookup failed, for scripting.
+- Atomic swap: write a sibling temp file, `chmod 0755`, rename over the
+  target. On Windows rename the running `.exe` to `<name>.old` first.
+- Keep the per-platform asset-name mapping in sync with the release
+  workflow's build matrix.
 
 ---
 
