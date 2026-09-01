@@ -15,7 +15,7 @@ allowed-tools:
 
 # README generator
 
-Generate an accurate, human-sounding README.md by reading the actual codebase. Every claim in the README should be verifiable from the code.
+Generate an accurate, plainly written README.md by reading the actual codebase. Every claim in the README should be verifiable from the code.
 
 ## Workflow
 
@@ -141,13 +141,13 @@ Route by the tone chosen in step 7:
 - **`natural`** → spawn the **readme-editor** agent (`~/.claude/agents/readme-editor.md`), pointing it at the README.md you just wrote. It is tuned to the owner's house style and takes no tone parameter.
 - **`professional`** → spawn the **humaniser** agent (`~/.claude/agents/humaniser.md`), pointing it at the README.md and telling it to use the `professional` tone. Do not use the readme-editor here — its house style is personal-repo casual, which is wrong for work projects.
 
-Either agent runs with fresh context (no memory of writing the README) and does an editorial pass to remove AI writing patterns.
+Either agent runs with fresh context (no memory of writing the README) and does an editorial pass to cut padding and apply the house style.
 
 If the chosen agent's file does not exist, fall back to the other one (the humaniser takes a `natural` tone; the readme-editor runs as-is). If neither exists, skip this step silently.
 
 ## Writing rules
 
-Follow these rules when writing the README. They are guardrails against common AI writing patterns.
+Follow these rules when writing the README. They are guardrails against the padding and marketing tone that creep into first drafts.
 
 - Use sentence case for headings (not Title Case Every Word)
 - No emojis and no badges unless the user specifically asks for them
@@ -161,7 +161,7 @@ Follow these rules when writing the README. They are guardrails against common A
 - Be specific and factual — every claim should be verifiable from the code you read
 - Vary sentence length naturally — not every sentence needs to be the same structure
 - If something is not known from the code, leave it out rather than hedging or guessing
-- No AI vocabulary words: Additionally, delve, enhance, foster, garner, landscape, tapestry, testament, underscore, valuable, vibrant, showcase, interplay, intricate
+- Banned words: Additionally, delve, enhance, foster, garner, landscape, tapestry, testament, underscore, valuable, vibrant, showcase, interplay, intricate
 - No synonym cycling — if you said "the project" once, you can say "the project" again instead of "the tool", "the system", "the application"
 - No "not only X but also Y" constructions
 - No curly quotes — use straight quotes
