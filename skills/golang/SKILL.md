@@ -279,6 +279,10 @@ Output errors as JSON: `{"error": {"code": "...", "message": "..."}}`.
 Plain `error` returns from store/logic layers. In the UI, set `m.status` to a
 short human-readable message. No logging frameworks.
 
+### API/Routing
+
+For non-trivial API/routing prefer to use 'chi'.
+
 ---
 
 ## Testing
@@ -449,13 +453,3 @@ reimplementing, preserve its safety properties:
 - Keep the per-platform asset-name mapping in sync with the release
   workflow's build matrix.
 
----
-
-## Out of Scope
-
-This skill does not cover:
-- Standalone web services / HTTP APIs (embedded web UIs for CLI tools are covered in WEB.md)
-- Multi-package library design
-- Anything requiring CGo
-- JS build pipelines or frontend frameworks (keep embedded UIs as vanilla HTML/JS)
-- Complex build pipelines (goreleaser, etc.)
