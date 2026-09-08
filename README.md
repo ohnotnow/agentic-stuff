@@ -84,7 +84,7 @@ Different AI coding tools (Claude Code, Codex, Gemini, Cursor, etc.) each have t
 2. Enable the tools you use and adjust paths if needed (`sync.yaml` is gitignored).
 3. Run `./sync` (requires [uv](https://docs.astral.sh/uv/)).
 
-If a destination file is **newer** than the repo source *and actually differs*, the script will warn you and offer a diff before overwriting — handy if you've been editing skills in-place. Identical files are left alone whatever their timestamps say. Skipped files are listed at the end for easy copy-back.
+If an existing destination file **differs** from the source, the script asks before overwriting, regardless of timestamps — handy if you've been editing skills in-place. Choose overwrite (`y`), skip (the default), or view a diff (`d`). Identical files are left alone and missing files are copied without prompting. Items containing skipped files are listed at the end for easy copy-back.
 
 To skip specific items entirely (e.g. you have your own `readme` skill), add an `ignore` block globally or per-target in `sync.yaml`:
 
@@ -103,7 +103,7 @@ targets:
 ```
 
 ```
-./sync             # sync with prompts for newer destinations
+./sync             # prompt before overwriting differing files
 ./sync --dry-run   # preview only
 ./sync --force     # overwrite everything without asking
 ```
@@ -166,7 +166,7 @@ gopick() { /path/to/agentic-stuff/sync preset go --to "$PWD/.claude/"; }
 
 `cd` into a fresh repo, type `gopick`, done.
 
-`--dry-run` previews either mode without writing anything; `--force` skips the "destination is newer than repo source" prompts.
+`--dry-run` previews either mode without writing anything; `--force` overwrites differing files without prompting.
 
 `--dry-run` and `--force` work for both modes.
 

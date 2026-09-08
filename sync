@@ -149,15 +149,14 @@ def ignored_names(config: dict, global_config: dict, content_type: str) -> set[s
 def _sync_file(src: Path, dest: Path, force: bool = False) -> str:
     """Sync a single file. Returns a status string."""
     if dest.exists():
-        # Same content means nothing to do, whatever the mtimes say —
-        # only prompt when the newer destination genuinely differs.
+        # Identical files need no action; differing files may contain local edits.
         if filecmp.cmp(src, dest, shallow=False):
             return "unchanged"
 
-        if dest.stat().st_mtime > src.stat().st_mtime and not force:
-            print(f"  ⚠  {dest} is NEWER than repo source")
-            if not ask_user("Overwrite with older repo version?", src, dest):
-                return "skipped (dest newer)"
+        if not force:
+            print(f"  ⚠  {dest} differs from source")
+            if not ask_user("Overwrite with source version?", src, dest):
+                return "skipped (destination differs)"
 
     dest.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(src, dest)
@@ -183,10 +182,12 @@ def sync_item(src: Path, dest: Path, force: bool = False) -> str:
 
     if not statuses:
         return "unchanged"
+    if any("skipped" in s for s in statuses):
+        if any(s == "synced" for s in statuses):
+            return "partially synced (some files skipped)"
+        return "skipped (destination differs)"
     if any(s == "synced" for s in statuses):
         return "synced"
-    if any("skipped" in s for s in statuses):
-        return "skipped (dest newer)"
     return "unchanged"
 
 
@@ -253,7 +254,7 @@ def apply_picks(
             skipped.append((dest, src))
 
     if skipped:
-        print("\n⚠  Skipped (destination newer than repo):")
+        print("\n⚠  Skipped (destination differs from source):")
         for dest, src in skipped:
             print(f"  {dest}")
             print(f"    ← repo: {src}")
@@ -434,7 +435,7 @@ def main() -> None:
         sync_target(name, target, config, items, skipped, force=force)
 
     if skipped:
-        print("\n⚠  Skipped (destination newer than repo):")
+        print("\n⚠  Skipped (destination differs from source):")
         for dest, src in skipped:
             print(f"  {dest}")
             print(f"    ← repo: {src}")
