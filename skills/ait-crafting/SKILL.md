@@ -203,11 +203,12 @@ Create a tracker issue for each phase (e.g., "Phase 2: Service layer"). Trackers
 
 ### 7. Amnesia check (multi-phase or gnarly work)
 
-For anything beyond a small epic, spawn the `ait-amnesia-check` agent with a handful of issue IDs — the foundation issues plus one or two deep in the dependency chain, not the lot. It has no conversation context (deliberately) and will *demonstrate* what it would build from each spec: restated goal, files, first failing test, with every guess and dead end marked.
+Important: The amnesia check costs the user a lot of money and it is also very slow.  It's primary design was to make sure a _future_ claude or subagent could work on the issues without having the context that led to them being created.  So it should be _offered_ as a choice for the user to make - not just run automatically.
+
+If the user has indicated that they want to pick the issues up in a future session, whether in conversation or because you asked them - spawn the `ait-amnesia-check` agent with a handful of issue IDs — the foundation issues plus one or two deep in the dependency chain, not the lot. It has no conversation context (deliberately) and will *demonstrate* what it would build from each spec: restated goal, files, first failing test, with every guess and dead end marked.
 
 **Never ask it for a verdict** — a "yep, looks great!" costs nothing to emit and means nothing. Instead, diff its demonstration against what you (holding the design context) know was intended. Its wrong guesses point at the exact sentence missing from an issue; its `STUCK` findings usually mean a prerequisite went unnamed. Patch the issues, don't argue with the checker.
 
-Skip this for a three-issue epic — it's a meaty run and small plans don't earn it.
 
 ## Testing modes
 
