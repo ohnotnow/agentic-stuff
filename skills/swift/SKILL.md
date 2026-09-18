@@ -157,6 +157,19 @@ Symptom → fix.
   (`Settings/VoicesSection.swift`, the Profile picker) on Xcode 26.1.1 with
   strict concurrency on. A compiler crash with no diagnostic; if the build
   dies in IRGen, look for a bare method reference handed to a `Binding`.
+- **`MainActor.assumeIsolated` inside a closure that a background task calls
+  crashes at runtime with SIGTRAP** in `dispatch_assert_queue_fail` under
+  `_swift_task_checkIsolatedSwift`; no diagnostic at compile time. The
+  temptation: a `@MainActor @Observable` settings object holds a value (an
+  API key) and a `Sendable` service needs it at call time, so you wrap the
+  read in `assumeIsolated` and reason that "every caller starts from the main
+  actor". They do not: a nonisolated `async` method on a `Sendable` type hops
+  to the global executor the moment it is awaited, even from a SwiftUI
+  `.task`. Fix: give the settings object a `nonisolated` reader over the
+  thread-safe store underneath (Keychain, a `Mutex`) and hand *that* closure
+  to the service, or pass the value into the snapshot on the main actor
+  before the hop. Seen in blether (`AppSettings.apiKeyReader(for:)`), macOS
+  26.6 / Xcode 26.1.1. A `Task.detached { read() }` in a test catches it.
 
 ## Out of scope (so far)
 
