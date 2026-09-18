@@ -150,6 +150,13 @@ Symptom → fix.
   image once into an owned `CGContext` (sRGB, premultiplied BGRA,
   `byteOrder32Little`) and keep `context.makeImage()` — nothing PNG-backed
   survives to draw time. Cost is width×height×4 bytes of resident memory.
+- **swift-frontend crashes in IRGen (`report_at_maximum_capacity` inside a
+  reabstraction thunk) when a `@MainActor` view method is passed directly as
+  a `Binding` setter**, e.g. `Binding(get: { id }, set: select)`. Wrapping it
+  in a closure, `set: { select($0) }`, builds fine. Seen in blether
+  (`Settings/VoicesSection.swift`, the Profile picker) on Xcode 26.1.1 with
+  strict concurrency on. A compiler crash with no diagnostic; if the build
+  dies in IRGen, look for a bare method reference handed to a `Binding`.
 
 ## Out of scope (so far)
 
