@@ -103,6 +103,25 @@ docker volume ls                          # see above
 
 The Brewfile lands in `~` so the script carries it over. On the new Mac: enable Remote Login (System Settings > General > Sharing) before running anything, install Homebrew, `brew bundle`, then re-auth `gh`, `glab`, `aws`, `az`, `1Password`, and let 1Password/keychain-style tools sync rather than copying `~/Library/Keychains` (do not copy Keychains).
 
+## Account-shaped things that are not files
+
+The script is the easy part. These are what actually niggle, and none of them rsync. Ask which the user has and cover the relevant ones in the report. Verified against a 2026 machine where noted; UI paths drift, so say "roughly here" rather than quoting menus as gospel.
+
+**Backblaze (personal backup).** A licence is per computer. A fresh install on the new Mac starts a brand-new backup and re-uploads the lot. The fix is *Inherit Backup State*, offered during sign-in on the new Mac: it moves the licence and the existing backup over and uploads only the diff. Do it *after* the rsync has finished and with any external drives plugged in, so the files it expects are already there. Inheriting takes the licence with it, so the old Mac stops being backed up unless a second licence is bought - say this out loud if the user is keeping the old machine. Mind the 30-day rule: a drive Backblaze has not seen for 30 days has its files dropped from the backup, so external drives live with whichever Mac holds the licence. (Flow described from memory; the user will only see the specifics live. Point them at Backblaze's "inherit backup state" help page.)
+
+**1Password.** Account-based, so signing in pulls everything down, but the new device needs more than the password:
+
+- *Password-unlocked account* (personal, or a business account set up before the org had SSO): needs the **Secret Key**. It is in the Emergency Kit PDF from signup, which many people have never seen. On the old Mac (1Password 8, verified 2026): click the account or profile name at the **top-left of Settings**, then **Manage accounts**, click the account, and the sign-in address, email and Secret Key are under **Your details**. There is no "Accounts" section under Settings itself, which is where people look first.
+- *SSO-unlocked business account*: no Secret Key and no Emergency Kit. Sign in via the org's sign-in address with the identity provider, then approve the new device from a device already signed in, or with an emailed code.
+
+Either way: keep the old Mac signed in until the new one is working. Then redo the bits that are per-machine: browser extension, SSH agent and Touch ID toggle, CLI integration. `~/.config/1Password` (SSH agent config) is in the copy list, but the app still has to be told to enable the agent.
+
+**Firefox Sync.** See the copy bucket above: copy the profile, treat Sync as the backup. A Mozilla account, never "sign in with Google", even if the email is Google-hosted; password reset goes to that address.
+
+**Password database in iCloud Drive (KeePassXC and friends).** Appears once iCloud syncs. Two checks: the file may be cloud-only at first and needs a click to download before the app can open it, and a key file used alongside the password may be sitting somewhere local on the old Mac rather than in iCloud.
+
+**Apple ID, Mail, Messages, Slack, Teams, Zoom, editors' settings sync.** Sign in again. Nothing to copy.
+
 ## The script
 
 Ship a re-runnable script, dry run by default, that pushes *from the old Mac to the new one* over ssh. Pushing is the right direction: the old machine has the tooling, and the new one only needs sshd on. A template lives beside this file: `migrate-template.sh`. Regenerate its include list for the machine in front of you; the exclude list is largely universal.
