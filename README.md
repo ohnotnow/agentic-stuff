@@ -44,28 +44,29 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 - `i-shape` -- UX/UI shaping skill for planning a feature before code. Runs a structured discovery interview, then produces a design brief covering direction, layout strategy, key states, interactions, content, and the most relevant `i-impeccable` references for implementation.
 - `improve` -- Senior-advisor audit and handoff-planning skill. Surveys codebases for bugs, security, performance, tests, tech debt, dependencies, DX, docs, and direction, then writes self-contained plans for other agents to execute while staying read-only on source.
 - `larastan` -- Installs and runs PHPStan + Larastan, separates framework false positives from real defects, and iterates through analysis levels.
-- `livewire-v4-upgrade` -- Audit-first workflow for upgrading production Laravel apps from Livewire v3 to v4. Covers app-shape triage, `wire:model` changes, layout/config traps, legacy model binding remediation, test baselines, browser smoke tests, and deploy pipeline gotchas.
-- `mac-migration` -- Plans a developer's move to a new Mac: surveys the home directory by name and size (never by content), sorts it into copy / rebuilds itself / syncs itself / reinstall, and produces a re-runnable, dry-run-by-default rsync script that leaves the caches behind. Covers the non-file bits (Brewfile, uv tools, Docker volumes, DB data) and the Apple openrsync traps. Ships a template script to regenerate per machine.
-- `mac-disk-hunter` -- Tracks down where disk space has gone on macOS, including misleading System Data, Time Machine local snapshots, developer caches, Docker, Xcode, and local ML models. Surveys and ranks the likely culprits first, then suggests appropriately cautious cleanup commands without deleting anything until you confirm.
 - `laravel-cloud` -- Deploy, update, and tear down demo apps on Laravel Cloud using the `cloud` CLI.
+- `livewire-v4-upgrade` -- Audit-first workflow for upgrading production Laravel apps from Livewire v3 to v4. Covers app-shape triage, `wire:model` changes, layout/config traps, legacy model binding remediation, test baselines, browser smoke tests, and deploy pipeline gotchas.
+- `mac-disk-hunter` -- Tracks down where disk space has gone on macOS, including misleading System Data, Time Machine local snapshots, developer caches, Docker, Xcode, and local ML models. Surveys and ranks the likely culprits first, then suggests appropriately cautious cleanup commands without deleting anything until you confirm.
+- `mac-migration` -- Plans a developer's move to a new Mac: surveys the home directory by name and size (never by content), sorts it into copy / rebuilds itself / syncs itself / reinstall, and produces a re-runnable, dry-run-by-default rsync script that leaves the caches behind. Covers the non-file bits (Brewfile, uv tools, Docker volumes, DB data) and the Apple openrsync traps. Ships a template script to regenerate per machine.
 - `modern-livewire` -- How we write Livewire components: principles, patterns, form state, testing. Covers everything from `findOrNew`+`fill`+`save` to named modals and `wire:model` behaviour.
 - `plan-to-html` -- Converts markdown plans, design docs, and issue writeups into self-contained HTML documents for sharing with non-technical stakeholders. Includes a stylesheet you can customise, optional author/title metadata, print-friendly output, and an optional Background preamble for context.
 - `practical-laravel-api` -- Conventions for practical, consumer-friendly Laravel JSON APIs with Sanctum. Covers self-describing response shapes, loud query failures, slugs, date windows, filtering, Scramble docs, and tests for API contracts.
 - `quality-gate` -- One-stop post-feature review: free deterministic checks first (model/Livewire section-order script, drop-in Pest arch test), then fresh-eyes review agents. Two scopes — recent work, or a whole legacy codebase chunked by model orbit and delegated to a sub-orchestrator. Confirms before spending agent tokens.  (Note: it likes to ask you to commit a lot - if you don't trust your agent to do git stuff, have a look at [agent-commit](https://github.com/ohnotnow/agent-commit)).
-- `ui-to-flux` -- Migration skill for converting older Laravel apps (Bulma, Bootstrap, Tailwind) to Flux UI. References `flux-ui` and `modern-livewire` for target patterns rather than duplicating them.
-- `ui-migration-screenshots` -- Captures full-page reference screenshots of existing app UIs before or during frontend migrations. Uses Playwright for authenticated, role-gated, and interactive flows so rebuilt pages can keep a familiar 1:1 mapping.
 - `readme` -- Generates a README from the actual codebase so claims stay grounded.
-- `technical-overview` -- Generates a `TECHNICAL_OVERVIEW.md` covering stack, architecture, domain model, routes, and key logic. Useful for onboarding.
-- `uofg-design-system` -- University of Glasgow web design system. Brand tokens, layout rules, and component patterns for HTML, CSS, React, Tailwind, and FluxUI.
 - `shell-function` -- Creates a shell function (bash, zsh, fish, etc.) that does what you describe.
 - `sop-creator` -- Writes Standard Operating Procedure documents from user outlines. Asks minimal clarifying questions, then generates a clean Markdown SOP with purpose, prerequisites, procedure, and verification steps.
 - `swift` -- Conventions and patterns for native macOS Swift apps. Young sibling of `golang`: XcodeGen workflow, sandbox-first permissions posture, fixture-backed testing, headless verification tricks, and a growing list of hard-won AppKit/SwiftUI gotchas.
+- `technical-overview` -- Generates a `TECHNICAL_OVERVIEW.md` covering stack, architecture, domain model, routes, and key logic. Useful for onboarding.
+- `ui-migration-screenshots` -- Captures full-page reference screenshots of existing app UIs before or during frontend migrations. Uses Playwright for authenticated, role-gated, and interactive flows so rebuilt pages can keep a familiar 1:1 mapping.
+- `ui-to-flux` -- Migration skill for converting older Laravel apps (Bulma, Bootstrap, Tailwind) to Flux UI. References `flux-ui` and `modern-livewire` for target patterns rather than duplicating them.
+- `uofg-design-system` -- University of Glasgow web design system. Brand tokens, layout rules, and component patterns for HTML, CSS, React, Tailwind, and FluxUI.
 - `wut` -- Ask the model to rewrite it's response in a more human-friendly and less jargon-laden way.
 
 ## Agents
 
 - `ait-amnesia-check.md` -- Fresh-eyes amnesia test for newly created `ait` issues. With no conversation context it demonstrates what it would build from each spec — restated goal, files, first failing test, every guess and dead end marked — so the caller can diff its reading against the real intent. Never gives a verdict.
 - `ait-audit.md` -- Reviews open `ait` issues against the codebase and flags work that looks done but hasn't been closed.
+- `devtools-rummage.md` -- Reads a Laravel app the way a helpful desktop agent with browser devtools would, hunting for places where the frontend promises a restriction the server never checks: `:disabled` buttons with no matching check in the action, unlocked Livewire properties, API routes no page uses, spreadsheet uploads trusted row by row. Friendly colleague tone, read-only. Complements `laravel-owasp-reporter`.
 - `fresh-eyes.md` -- Fresh pair of eyes for when you're stuck or looping. Suggests one or two things to try rather than editing code directly.
 - `humaniser.md` -- Removes common AI-writing patterns from text files like READMEs and docs.
 - `laravel-conventions-reviewer.md` -- Reviews Laravel code against team conventions: readable model helpers over raw column checks, fat models, Eloquent over query-building, enums over strings, duplicate-purpose methods. Seeded with real before/after examples — swap in your own house style before adopting.
@@ -74,6 +75,7 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 - `phpmetrics-check.md` -- Runs phpmetrics on a PHP/Laravel codebase, flags complexity hotspots, and compares against a saved baseline.
 - `plan-reconciler.md` -- Reconciles a plan document against the conversation that produced it. Reports what was captured, missed, glossed over, or drifted without editing the plan.
 - `plan-to-ait.md` -- Turns approved plan documents into `ait` epics and issues that a fresh coding agent can execute without context. Now a thin shell around the `ait-crafting` skill, which holds the templates and quality bar.
+- `readme-editor.md` -- Deletion-first editor for READMEs and other text files. Cuts padding and applies the owner's house style, learned from their own hand edits of past documents, then reports what it cut. Leaves the owner's voice and slips alone, flagging rather than fixing them.
 - `test-debug.md` -- Debugging assistant for stubborn failing tests. Uses `dump()` instrumentation rather than speculative rewrites.
 - `test-quality-checker.md` -- Reviews Laravel tests for false-confidence patterns and coverage gaps: tautologies, weak assertions, missing control records, unit tests that should be feature tests.
 
@@ -168,8 +170,6 @@ gopick() { /path/to/agentic-stuff/sync preset go --to "$PWD/.claude/"; }
 `cd` into a fresh repo, type `gopick`, done.
 
 `--dry-run` previews either mode without writing anything; `--force` overwrites differing files without prompting.
-
-`--dry-run` and `--force` work for both modes.
 
 ## You might also be interested in
 
