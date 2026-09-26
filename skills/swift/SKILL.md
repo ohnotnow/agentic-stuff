@@ -45,7 +45,17 @@ here rather than leaving it in a transcript.
   truthful when adding features — libraries may write their own defaults (e.g.
   KeyboardShortcuts stores the recorded shortcut there).
 - Ad-hoc signed rebuilds look like new apps to Keychain, so the first access
-  after a rebuild re-prompts. Expected, not a bug.
+  after a rebuild re-prompts. Expected, not a bug. Privacy (TCC) grants such
+  as Apple Music access are tied to the signature the same way. For people
+  who just want to run the app, give the Makefile a `make install` that
+  builds once, `ditto`s the bundle into `/Applications` and opens it; that
+  copy keeps its grant when quit and reopened (verified in Streamer; not yet
+  checked across a reboot or after a plain rebuild). A
+  stable `SIGN` certificate in an untracked `local.mk` is the fix for
+  developers who rebuild often.
+- A TCC usage string is not optional decoration: without it macOS may refuse
+  **silently, with no prompt at all**. See the Streamer gotchas for how to get
+  the real reason out of `tccd`.
 
 ## Dependencies
 
@@ -96,8 +106,8 @@ sufficient. Useful sandboxed, permission-light techniques:
 
 ## Gotchas, earned the hard way
 
-Mostly from Naiku (`https://github.com/ohnotnow/naiku`), macOS 26 / Xcode 26.1.1.
-Symptom → fix.
+Mostly from Naiku (`https://github.com/ohnotnow/naiku`), macOS 26 / Xcode 26.1.1,
+plus blether and Streamer where marked. Symptom → fix.
 
 - **Borderless `NSPanel` refuses key status** → text fields silently
   untypable. Subclass and `override var canBecomeKey: Bool { true }`.
@@ -170,6 +180,76 @@ Symptom → fix.
   to the service, or pass the value into the snapshot on the main actor
   before the hop. Seen in blether (`AppSettings.apiKeyReader(for:)`), macOS
   26.6 / Xcode 26.1.1. A `Task.detached { read() }` in a test catches it.
+
+### From Streamer
+
+Streamer (`https://github.com/ohnotnow/streamer`), a menubar app that serves
+a playlist as an AAC stream. macOS 27, Swift 6.4, strict concurrency.
+
+- **`AVAssetReader`'s classic calls are deprecated on macOS 27** (`add`,
+  `startReading`, `copyNextSampleBuffer`). The replacement, available since
+  macOS 26, is `reader.outputProvider(for: output)` (returns
+  `AVAssetReaderOutput.Provider<CMReadySampleBuffer<CMSampleBuffer.DynamicContent>>`),
+  `try reader.start()`, and `try await provider.next()`, which is **async**
+  and returns nil at the end of the track. Get PCM out with
+  `sample.withUnsafeSampleBuffer { CMSampleBufferCopyPCMDataIntoAudioBufferList(...) }`.
+  Also use `loadTracks(withMediaType:)`, not `tracks(withMediaType:)`.
+- **Swift-only APIs are not in the Objective-C headers.** When a deprecation
+  names a replacement you cannot find, search the SDK's Swift interfaces:
+  `rg -n 'outputProvider' "$(xcrun --show-sdk-path)/usr/lib/swift/AVFoundation.swiftmodule/arm64e-apple-macos.swiftinterface"`.
+  CoreMedia's lives under
+  `System/Library/Frameworks/CoreMedia.framework/Versions/A/Modules/CoreMedia.swiftmodule/`.
+- **An async decoder cannot feed `AVAudioConverter` directly**: the
+  converter's `convert(to:error:withInputFrom:)` input block is synchronous.
+  Queue decoded PCM buffers and let the block pull from the queue. When the
+  queue is momentarily empty, set the status to `.noDataNow` and return nil,
+  **never `.endOfStream`**, which flushes the encoder and leaves a gap. Keep
+  one converter for the whole run and track changes are gapless. Verified by
+  a test that encodes a tone split across a dry spell, decodes the AAC back,
+  and checks for silent runs; injecting a real 1024-sample gap made that test
+  fail, so it does detect gaps.
+- **"sending 'x' risks causing data races"** when a `@MainActor` type owns a
+  non-Sendable helper and awaits its async method: in Swift 6 mode a
+  nonisolated async method runs off the actor, so calling it sends the helper
+  away. Mark the helper's async `init` and methods `nonisolated(nonsending)`
+  so they run on the caller's actor (Apple's own `Provider.next()` is
+  declared this way).
+- **Wrapping an `NWListener`'s readiness in a continuation**: capturing a
+  local `settle` function in the listener's handlers fails strict
+  concurrency ("concurrently-executed local function must be marked as
+  '@Sendable'"). Store the `CheckedContinuation` as a property on the
+  `@MainActor` server, start the listener on `.main`, and resume it from
+  handlers wrapped in `MainActor.assumeIsolated`. That is safe here because
+  the handlers really do run on the main queue (contrast the `assumeIsolated`
+  crash above, where they did not). Blether's `HookServer` waits on a
+  semaphore instead, which only works because its listener has its own
+  queue; on the main queue that wait would deadlock (reasoned, not seen).
+- **Music library access fails with NSCocoaError 4097 "connection to service
+  named com.apple.amp.library.framework" and no prompt ever appears** →
+  Info.plist lacks `NSAppleMusicUsageDescription`. Hardened runtime needs no
+  entitlement for it. The reason is only in the privacy daemon's log:
+  `log show --last 5m --predicate '(process == "tccd" OR sender == "TCC") AND eventMessage CONTAINS[c] "<app name>"'`,
+  which said "Refusing authorization request for service
+  kTCCServiceMediaLibrary ... without NSAppleMusicUsageDescription". Try that
+  log first for any silent permission failure.
+- **Loading data into a `@State` model from `App.init` loses it**: reading a
+  `@State` property in `init` can hand back a temporary instance, so the data
+  lands in an object the view never uses, with no error. Do the work in the
+  property's initialiser instead:
+  `@State private var model: AppModel = { let m = AppModel(); m.load(); return m }()`.
+- **iTunesLibrary in Swift**: distinguished playlist kinds are spelt
+  `.kindMovies`, `.kindPodcasts` and so on; `isPrimary` (the top-level
+  Library playlist) replaces the deprecated `isMaster`.
+- **A free-form app icon gets a grey rounded-square frame on macOS 26 and
+  later.** A transparent PNG of an arbitrary shape is shown inside a grey
+  plate. Fix: composite the artwork onto your own rounded square on Apple's
+  grid (an 824-point square inset 100 in a 1024 canvas, corner radius about
+  185), then generate the ten `mac` sizes (16 to 512, at 1x and 2x) with
+  `sips -z` into `Assets.xcassets/AppIcon.appiconset` and set
+  `ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon` in `project.yml`. The
+  `mac-app-icon` skill does all of this with a tested script; use it rather
+  than re-deriving the ImageMagick commands. Icon Composer would not open a
+  plain PNG for the user.
 
 ## Out of scope (so far)
 
