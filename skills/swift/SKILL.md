@@ -232,6 +232,53 @@ a playlist as an AAC stream. macOS 27, Swift 6.4, strict concurrency.
   which said "Refusing authorization request for service
   kTCCServiceMediaLibrary ... without NSAppleMusicUsageDescription". Try that
   log first for any silent permission failure.
+- **Capturing another app's audio: use a Core Audio process tap, not an
+  extension or a virtual audio driver.** `CATapDescription` (macOS 14.2+)
+  describes which processes to tap, `AudioHardwareCreateProcessTap` makes it,
+  and you read it through a private aggregate device whose tap list holds the
+  tap's UUID and whose main sub-device is the default output device. Then
+  `AudioDeviceCreateIOProcIDWithBlock` and `AudioDeviceStart`. Setting
+  `muteBehavior = .mutedWhenTapped` silences the app at the desk only while
+  something reads the tap, so an app you rebroadcast is not heard twice. On
+  macOS 26, `bundleIDs` plus `isProcessRestoreEnabled` also catch processes
+  that start playing after the tap is made (verified with Chrome open but
+  silent; a cold launch is untested). The tap came out as 48 kHz stereo
+  float32 interleaved. The hardened runtime needed no entitlement. Working
+  code: Streamer's `Audio/ProcessTap.swift`, and `spike/tap.swift`, whose
+  `list` mode prints every audio process with its bundle ID and whether it
+  is playing.
+- **Which process plays a browser's audio** (seen with `spike/tap list`):
+  Firefox from its main process, `org.mozilla.firefox`. Chrome from a helper,
+  `com.google.Chrome.helper`. Safari from a `com.apple.WebKit.GPU` process,
+  which is shared by Mail, Raycast and every app with a web view, and nothing
+  in Core Audio's process list ties one to Safari. So Safari cannot be tapped
+  on its own.
+- **An audio tap run from the terminal hears only zeros.** Frames arrive at
+  the right rate, every sample is 0, no prompt appears, and no call returns
+  an error. macOS judges the request on the responsible process, which is the
+  terminal, and `tccd` refuses it: "Refusing authorization request for
+  service kTCCServiceAudioCapture ... without NSAudioCaptureUsageDescription
+  key" (`log show --last 10m --predicate 'subsystem == "com.apple.TCC"'`).
+  Fix for a command-line spike: wrap the binary in a minimal `.app` whose
+  Info.plist has `NSAudioCaptureUsageDescription`, ad-hoc sign it, and launch
+  it with `open -W --stdout <file> Thing.app --args ...` so it asks as
+  itself. For the real app, just add the key. **The tapped app is muted even
+  when the capture is refused**, so a refused tap silences it at the desk
+  *and* broadcasts silence. Watch for a long run of pure zeros and say so.
+- **A C callback written inline inside a `@MainActor` type crashes when the
+  system calls it on its own thread**: SIGTRAP in `dispatch_assert_queue_fail`
+  under `_swift_task_checkIsolatedSwift`, with no compile-time warning. The
+  closure inherits main-actor isolation from where it is written, and Swift 6
+  adds a runtime check that the caller is on the main thread. Seen with the
+  block handed to `AudioDeviceCreateIOProcIDWithBlock` inside a `@MainActor`
+  class: the app died on the first audio buffer, which also made the tap look
+  as if it did nothing. Fix: build the block in a `nonisolated static func`
+  that returns it (Streamer's `ProcessTap.ioBlock`), and hop to the main
+  queue explicitly inside it. Unit tests with a fake that calls back on the
+  main thread will not catch it. Same crash signature as the blether
+  `assumeIsolated` gotcha above, different cause: check the crash report
+  (`~/Library/Logs/DiagnosticReports/<App>-<date>.ips`) for which closure
+  is the faulting frame.
 - **Loading data into a `@State` model from `App.init` loses it**: reading a
   `@State` property in `init` can hand back a temporary instance, so the data
   lands in an object the view never uses, with no error. Do the work in the
