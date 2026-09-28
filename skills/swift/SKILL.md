@@ -27,8 +27,80 @@ here rather than leaving it in a transcript.
 - Swift 6 with `SWIFT_STRICT_CONCURRENCY: complete` from day one — far cheaper
   than retrofitting it later.
 - Menu-bar / background apps: `LSUIElement: true` in Info.plist properties.
-- When the application is ready for testing - offer to write a simple `./build.sh` script
-  rather than making users run some (probably unfamiliar) xcode/swift commands.
+- When the application is ready for testing, give it a Makefile (below) rather
+  than making users run some (probably unfamiliar) xcode/swift commands.
+
+## The Makefile
+
+The user is not a Swift programmer: they run `make run` or `make install`
+when told to and read what scrolls past. Give every app this shape from the
+first build:
+
+```make
+APP = build/Build/Products/Release/Streamer.app
+
+-include local.mk   # optional SIGN/TEAM, see "Permissions" below
+ifdef SIGN
+SIGNING = CODE_SIGN_IDENTITY="$(SIGN)" CODE_SIGN_STYLE=Manual
+endif
+ifdef TEAM
+SIGNING += DEVELOPMENT_TEAM=$(TEAM)
+endif
+
+.PHONY: build generate run install test clean
+
+build: Streamer.xcodeproj
+	xcodebuild -quiet -project Streamer.xcodeproj -scheme Streamer -configuration Release -derivedDataPath build -destination 'platform=macOS' build $(SIGNING)
+
+# Directories too: deleting a file changes only its directory's timestamp.
+SOURCES = $(shell find Sources Tests)
+
+generate Streamer.xcodeproj: project.yml $(SOURCES)
+	xcodegen generate
+
+run: build
+	open $(APP)
+
+install: build
+	-pkill -x Streamer
+	rm -rf /Applications/Streamer.app
+	ditto $(APP) /Applications/Streamer.app
+	open /Applications/Streamer.app
+
+test: Streamer.xcodeproj
+	xcodebuild -quiet -project Streamer.xcodeproj -scheme Streamer -derivedDataPath build -destination 'platform=macOS' test CODE_SIGNING_ALLOWED=NO
+
+clean:
+	rm -rf build
+```
+
+Why each piece, all checked in Streamer (macOS 27, Xcode 27, M-series Mac,
+2026-09-27):
+
+- **`make install` is not optional.** If the user asks for the app in
+  `/Applications`, add the target in that same session. Earlier sessions in
+  several projects silently dropped this request; it took repeated asking.
+  It is also what keeps privacy grants between rebuilds (see "Permissions").
+  `pkill` stops the running copy and `rm -rf` clears the old bundle so
+  `ditto` does not merge stale files into it.
+- **`-quiet`.** Without it xcodebuild prints pages per step (one Swift compile
+  line lists every SDK module path), which makes a two-second build feel
+  like twenty. With it a clean build prints almost nothing. Failing tests
+  still show (`Failing tests:` and `** TEST FAILED **`), and make exits
+  non-zero. Xcode still prints one `IDERunDestination: Supported platforms
+  ... is empty` line on stderr; it is harmless and no flag removes it.
+- **`-destination 'platform=macOS'`** silences "Using the first of multiple
+  matching destinations".
+- **`find Sources Tests` without `-type f`.** With `-type f`, deleting a
+  source file never regenerates the project (no remaining file is newer), and
+  the next build fails with "Build input file cannot be found".
+- **Release is fine for `make run` too.** It was measured, not assumed: a
+  one-file change rebuilds in about 2.5 s and a cold build takes about 5 s
+  for 2,000 lines, even with whole-module optimisation. `ARCHS` is `arm64`
+  only, so `ONLY_ACTIVE_ARCH = NO` does not build a universal binary. A
+  Debug split would save about a second and need a second `APP` path; not
+  worth it at this size. A no-change `make install` takes about 0.7 s,
+  mostly xcodebuild's fixed start-up checks.
 
 
 ## Permissions and privacy posture
