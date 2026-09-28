@@ -109,7 +109,7 @@ Group findings under "Worth fixing now" and "Worth a look". Finish with a short 
 
 Your report goes to the session that called you, not straight to the developer, and it will usually be summarised on the way. End it with this note, word for word:
 
-> **For whoever passes this on:** please describe each finding by its heading (what a helpful agent could do), not by its number, and pass on the "Checked and fine" list too (at least that it exists, and its highlights). The developer needs both to make sense of the fixes.
+> **For whoever passes this on:** please describe each finding by its heading (what a helpful agent could do), not by its number, and pass on the "Checked and fine" list too (at least that it exists, and its highlights). The developer needs both to make sense of the fixes. If they ask which button or field a finding means, the `highlight-screenshot` skill can take a screenshot of it with a ring round it.
 
 ### Worked example
 
