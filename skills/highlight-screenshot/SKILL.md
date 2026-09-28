@@ -26,7 +26,7 @@ Only `localhost`, `127.0.0.1` and `*.lndo.site`. Anything else: stop and ask. Th
 
 ## 3. Open the browser
 
-Ask the user for a login if they haven't given one. Don't read `.env` or seeders to find one.
+If you are in a laravel codebase try reading database/seeders/TestDataSeeder.php first - there will often be a local-development admin user account seeder. Ask the user for a login if they haven't given one and there's nothing obvious in the seeder (or it's not a laravel app).  
 
 Work from the app's root. If `.playwright/cli.config.json` doesn't exist there, create it:
 
