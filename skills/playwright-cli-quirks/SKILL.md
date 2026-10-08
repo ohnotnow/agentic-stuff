@@ -90,6 +90,27 @@ that shares the instrument's flaw confirms the artefact, not the behaviour.
   state) and read state deterministically instead of doing screenshot
   archaeology. (Verified on a Bun-served TypeScript canvas game, 2026-07.)
 
+## `run-code` is not a sandbox; `eval` is
+
+Matters whenever an agent's playwright-cli use is meant to be confined (e.g.
+a probe that must not read the codebase).
+
+- **`run-code` LOOKS sandboxed but isn't.** It runs in a Node `vm` context:
+  `require`, `process` and `import()` are all missing, so the obvious file
+  reads fail. But Node's `vm` is not a security boundary: reaching the host
+  realm's `Function` constructor through any passed-in object hands back the
+  real `process`, i.e. full Node. And Playwright's own page methods read
+  files by path with no escape needed: `page.addStyleTag({path})` (or
+  `addScriptTag`) injects any file's contents into the page, where an
+  evaluate can read them back. Treat `run-code` as arbitrary code execution
+  on the host. (Both verified against a scratch canary file, @playwright/cli
+  0.1.21, 2026-10-08.)
+- **`eval` runs in the page, inside the browser's sandbox**: no `require`, no
+  `process`. It can still do most page work, e.g. scroll something into view
+  (`document.querySelector(sel).scrollIntoView()`) or scroll up without the
+  negative-number rake (`window.scrollBy(0, -800)`). If an agent must be
+  confined, allow `eval` and deny `run-code`.
+
 ## Driving npm-only browser libraries inside a page
 
 Verified pattern: esbuild-bundle the package via a stdin wrapper to an IIFE
