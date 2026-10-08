@@ -10,6 +10,7 @@ import os
 import shutil
 import subprocess
 import sys
+from datetime import datetime
 from pathlib import Path
 
 import yaml
@@ -109,6 +110,30 @@ def newest_mtime(path: Path) -> float:
     return 0
 
 
+def describe_gap(seconds: float) -> str:
+    """Rough human-readable span, e.g. '3 months'."""
+    days = seconds / 86400
+    for size, unit in ((365, "year"), (30, "month"), (7, "week"), (1, "day")):
+        if days >= size:
+            n = int(days // size)
+            return f"{n} {unit}{'s' if n != 1 else ''}"
+    hours = int(seconds // 3600)
+    return f"{hours} hour{'s' if hours != 1 else ''}" if hours else "under an hour"
+
+
+def show_dates(src: Path, dest: Path) -> None:
+    """Print both modification times and which side is newer."""
+    src_m, dest_m = src.stat().st_mtime, dest.stat().st_mtime
+    fmt = "%Y-%m-%d %H:%M"
+    src_note = dest_note = ""
+    if src_m > dest_m:
+        src_note = f"  (newer by {describe_gap(src_m - dest_m)})"
+    elif dest_m > src_m:
+        dest_note = f"  (newer by {describe_gap(dest_m - src_m)})"
+    print(f"     source: {datetime.fromtimestamp(src_m).strftime(fmt)}{src_note}")
+    print(f"     dest:   {datetime.fromtimestamp(dest_m).strftime(fmt)}{dest_note}")
+
+
 def show_diff(src: Path, dest: Path) -> None:
     """Show a diff between source and destination."""
     try:
@@ -155,6 +180,7 @@ def _sync_file(src: Path, dest: Path, force: bool = False) -> str:
 
         if not force:
             print(f"  ⚠  {dest} differs from source")
+            show_dates(src, dest)
             if not ask_user("Overwrite with source version?", src, dest):
                 return "skipped (destination differs)"
 
