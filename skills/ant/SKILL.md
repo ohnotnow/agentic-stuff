@@ -1,11 +1,11 @@
 ---
 name: ant
-description: Local-first notebook for *why* — design decisions, alternatives rejected, pivots taken, the conversational nuance that gets lost when an issue closes. Sibling to ait. You must use this when the user asks to record/note a decision, after a load-bearing choice between options, after a library swap or refactor of direction, or to recall prior decisions in an area.
+description: Local-first notebook for *why* — design decisions, alternatives rejected, pivots taken, the conversational nuance that gets lost when an issue closes. Sibling to ait. Use when the user asks to record/note a decision, after a load-bearing choice between options, after a library swap or refactor of direction, or to recall prior decisions in an area.
 ---
 
 # AIT (`ant`) — Agent Notebook Tool
 
-`ant` is the *why* companion to `ait`'s *what*. Where ait tracks
+`ant` is the *why* companion to [ait](../../ait)'s *what*. Where ait tracks
 open issues and dependencies, ant captures the durable record of decisions
 made, alternatives evaluated, and pivots taken — the context a future
 session needs to pick up where the last one left off.
@@ -85,7 +85,12 @@ ant init --prefix myproject               # override the inferred prefix
 
 ant add --body "rationale text"           # literal body
 ant add --body @path/to/file.md           # body from file
-echo "rationale" | ant add                # body from stdin
+echo "rationale" | ant add                # implicit stdin
+ant add --human --title "Why X"           # body written in $EDITOR (for a person)
+ant add --body - <<'EOF'                  # explicit stdin via heredoc
+Multi-line body. Single-quoted 'EOF' means no shell expansion —
+backticks and $vars stay literal.
+EOF
 
 ant add --title "Choose sqlite" --kind adr --issue ait-AbCdE.2 \
         --body "we picked modernc/sqlite over CGO bindings because…"
@@ -94,8 +99,33 @@ ant add --title "Choose sqlite" --kind adr --issue ait-AbCdE.2 \
 `--issue` is free-form; if you use ait it'll match an ait id, but Jira /
 Linear / GitHub ids work just as well — ant doesn't validate the value.
 
-For non-trivial bodies, write a temp file and use @file; heredocs are fragile 
-when the body contains backticks.
+For non-trivial bodies, the safest options are `--body @file` or a
+single-quoted heredoc (`<<'EOF' ... EOF`). The single-quoted delimiter
+disables shell expansion, so backticks, `$variables`, and apostrophes
+all survive untouched.
+
+### When a new entry overturns an older one
+
+If what you are writing replaces any part of an earlier entry, say so
+with `--supersedes`. Readers of the older entry then see a warning
+before they act on it. Nobody goes back and edits old entries, so this
+is the only way they find out.
+
+```bash
+ant add --kind adr --title "Grouping, second wave" \
+        --supersedes x-Ed6UZ --supersedes-reason "a story is no longer one folder" \
+        --body @path/to/notes.md
+```
+
+- Use it whenever any part of the older decision no longer holds, even a
+  small part. When it is only part, the reason says which part; leave the
+  reason out only when the whole entry is replaced.
+- Building on an entry without overturning anything is not superseding.
+  Cite it in the body instead ("builds on x-AbCdE, which chose...");
+  `show` picks that up as a mention.
+- Forgot, or found out later? `ant edit <newer-id> --supersedes <older-id>`
+  adds it after the fact, and `--unsupersede <older-id>` removes a wrong
+  one. Neither needs a prior `show`, because the body is untouched.
 
 ## Recall — the four read-side moments
 
@@ -123,6 +153,30 @@ ant list --kind adr --since 2026-04-01    # filtered
 ant show <id>                             # one entry, full record
 ```
 
+**Superseded entries.** If `show` starts with `superseded_by`, or a row
+from `list`, `recent`, `search` or `for` carries a `superseded_by`
+marker, a newer entry has overturned at least part of this one. Read the
+newer entry (and its `reason`, which says which part) before you act on
+the older one. A marker on a row is also a good reason to skip straight
+to the newer entry. `show` lists the other direction as `supersedes`.
+
+`show` also lists the entries connected to this one by id, worked out
+from the bodies on every read:
+
+- `mentions`: entries this body cites, each with its title. If a title
+  doesn't fit the sentence that cites it, the id in the body is probably
+  mistyped.
+- `mentioned_by`: entries whose bodies cite this one. Newer entries that
+  build on or revise this one show up here, so check them before acting
+  on an older decision.
+- `not_in_notebook`: ids with this project's prefix that match no entry.
+  Often an ait issue (projects usually share one prefix), sometimes a
+  typo; the surrounding sentence usually tells you which.
+
+When asked to read one entry cold ("read ant note x-AbCdE"), look at
+`superseded_by` and `mentioned_by` too: the conclusion is in this entry,
+but how it was later revised is in those.
+
 ## Editing and promotion
 
 ```bash
@@ -130,11 +184,39 @@ ant edit <id> --title "New title"         # change one column
 ant edit <id> --issue ""                  # clear a column (empty string)
 echo "new body" | ant edit <id>           # replace body via stdin
 ant edit <id> --body @path/to/new.md      # replace body from file
+ant edit <id> --human                     # rewrite body in $EDITOR (for a person)
+ant edit <id> --body - <<'EOF'            # explicit stdin via heredoc
+Rewritten body, apostrophes and `backticks` fine.
+EOF
+```
 
+**Read before you write.** `ant show <id>` first, then `edit`. The tool records which session showed an entry, and `edit --body/--title/--human` is refused (`unread` error) unless you showed it within the last hour. This is the same rule as reading a file before editing it, and it exists because an agent once overwrote a hand-written entry without having looked at it. If the refusal says the show was too long ago, run `show` again and re-read it; your context may have been compacted since. `--dangerously-skip-read-check` overrides the guard and should almost never appear in your commands.
+
+Two more refusals: an empty body (including an empty heredoc on `--body -`) is rejected, and a replacement under half the length of the existing body is rejected as a likely diff or summary unless you pass `--force`. Only use `--force` when you have just read the old body and mean to replace it. To add to an entry, use `ant append`, which is never guarded.
+
+```bash
 ant export <id>                           # render one entry as markdown
 ant export --kind adr                     # render every ADR as markdown
 ant export --json                         # JSON instead of markdown
 ```
+
+`edit` replaces the body wholesale. To **grow** an entry instead — a
+later clarification, a link to a follow-up note, a dated update — use
+`append`:
+
+```bash
+ant append <id> --body "2026-05-15: linked to demo-FgHiJ"
+ant append <id> --body @path/to/update.md
+ant append <id> --body - <<'EOF'
+Multi-line update via heredoc.
+EOF
+```
+
+`append` joins the new content onto the existing body with a blank line,
+a markdown `---` rule, and another blank line — so the entry renders as
+distinct sections when exported through a markdown viewer. Reach for it
+for small clarifications and dated updates; create a sibling `pivot`
+entry when the change is structural enough to deserve its own id.
 
 `export` is how a personal entry gets promoted to project documentation:
 pipe it into a PR description, save it as a doc file, share it as a gist.
@@ -155,6 +237,29 @@ refusal to the user instead.
 
 Default output is JSON. Pipe to `jq` for ad-hoc shaping, or use
 `ant list --human` when a table is more useful for a person reading along.
+
+### Response shapes
+
+- **Single records** (`add`, `edit`, `delete`, `show`, `foundation`,
+  `init`, `config`) return one JSON object on stdout.
+- **List commands** (`list`, `recent`, `search`, `for`, `export --json`)
+  return `{"entries": [...]}` — always wrapped, never a bare array. The
+  envelope leaves room for sibling fields (counts, cursors) without
+  breaking consumers, so check `.entries` rather than treating the top
+  level as the array itself.
+- **Mutations are slim by default.** `add`, `edit`, `append`, and
+  `delete` echo back `{id, kind, title?, issue_id?, created_at, superseded_by?}` — no
+  body, no `updated_at`. Pass `--long` to get the full record back when
+  you actually need it (e.g. confirming a body change took effect).
+- **Errors** go to stderr as `{"error": {"code": "...", "message":
+  "..."}}` and the process exits non-zero. Stable codes:
+  `not_found`, `validation_error`, `conflict`, `confirmation_required`,
+  `uninitialised`, `internal_error`. Branch on the code, not the
+  message text.
+
+```bash
+ant show fake-NOPE 2>&1 >/dev/null | jq -r .error.code   # → not_found
+```
 
 ## Database location and `--db`
 
