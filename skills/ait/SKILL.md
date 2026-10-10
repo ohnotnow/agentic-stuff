@@ -56,13 +56,22 @@ ait update <id> --status in_progress   # Start working
 ait update <id> --status open          # Back to open
 ait update <id> --title "New title"    # Change title
 ait update <id> --priority P0          # Change priority
-ait update <id> --status in_progress --claim <agent-name>   # Claim and update in one step
+ait update <id> --description @spec.md # Replace the description (whole text, not a diff)
+ait update <id> --description - <<'EOF' # Or via heredoc on stdin
+Whole new description here.
+EOF
+ait update <id> --parent <epic-id>     # Move under another parent (children come too)
+ait update <id> --parent ""            # Make it a standalone root issue
 ```
-`--claim <agent-name>` folds a claim into the same update, so you can claim and
-start an issue in a single call instead of running `claim` then `update`. It
-uses the same rules as the `claim` command: it fails with a conflict if the
-issue is already claimed. `--claim` on its own is a valid update (no other field
-required).
+
+A move gives the issue and its children new IDs; the response shows the new
+one. Old IDs keep working everywhere, and `ait show <old-id>` returns the
+issue with `moved_from` set to the ID you asked for, so you can follow an old
+reference from a note or commit without any extra step.
+
+**Read before you write.** `ait show <id>` first, then `update`. The tool records which session showed an issue, and `update --title/--description` and `close --note` are refused (`unread` error) unless you showed it within the last hour. This is the same rule as reading a file before editing it, and it exists because an agent once overwrote a hand-written issue body without having looked at it. If the refusal says the show was too long ago, run `show` again and re-read it; your context may have been compacted since. `--dangerously-skip-read-check` overrides the guard and should almost never appear in your commands.
+
+Two more refusals: an empty `--description` is rejected, and a replacement under half the length of the existing description is rejected as a likely diff or summary unless you pass `--force`. Only use `--force` when you have just read the old body and mean to replace it.
 
 ### Close / Cancel / Reopen
 ```bash
@@ -70,11 +79,8 @@ ait close <id>                # Close a single issue
 ait close <id> --cascade      # Close an epic and all its descendants
 ait close <id> --note "Done — merged in PR #42"    # Add a closing note then close (--reason is an alias)
 ait cancel <id>               # Cancel an issue
-ait cancel <id> --note "Superseded by new approach" # Add a note then cancel (--reason is an alias)
 ait reopen <id>               # Reopen a closed or cancelled issue
 ```
-`--note` on `close` and `cancel` attaches the note before the status change and
-returns a single issue ref (it does not echo a separate note ack).
 
 ### Dependencies
 ```bash
@@ -110,6 +116,26 @@ closed epic has open or in-progress children — something that probably needs
 human attention. Flag this to the user and suggest they review the skipped
 issues before deciding what to do.
 
+### Delete (mistakes only)
+```bash
+ait delete <id> --force             # permanently remove a single issue
+ait delete <id> --force --cascade   # remove the issue and its whole subtree
+```
+`delete` is for genuine mistakes — a fat-fingered duplicate, a throwaway. An
+issue created against the wrong parent should be moved with
+`update --parent` instead. It is **irreversible** and, unlike
+flush, records **nothing**: the issue, its notes, and its dependency links are
+gone for good. The response is `{ "deleted": [refs] }`, listing exactly what
+was removed.
+
+It is deliberately guarded:
+- nothing happens without `--force`;
+- an issue that has children is refused unless you also pass `--cascade`.
+
+Reach for `cancel` or `close` (which keep an auditable record) when you're
+closing out real work. Use `delete` only when an issue genuinely should never
+have existed.
+
 ### Flush History
 ```bash
 ait log                           # summary: date, summary, root items, item count
@@ -141,10 +167,6 @@ ait unclaim <id>               # Release the claim
 ```
 If another agent already holds the claim, `claim` returns a conflict error with
 the current holder's name.
-
-To claim and update in one step, use `ait update <id> --claim <agent-name>`
-(see **Update Issues** above) — handy when you want to claim an issue and mark
-it `in_progress` together.
 
 The agent-name parameter is for you to have a little creative fun if you want to.  You're free to use your real name, or pick a name that amuses and delights you or a project-specific name for your 'agentic persona'.  If the user seems like a terribly serious person - maybe steer away from 'plush-plush-tooshie-shake' though ;-)  It's important to pick one name and stick with it though!
 
@@ -179,13 +201,15 @@ IDs are auto-generated with the project prefix:
 
 The parent-child structure is visible directly in the identifier. For a full
 three-tier setup: `proj-abc` (initiative) -> `proj-abc.1` (epic) -> `proj-abc.1.1` (task).
+A child keeps its number for life, so gaps (`.1`, `.3`) just mean a sibling
+was deleted or moved away.
 
 ## Workflow Pattern
 
 1. **Start of session**: `ait log --last 3` for recent context, then `ait ready` to see what is unblocked
 2. **Pick work**: `ait claim <id> <your-name>` to claim an issue
 3. **Check context**: `ait show <id>` for full details and notes. If the issue belongs to an initiative, read the initiative description to understand the strategic intent.
-4. **Mark in progress**: `ait update <id> --status in_progress` (tip: steps 2 and 4 can be combined with `ait update <id> --status in_progress --claim <your-name>`)
+4. **Mark in progress**: `ait update <id> --status in_progress`
 5. **Do the work**: implement, test, iterate
 6. **Leave notes**: `ait note add <id> "what was done / what remains"`
 7. **Close**: `ait close <id>` (or `--cascade` for an epic and its children)
@@ -195,6 +219,9 @@ three-tier setup: `proj-abc` (initiative) -> `proj-abc.1` (epic) -> `proj-abc.1.
 ## Output Modes
 
 By default all commands return JSON — compact and token-efficient for agents.
+Data goes to stdout; failures are a JSON `{"error": {"code", "message"}}`
+envelope on **stderr** with a non-zero exit code, so pipelines and `$(...)`
+captures never ingest an error as data. Same contract as `ant`.
 
 - `--long` adds all fields (description, timestamps, claimed_by, etc.)
 - `--human` gives a compact tabular view grouped by epic
@@ -222,10 +249,23 @@ omitted when nothing is hidden.
 ## Initialisation
 
 ```bash
-ait init --prefix myproject    # Set the project prefix for issue IDs
+ait init --prefix myproject    # Create the database and set the ID prefix
 ```
+`init` is the only command that creates the database. Every other command
+refuses until it has been run once, returning exit code 1 and:
+
+```json
+{"error": {"code": "uninitialised", "message": "no ait database at <path> — run 'ait init' first"}}
+```
+
+If you hit this, don't just run `init` reflexively — a project without an ait
+database may simply not use ait. Check with the user before initialising a
+project that isn't yours.
+
 If no prefix is set, one is inferred from the directory name. The prefix can be
 changed later with `init --prefix` — existing IDs are re-keyed automatically.
+In a git repository, `init` also ensures `.ait/` is in `.gitignore`; outside
+one, its output carries a `note` saying that step was skipped.
 
 ## Custom Database Path
 
