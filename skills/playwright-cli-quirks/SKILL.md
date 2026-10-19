@@ -123,6 +123,23 @@ automatically - worked first try. Pair with the browser-context option
 `bypassCSP: true`, or a strict CSP on the target page blocks the script tag.
 (Verified Playwright 1.61 + esbuild 0.28, 2026-07-09.)
 
+## A config file can swap the browser, and the GPU with it
+
+- **`browserName: "chromium"` in a `--config` file silently swaps the
+  browser.** A plain `playwright-cli open`, or a config whose `browser` block
+  leaves `browserName` out, drives the installed Google Chrome, whose headless
+  WebGL runs on the real GPU (ANGLE on Metal). Name `chromium` and you get
+  Playwright's own `chromium_headless_shell` instead, which renders WebGL in
+  software (SwiftShader): a three.js scene that ran at 60 fps took about a
+  second a frame, and every timing from it was meaningless. To pass launch
+  flags, put them in `browser.launchOptions.args` and leave `browserName` out;
+  they still apply (checked with `--lang=en-GB`). Before trusting any WebGL
+  timing, read the renderer string:
+  `gl.getParameter(gl.getExtension('WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL)`
+  names `ANGLE Metal Renderer` on the GPU and `SwiftShader` in software.
+  (Verified @playwright/cli 0.1.21, Chrome 154 against
+  chromium_headless_shell-1246, macOS, 2026-10-19.)
+
 ## Clean up after yourself
 
 playwright-cli daemons persist after sessions end. Each owns a headless
