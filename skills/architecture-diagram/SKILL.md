@@ -1,6 +1,6 @@
 ---
 name: architecture-diagram
-description: Make an interactive, zoomable architecture diagram of an application as a single self-contained HTML file, for non-technical managers who want to see how a system hangs together. The top view shows the app, its users and the outside systems it talks to; clicking a box zooms smoothly into what is inside it. Use this whenever the user asks for an architecture diagram, a system overview picture, "something to show management/the director", a visual of how an app works, or wants an existing architecture diagram brought up to date, for Laravel apps and small Go or Python tools alike, even if they do not say "interactive" or "HTML".
+description: Make an architecture diagram of an application as a single self-contained HTML file, for non-technical managers who want to see how a system hangs together. Use this whenever the user asks for an architecture diagram, a system overview picture, "something to show management/the director", a visual of how an app works.
 ---
 
 # Architecture diagram
