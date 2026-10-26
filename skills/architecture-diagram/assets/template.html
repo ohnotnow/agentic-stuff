@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Architecture diagram</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23011451'/><rect x='10' y='4' width='12' height='8' rx='2' fill='%23fff'/><rect x='3' y='20' width='11' height='8' rx='2' fill='%23fff'/><rect x='18' y='20' width='11' height='8' rx='2' fill='%23fff'/><path d='M16 12v4M8.5 20v-4h15v4' stroke='%23fff' stroke-width='2' fill='none'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400..700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #011451;
+  --blue: #005398;
+  --navy-80: #344374;
+  --navy-60: #677297;
+  --navy-40: #99A1B9;
+  --navy-20: #CCD0DC;
+  --navy-10: #E6E7EE;
+  --page: #F5F5F5;
+  --grey-2: #E6E6E6;
+  --grey-3: #CCCCCC;
+  --text: #323232;
+  --text-soft: #4D4D4D;
+  --grey-mid: #757575;
+  --focus: #FFDD00;
+  --white: #FFFFFF;
+  --error: #D4351C;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; margin: 0; }
+
+body {
+  font-family: "Noto Sans", Arial, Helvetica, sans-serif;
+  font-size: 1.125rem;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--page);
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+:focus-visible { outline: 4px solid var(--focus); outline-offset: 2px; }
+
+header {
+  background: var(--navy);
+  color: var(--white);
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+}
+
+header h1 { font-size: 1.5rem; font-weight: 600; margin: 0; }
+
+#crumbs {
+  display: flex; flex-wrap: wrap; align-items: center;
+  list-style: none; margin: 0; padding: 0; gap: 0.25rem;
+}
+#crumbs li { display: flex; align-items: center; gap: 0.25rem; }
+#crumbs li + li::before { content: "\203A"; color: var(--navy-40); padding: 0 0.25rem; }
+#crumbs a {
+  color: var(--white); text-decoration: underline; text-underline-offset: 0.2em;
+  padding: 0.125rem 0.25rem; border-radius: 4px;
+}
+#crumbs a:hover { background: var(--navy-80); }
+#crumbs [aria-current="page"] { font-weight: 600; text-decoration: none; padding: 0.125rem 0.25rem; }
+
+#up {
+  margin-left: auto;
+  font: inherit; font-size: 1rem; font-weight: 600;
+  color: var(--navy); background: var(--white);
+  border: 0; border-radius: 4px; padding: 0.5rem 1rem; cursor: pointer;
+}
+#up:hover { background: var(--navy-10); }
+#up[hidden] { display: none; }
+
+main {
+  display: grid;
+  grid-template-columns: 1fr minmax(18rem, 26rem);
+  min-height: 0;
+}
+
+/* Shadows on whichever edges have more diagram to scroll to: page-coloured covers
+   travel with the content and hide each shadow once its edge is reached. */
+.stage-wrap {
+  position: relative; min-height: 0; min-width: 0; overflow: auto;
+  background:
+    linear-gradient(var(--page) 40%, transparent) top / 100% 2.5rem no-repeat local,
+    linear-gradient(transparent, var(--page) 60%) bottom / 100% 2.5rem no-repeat local,
+    linear-gradient(to right, var(--page) 40%, transparent) left / 2.5rem 100% no-repeat local,
+    linear-gradient(to left, var(--page) 40%, transparent) right / 2.5rem 100% no-repeat local,
+    radial-gradient(farthest-side at 50% 0, rgba(1, 20, 81, 0.22), transparent) top / 100% 1rem no-repeat scroll,
+    radial-gradient(farthest-side at 50% 100%, rgba(1, 20, 81, 0.22), transparent) bottom / 100% 1rem no-repeat scroll,
+    radial-gradient(farthest-side at 0 50%, rgba(1, 20, 81, 0.22), transparent) left / 1rem 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, rgba(1, 20, 81, 0.22), transparent) right / 1rem 100% no-repeat scroll,
+    var(--page);
+}
+
+#stage { display: block; }
+#stage.fill { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+#panel {
+  background: var(--white);
+  border-left: 1px solid var(--grey-3);
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+#panel .eyebrow { font-size: 1rem; color: var(--grey-mid); margin: 0; }
+#panel h2 { font-size: 1.5rem; font-weight: 600; color: var(--navy); margin: 0 0 0.25rem; line-height: 1.25; }
+#panel .tech { font-size: 1rem; color: var(--text-soft); margin: 0 0 1rem; }
+#panel p { margin: 0 0 1rem; }
+#panel h3 { font-size: 1rem; font-weight: 600; color: var(--navy); margin: 1.5rem 0 0.5rem; }
+#panel ul { margin: 0; padding-left: 1.25rem; }
+#panel li { margin-bottom: 0.25rem; }
+#panel .hint { font-size: 1rem; color: var(--text-soft); }
+#panel button.inside {
+  font: inherit; font-weight: 600; color: var(--white); background: var(--blue);
+  border: 0; border-radius: 4px; padding: 0.5rem 1rem; cursor: pointer; margin-top: 0.5rem;
+}
+#panel button.inside:hover { background: var(--navy); }
+
+.legend { list-style: none; padding: 0 !important; display: grid; gap: 0.5rem; font-size: 1rem; }
+.legend li { display: flex; align-items: center; gap: 0.75rem; }
+.legend svg { flex: none; }
+
+#error {
+  margin: 1.5rem; padding: 1rem 1.5rem; background: var(--white);
+  border: 3px solid var(--error); color: var(--text);
+}
+#error h2 { margin-top: 0; color: var(--error); font-size: 1.5rem; }
+
+/* Narrow or heavily zoomed: one column, the page scrolls, the diagram keeps most of the screen. */
+@media (max-width: 56rem) {
+  html, body { height: auto; }
+  body { display: block; }
+  header { padding: 0.5rem 1rem; gap: 0.25rem 1rem; }
+  header h1 { font-size: 1.125rem; }
+  #up { font-size: 1rem; padding: 0.25rem 0.75rem; }
+  main { display: block; }
+  .stage-wrap { height: 75vh; min-height: 16rem; }
+  #panel { border-left: 0; border-top: 1px solid var(--grey-3); }
+}
+
+/* Diagram */
+#stage text { font-family: "Noto Sans", Arial, Helvetica, sans-serif; }
+
+.node { outline: none; }
+.node.zoomable, .node.ghost { cursor: pointer; }
+.node .shape { stroke-width: 2; }
+.kind-process .shape { fill: var(--white); stroke: var(--blue); }
+.kind-process .label { fill: var(--navy); }
+.kind-store .shape, .kind-store .rim { fill: var(--navy-10); stroke: var(--blue); }
+.kind-store .label { fill: var(--navy); }
+.kind-external .shape { fill: var(--grey-2); stroke: var(--grey-mid); stroke-dasharray: 6 4; }
+.kind-external .label { fill: var(--text); }
+.kind-person .shape { fill: var(--navy); stroke: var(--navy); }
+.kind-person .label, .kind-person .tech { fill: var(--white); }
+.kind-ghost .shape { fill: var(--page); stroke: var(--navy-40); stroke-dasharray: 4 4; stroke-width: 1.5; }
+.kind-ghost .label { fill: var(--text-soft); font-style: italic; }
+.node .tech { fill: var(--text-soft); }
+
+.node .card { fill: var(--white); stroke: var(--navy-40); stroke-width: 1.5; }
+.node.zoomable .shape { stroke: var(--navy); stroke-width: 2.5; }
+.node .badge { fill: var(--blue); stroke: var(--white); stroke-width: 2; }
+.node .badge-glyph { stroke: var(--white); stroke-width: 2; fill: none; stroke-linecap: round; }
+.node.has-issue .shape { stroke: var(--error); stroke-width: 3.5; }
+.issue-badge .issue-disc { fill: var(--error); stroke: var(--white); stroke-width: 2; }
+.issue-badge .issue-glyph { stroke: var(--white); stroke-width: 2.5; stroke-linecap: round; }
+.issue-badge .issue-dot { fill: var(--white); }
+#panel .issue-note h3 { color: var(--error); display: flex; align-items: center; gap: 0.5rem; }
+
+.node .ring, .node .ring-outer { fill: none; display: none; }
+.node .ring { stroke: var(--focus); stroke-width: 5; }
+.node .ring-outer { stroke: var(--navy); stroke-width: 1.5; }
+.node:focus-visible .ring, .node:focus-visible .ring-outer { display: block; }
+
+.node:hover .shape { filter: brightness(0.97); }
+
+.edge path { fill: none; stroke: var(--navy-60); stroke-width: 2; }
+.edge .edge-label-bg { fill: var(--page); }
+.edge .edge-label { fill: var(--text-soft); }
+.edge.hi path { stroke: var(--blue); stroke-width: 3; }
+.edge.hi .edge-label { fill: var(--navy); font-weight: 600; }
+
+#stage.interactive .node, #stage.interactive .edge { transition: opacity 0.15s ease; }
+#stage.focusing .node:not(.hi), #stage.focusing .edge:not(.hi) { opacity: 0.3; }
+
+@media (prefers-reduced-motion: reduce) {
+  #stage.interactive .node, #stage.interactive .edge { transition: none; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="app-title">Architecture</h1>
+  <nav aria-label="Breadcrumb"><ol id="crumbs"></ol></nav>
+  <button type="button" id="up" aria-keyshortcuts="Escape" hidden>Up a level (Esc)</button>
+</header>
+<main>
+  <div class="stage-wrap">
+    <svg id="stage" class="fill" role="group" aria-roledescription="diagram" aria-label="Architecture diagram">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#677297"></path>
+        </marker>
+        <marker id="arrow-hi" viewBox="0 0 10 10" refX="10" refY="5" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#005398"></path>
+        </marker>
+      </defs>
+      <g id="world"></g>
+    </svg>
+  </div>
+  <aside id="panel" aria-label="Details"></aside>
+</main>
+<div id="announce" class="sr-only" aria-live="polite"></div>
+
+<script type="application/json" id="diagram-data">
+__DIAGRAM_DATA__
+</script>
+<script>/*__ELK__*/</script>
+<script>
+(() => {
+  'use strict';
+
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const FONT = '"Noto Sans", Arial, Helvetica, sans-serif';
+  const LABEL = { size: 18, weight: 600, line: 23 };
+  const GHOST = { size: 16, weight: 400, line: 20, style: 'italic' };
+  const SMALL = { size: 15, weight: 400, line: 19 };
+  const NODE_PAD = 16;
+  const NODE_TEXT_MAX = 200;
+  const EDGE_TEXT_MAX = 150;
+  const VIEW_PAD = 40;
+  const CARD_OFFSET = 5;
+  const MIN_SCALE = 0.8;
+  const MAX_SCALE = 1.6;
+  const KINDS = ['person', 'process', 'store', 'external'];
+
+  const stage = document.getElementById('stage');
+  const viewport = document.querySelector('.stage-wrap');
+  const world = document.getElementById('world');
+  const panel = document.getElementById('panel');
+  const crumbs = document.getElementById('crumbs');
+  const upButton = document.getElementById('up');
+  const announcer = document.getElementById('announce');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  // Matches the CSS breakpoint where the panel moves below the diagram.
+  const stacked = window.matchMedia('(max-width: 56rem)');
+
+  const data = JSON.parse(document.getElementById('diagram-data').textContent);
+
+  /* ---------- Data: index every view by its path ---------- */
+
+  // A path is the list of node ids clicked to reach a view; the root view is [].
+  const views = new Map();
+
+  function key(path) { return path.join('/'); }
+
+  function indexViews(view, path, errors) {
+    views.set(key(path), { view, path });
+    const ids = new Set();
+    for (const node of view.nodes || []) {
+      if (!node.id || !node.label) errors.push(`A node in "${viewTitle(path)}" is missing an id or label.`);
+      if (ids.has(node.id)) errors.push(`Duplicate node id "${node.id}" in "${viewTitle(path)}".`);
+      if (node.id && node.id.startsWith('^')) errors.push(`Node id "${node.id}" may not start with ^.`);
+      if (!KINDS.includes(node.kind)) errors.push(`Node "${node.id}" has kind "${node.kind}"; expected one of ${KINDS.join(', ')}.`);
+      ids.add(node.id);
+      if (node.view) indexViews(node.view, [...path, node.id], errors);
+    }
+  }
+
+  function nodeAt(path) {
+    if (!path.length) return null;
+    const parent = views.get(key(path.slice(0, -1)));
+    return parent.view.nodes.find(n => n.id === path[path.length - 1]);
+  }
+
+  function viewTitle(path) { return path.length ? nodeAt(path).label : data.title; }
+  function viewDescription(path) { return path.length ? nodeAt(path).description : data.summary; }
+
+  // "^id" in an edge points at a node outside this view: the nearest ancestor view holding it.
+  function resolveOutside(id, path) {
+    for (let depth = path.length - 1; depth >= 0; depth--) {
+      const homePath = path.slice(0, depth);
+      const node = views.get(key(homePath)).view.nodes.find(n => n.id === id);
+      if (node) return { node, homePath };
+    }
+    return null;
+  }
+
+  function validateEdges(errors) {
+    for (const { view, path } of views.values()) {
+      const ids = new Set((view.nodes || []).map(n => n.id));
+      for (const edge of view.edges || []) {
+        for (const end of [edge.from, edge.to]) {
+          if (typeof end !== 'string') {
+            errors.push(`An edge in "${viewTitle(path)}" is missing its from or to.`);
+          } else if (end.startsWith('^')) {
+            if (!resolveOutside(end.slice(1), path)) errors.push(`Edge end "${end}" in "${viewTitle(path)}" matches no node in any enclosing view.`);
+          } else if (!ids.has(end)) {
+            errors.push(`Edge end "${end}" in "${viewTitle(path)}" matches no node in that view.`);
+          }
+        }
+      }
+    }
+  }
+
+  /* ---------- Text measuring ---------- */
+
+  const measureCtx = document.createElement('canvas').getContext('2d');
+
+  function measure(text, f) {
+    measureCtx.font = `${f.style || 'normal'} ${f.weight} ${f.size}px ${FONT}`;
+    return measureCtx.measureText(text).width;
+  }
+
+  function wrap(text, f, maxWidth) {
+    const lines = [];
+    let line = '';
+    for (const word of String(text).split(/\s+/)) {
+      const attempt = line ? `${line} ${word}` : word;
+      if (line && measure(attempt, f) > maxWidth) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = attempt;
+      }
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  /* ---------- Layout ---------- */
+
+  function prepareNode(node) {
+    const font = node.kind === 'ghost' ? GHOST : LABEL;
+    const labelLines = wrap(node.label, font, NODE_TEXT_MAX);
+    const techLines = node.tech && node.kind !== 'ghost' ? wrap(node.tech, SMALL, NODE_TEXT_MAX) : [];
+    const textWidth = Math.max(...labelLines.map(l => measure(l, font)), ...techLines.map(l => measure(l, SMALL)));
+    const textHeight = labelLines.length * font.line + (techLines.length ? 4 + techLines.length * SMALL.line : 0);
+    let width = Math.max(node.kind === 'ghost' ? 110 : 160, Math.ceil(textWidth) + NODE_PAD * 2);
+    let height = Math.max(node.kind === 'ghost' ? 44 : 68, textHeight + NODE_PAD * 2);
+    if (node.kind === 'person') width += height / 2;
+    if (node.kind === 'store') height += 16;
+    // Room for the stacked cards behind a zoomable box, so arrows meet the cards, not hide under them.
+    const inset = node.view ? CARD_OFFSET * 2 : 0;
+    return { ...node, font, labelLines, techLines, textHeight, inset, width: width + inset, height: height + inset };
+  }
+
+  function prepareEdgeLabel(text) {
+    const lines = wrap(text, SMALL, EDGE_TEXT_MAX);
+    const width = Math.ceil(Math.max(...lines.map(l => measure(l, SMALL)))) + 10;
+    return { text, lines, width, height: lines.length * SMALL.line + 4 };
+  }
+
+  // Views without a fixed direction are laid out both ways; the better fit for the screen wins.
+  async function layoutView(elk, entry) {
+    const directions = entry.view.direction ? [entry.view.direction] : ['RIGHT', 'DOWN'];
+    entry.layouts = [];
+    for (const direction of directions) entry.layouts.push(await layoutOnce(elk, entry, direction));
+    pickLayout(entry);
+  }
+
+  function pickLayout(entry) {
+    const before = entry.layout;
+    entry.layout = entry.layouts.reduce((best, l) => (layoutScore(l) > layoutScore(best) + 0.01 ? l : best));
+    return entry.layout !== before;
+  }
+
+  // Best: fits without scrolling, the bigger the better. Otherwise the least diagram to
+  // scroll through at readable size, counting sideways scrolling a little more than down.
+  function layoutScore(layout) {
+    const fit = fitScale(layout.bounds), lim = scaleLimits();
+    if (fit >= lim.min) return 1 + Math.min(fit, lim.max);
+    const s = stageSize(), p = padded(layout.bounds);
+    const screensAcross = Math.max(1, p.w * lim.min / s.w);
+    const screensDown = Math.max(1, p.h * lim.min / s.h);
+    return 1 / (Math.pow(screensAcross, 1.5) * screensDown);
+  }
+
+  async function layoutOnce(elk, entry, direction) {
+    const { view, path } = entry;
+    const nodes = view.nodes.map(prepareNode);
+    for (const edge of view.edges || []) {
+      for (const end of [edge.from, edge.to]) {
+        if (end.startsWith('^') && !nodes.some(n => n.id === end)) {
+          const { node, homePath } = resolveOutside(end.slice(1), path);
+          nodes.push(prepareNode({ id: end, label: node.label, kind: 'ghost', homePath, target: node }));
+        }
+      }
+    }
+    const edges = (view.edges || []).map((e, i) => ({ ...e, id: `e${i}`, labelBox: e.label ? prepareEdgeLabel(e.label) : null }));
+
+    const result = await elk.layout({
+      id: 'root',
+      layoutOptions: {
+        'elk.algorithm': 'layered',
+        'elk.direction': direction,
+        'elk.edgeRouting': 'ORTHOGONAL',
+        'elk.spacing.nodeNode': '36',
+        'elk.layered.spacing.nodeNodeBetweenLayers': '40',
+        'elk.spacing.edgeNode': '20',
+        'elk.spacing.edgeEdge': '16',
+        'elk.spacing.edgeLabel': '6',
+        'elk.layered.spacing.edgeNodeBetweenLayers': '12',
+        'elk.layered.nodePlacement.strategy': 'NETWORK_SIMPLEX',
+        'elk.edgeLabels.placement': 'CENTER',
+        'elk.padding': '[top=16,left=16,bottom=16,right=16]',
+      },
+      children: nodes.map(n => ({ id: n.id, width: n.width, height: n.height })),
+      edges: edges.map(e => ({
+        id: e.id, sources: [e.from], targets: [e.to],
+        labels: e.labelBox ? [{ text: e.label, width: e.labelBox.width, height: e.labelBox.height }] : [],
+      })),
+    });
+
+    for (const child of result.children) Object.assign(nodes.find(n => n.id === child.id), { x: child.x, y: child.y });
+    for (const out of result.edges) {
+      const edge = edges.find(e => e.id === out.id);
+      edge.sections = out.sections || [];
+      if (edge.labelBox && out.labels && out.labels[0]) Object.assign(edge.labelBox, { x: out.labels[0].x, y: out.labels[0].y });
+    }
+    const vertical = direction === 'DOWN' || direction === 'UP';
+    nodes.sort((a, b) => vertical ? (a.y - b.y || a.x - b.x) : (a.x - b.x || a.y - b.y));
+    return { nodes, edges, bounds: { x: 0, y: 0, w: result.width, h: result.height } };
+  }
+
+  /* ---------- Rendering ---------- */
+
+  function el(tag, attrs, parent) {
+    const node = document.createElementNS(SVGNS, tag);
+    for (const [k, v] of Object.entries(attrs || {})) node.setAttribute(k, v);
+    if (parent) parent.appendChild(node);
+    return node;
+  }
+
+  function roundedPath(points, radius) {
+    let d = `M${points[0].x},${points[0].y}`;
+    for (let i = 1; i < points.length - 1; i++) {
+      const p = points[i - 1], c = points[i], n = points[i + 1];
+      const r = Math.min(radius, Math.hypot(c.x - p.x, c.y - p.y) / 2, Math.hypot(n.x - c.x, n.y - c.y) / 2);
+      const a = { x: c.x + (p.x - c.x) * r / (Math.hypot(p.x - c.x, p.y - c.y) || 1), y: c.y + (p.y - c.y) * r / (Math.hypot(p.x - c.x, p.y - c.y) || 1) };
+      const b = { x: c.x + (n.x - c.x) * r / (Math.hypot(n.x - c.x, n.y - c.y) || 1), y: c.y + (n.y - c.y) * r / (Math.hypot(n.x - c.x, n.y - c.y) || 1) };
+      d += ` L${a.x},${a.y} Q${c.x},${c.y} ${b.x},${b.y}`;
+    }
+    const last = points[points.length - 1];
+    return `${d} L${last.x},${last.y}`;
+  }
+
+  function textLines(parent, lines, font, cls, centreX, top) {
+    lines.forEach((line, i) => {
+      const t = el('text', {
+        class: cls, x: centreX, y: top + i * font.line + (font.line + font.size * 0.72) / 2,
+        'text-anchor': 'middle', 'font-size': font.size, 'font-weight': font.weight,
+      }, parent);
+      t.textContent = line;
+    });
+  }
+
+  // Problems flagged anywhere inside a box, so outer views can point the way to them.
+  function issuesInside(view) {
+    if (!view) return 0;
+    return (view.nodes || []).reduce((n, child) => n + (child.issue ? 1 : 0) + issuesInside(child.view), 0);
+  }
+
+  const INSIDE_ISSUE = 'Something inside this part has a known issue. Look inside to find it.';
+
+  function describeNode(node, entry) {
+    if (node.kind === 'ghost') return `${node.label}, outside this view. Select to go to it.`;
+    const parts = [`${node.label}.`];
+    if (node.tech) parts.push(`${node.tech}.`);
+    if (node.description) parts.push(node.description);
+    if (node.issue) parts.push(`Known issue: ${node.issue}`);
+    if (issuesInside(node.view)) parts.push(INSIDE_ISSUE);
+    for (const c of connections(node.id, entry)) parts.push(`${c}.`);
+    if (node.view) parts.push('Select to look inside.');
+    return parts.join(' ');
+  }
+
+  function renderNode(node, entry, parent) {
+    const zoomable = !!node.view;
+    const g = el('g', {
+      class: `node kind-${node.kind}${zoomable ? ' zoomable' : ''}${node.kind === 'ghost' ? ' ghost' : ''}${node.issue ? ' has-issue' : ''}`,
+      transform: `translate(${node.x},${node.y})`,
+      tabindex: '0',
+      role: zoomable ? 'button' : node.kind === 'ghost' ? 'link' : 'img',
+      'aria-label': describeNode(node, entry),
+      'data-id': node.id,
+    }, parent);
+    const w = node.width - node.inset, h = node.height - node.inset;
+    const rx = node.kind === 'person' ? h / 2 : 8;
+
+    el('rect', { class: 'ring-outer', x: -10, y: -10, width: node.width + 20, height: node.height + 20, rx: rx + 8 }, g);
+    el('rect', { class: 'ring', x: -7, y: -7, width: node.width + 14, height: node.height + 14, rx: rx + 5 }, g);
+
+    if (zoomable) {
+      el('rect', { class: 'card face', x: CARD_OFFSET * 2, y: CARD_OFFSET * 2, width: w, height: h, rx }, g);
+      el('rect', { class: 'card face', x: CARD_OFFSET, y: CARD_OFFSET, width: w, height: h, rx }, g);
+    }
+
+    let textTop = (h - node.textHeight) / 2;
+    if (node.kind === 'store') {
+      const ry = 9;
+      el('path', {
+        class: 'shape',
+        d: `M0,${ry} A${w / 2},${ry} 0 0 1 ${w},${ry} L${w},${h - ry} A${w / 2},${ry} 0 0 1 0,${h - ry} Z`,
+      }, g);
+      el('path', { class: 'rim face', d: `M0,${ry} A${w / 2},${ry} 0 0 0 ${w},${ry}`, fill: 'none' }, g);
+      textTop += ry / 2 + 2;
+    } else {
+      el('rect', { class: 'shape', x: 0, y: 0, width: w, height: h, rx }, g);
+    }
+
+    const faces = el('g', { class: 'face' }, g);
+    textLines(faces, node.labelLines, node.font, 'label', w / 2, textTop);
+    if (node.techLines.length) {
+      textLines(faces, node.techLines, SMALL, 'tech', w / 2, textTop + node.labelLines.length * node.font.line + 4);
+    }
+
+    if (zoomable) {
+      const badge = el('g', { class: 'face', transform: `translate(${w},0)`, 'aria-hidden': 'true' }, g);
+      el('circle', { class: 'badge', r: 14 }, badge);
+      el('circle', { class: 'badge-glyph', cx: -1.5, cy: -1.5, r: 5.5 }, badge);
+      el('path', { class: 'badge-glyph', d: 'M2.5,2.5 L7,7 M-4,-1.5 L1,-1.5 M-1.5,-4 L-1.5,1' }, badge);
+    }
+
+    // A "!" on the top-left corner: large for a problem here, small for one somewhere inside.
+    if (node.issue || issuesInside(node.view)) {
+      const r = node.issue ? 13 : 9;
+      const mark = el('g', { class: 'face issue-badge', 'aria-hidden': 'true' }, g);
+      el('circle', { class: 'issue-disc', r }, mark);
+      el('path', { class: 'issue-glyph', d: `M0,${-r * 0.5} L0,${r * 0.12}` }, mark);
+      el('circle', { class: 'issue-dot', cy: r * 0.45, r: r * 0.13 }, mark);
+    }
+    return g;
+  }
+
+  function renderEdge(edge, parent) {
+    const g = el('g', { class: 'edge', 'data-from': edge.from, 'data-to': edge.to, 'aria-hidden': 'true' }, parent);
+    for (const s of edge.sections) {
+      const points = [s.startPoint, ...(s.bendPoints || []), s.endPoint];
+      el('path', { d: roundedPath(points, 10), 'marker-end': 'url(#arrow)' }, g);
+    }
+    const lb = edge.labelBox;
+    if (lb && lb.x !== undefined) {
+      el('rect', { class: 'edge-label-bg', x: lb.x, y: lb.y, width: lb.width, height: lb.height, rx: 4 }, g);
+      textLines(g, lb.lines, SMALL, 'edge-label', lb.x + lb.width / 2, lb.y + 2);
+    }
+    return g;
+  }
+
+  function renderView(entry) {
+    const g = el('g', { class: 'view' });
+    const edgesG = el('g', { class: 'edges' }, g);
+    const nodesG = el('g', { class: 'nodes' }, g);
+    for (const edge of entry.layout.edges) renderEdge(edge, edgesG);
+    for (const node of entry.layout.nodes) renderNode(node, entry, nodesG);
+    return g;
+  }
+
+  /* ---------- Camera ---------- */
+
+  // The camera is the part of the diagram on screen: centre and width, in diagram units.
+  let camera = { cx: 0, cy: 0, w: 1000 };
+  // Set while the diagram is bigger than the stage at a readable size and scrolls natively.
+  let scrollState = null;
+
+  function stageSize() { return { w: viewport.clientWidth || 1, h: viewport.clientHeight || 1 }; }
+
+  // Scaled by the root font size, so browser zoom and larger default fonts enlarge the diagram too.
+  function scaleLimits() {
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) / 16 || 1;
+    return { min: MIN_SCALE * rem, max: MAX_SCALE * rem };
+  }
+
+  function padded(b) { return { x: b.x - VIEW_PAD, y: b.y - VIEW_PAD, w: b.w + VIEW_PAD * 2, h: b.h + VIEW_PAD * 2 }; }
+
+  function fitScale(b) {
+    const s = stageSize(), p = padded(b);
+    return Math.min(s.w / p.w, s.h / p.h);
+  }
+
+  function visibleRect(c) {
+    const s = stageSize();
+    const h = c.w * s.h / s.w;
+    return { x: c.cx - c.w / 2, y: c.cy - h / 2, w: c.w, h };
+  }
+
+  function applyCamera(c) {
+    const v = visibleRect(c);
+    stage.setAttribute('viewBox', `${v.x} ${v.y} ${v.w} ${v.h}`);
+    camera = c;
+  }
+
+  // The whole view if it fits at a readable size; otherwise a readable window onto it,
+  // centred on `focus` where given, else starting at the top left.
+  function targetCamera(b, focus) {
+    const s = stageSize(), p = padded(b), lim = scaleLimits();
+    const scale = Math.min(lim.max, Math.max(lim.min, fitScale(b)));
+    const w = s.w / scale, h = s.h / scale;
+    const axis = (start, size, view, want) => size <= view
+      ? start + size / 2
+      : Math.min(start + size - view / 2, Math.max(start + view / 2, want === undefined ? -Infinity : want));
+    return { cx: axis(p.x, p.w, w, focus && focus.x), cy: axis(p.y, p.h, h, focus && focus.y), w };
+  }
+
+  // After landing: if the view overflows the stage, hand over to native scrolling,
+  // sized and scrolled so the picture does not move.
+  function settle(bounds) {
+    const v = visibleRect(camera), p = padded(bounds), e = 0.5;
+    if (p.x >= v.x - e && p.y >= v.y - e && p.x + p.w <= v.x + v.w + e && p.y + p.h <= v.y + v.h + e) return;
+    const scale = stageSize().w / camera.w;
+    const c = { x: Math.min(p.x, v.x), y: Math.min(p.y, v.y) };
+    c.w = Math.max(p.x + p.w, v.x + v.w) - c.x;
+    c.h = Math.max(p.y + p.h, v.y + v.h) - c.y;
+    stage.classList.remove('fill');
+    stage.setAttribute('width', c.w * scale);
+    stage.setAttribute('height', c.h * scale);
+    stage.setAttribute('viewBox', `${c.x} ${c.y} ${c.w} ${c.h}`);
+    viewport.scrollLeft = (v.x - c.x) * scale;
+    viewport.scrollTop = (v.y - c.y) * scale;
+    scrollState = { c, scale };
+  }
+
+  // Before animating: back to a fixed stage showing exactly what is on screen now.
+  function unsettle() {
+    if (!scrollState) return;
+    const { c, scale } = scrollState;
+    const left = c.x + viewport.scrollLeft / scale, top = c.y + viewport.scrollTop / scale;
+    scrollState = null;
+    stage.classList.add('fill');
+    stage.removeAttribute('width');
+    stage.removeAttribute('height');
+    viewport.scrollTo(0, 0);
+    const s = stageSize();
+    applyCamera({ cx: left + s.w / scale / 2, cy: top + s.h / scale / 2, w: s.w / scale });
+  }
+
+  // Van Wijk and Nuij's smooth zoom-and-pan: pulls back while travelling, then swoops in.
+  function zoomInterpolator(c0, c1) {
+    const rho = Math.SQRT2;
+    const dx = c1.cx - c0.cx, dy = c1.cy - c0.cy, d2 = dx * dx + dy * dy;
+    if (d2 < 1e-6) {
+      const S = Math.log(c1.w / c0.w) / rho;
+      return { S, at: t => ({ cx: c0.cx + t * dx, cy: c0.cy + t * dy, w: c0.w * Math.exp(rho * t * S) }) };
+    }
+    const d1 = Math.sqrt(d2);
+    const b0 = (c1.w * c1.w - c0.w * c0.w + 4 * d2) / (2 * c0.w * 2 * d1);
+    const b1 = (c1.w * c1.w - c0.w * c0.w - 4 * d2) / (2 * c1.w * 2 * d1);
+    const r0 = Math.log(Math.sqrt(b0 * b0 + 1) - b0);
+    const r1 = Math.log(Math.sqrt(b1 * b1 + 1) - b1);
+    const S = (r1 - r0) / rho;
+    return {
+      S,
+      at: t => {
+        const s = t * S;
+        const u = c0.w / (2 * d1) * (Math.cosh(r0) * Math.tanh(rho * s + r0) - Math.sinh(r0));
+        return { cx: c0.cx + u * dx, cy: c0.cy + u * dy, w: c0.w * Math.cosh(r0) / Math.cosh(rho * s + r0) };
+      },
+    };
+  }
+
+  const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const smooth = (a, b, t) => { const x = Math.min(1, Math.max(0, (t - a) / (b - a))); return x * x * (3 - 2 * x); };
+
+  function flyCamera(target, onFrame, speed) {
+    const zoom = zoomInterpolator(camera, target);
+    const duration = reducedMotion.matches ? 0 : Math.min(1500, Math.max(650, Math.abs(zoom.S) * 750)) * (speed || 1);
+    return new Promise(resolve => {
+      if (!duration) { applyCamera(target); onFrame(1); resolve(); return; }
+      const start = performance.now();
+      const frame = now => {
+        const t = Math.min(1, (now - start) / duration);
+        const e = ease(t);
+        applyCamera(t === 1 ? target : zoom.at(e));
+        onFrame(e);
+        if (t < 1) requestAnimationFrame(frame); else resolve();
+      };
+      requestAnimationFrame(frame);
+    });
+  }
+
+  /* ---------- Navigation ---------- */
+
+  let current = null; // { entry, g }
+  let busy = false;
+  let queued = null;
+
+  // Where a child view sits inside its parent's box, in the parent's coordinates.
+  function placement(node, childBounds) {
+    const pad = 12;
+    const iw = node.width - node.inset - pad * 2, ih = node.height - node.inset - pad * 2;
+    const s = Math.min(iw / childBounds.w, ih / childBounds.h);
+    return {
+      s,
+      ox: node.x + pad + (iw - childBounds.w * s) / 2 - childBounds.x * s,
+      oy: node.y + pad + (ih - childBounds.h * s) / 2 - childBounds.y * s,
+    };
+  }
+
+  function toParent(c, p) { return { cx: p.ox + p.s * c.cx, cy: p.oy + p.s * c.cy, w: p.s * c.w }; }
+
+  // t = 0: the parent view as normal; t = 1: fully zoomed into the node, only the child visible.
+  function zoomFrame(parentG, nodeG, childG, t) {
+    const out = (a, b) => String(1 - smooth(a, b, t));
+    for (const item of parentG.querySelectorAll('.node, .edge')) {
+      if (item !== nodeG) item.style.opacity = out(0.1, 0.6);
+    }
+    for (const face of nodeG.querySelectorAll('.face')) face.style.opacity = out(0, 0.3);
+    nodeG.querySelector('.shape').style.opacity = out(0.6, 1);
+    childG.style.opacity = String(smooth(0.25, 0.85, t));
+  }
+
+  function clearInlineOpacity(g) {
+    for (const item of g.querySelectorAll('[style]')) item.style.opacity = '';
+    g.style.opacity = '';
+  }
+
+  function show(entry, g) {
+    world.replaceChildren(g);
+    g.removeAttribute('transform');
+    clearInlineOpacity(g);
+    current = { entry, g };
+    current.controls = wireView(entry, g);
+    updateChrome(entry);
+  }
+
+  async function zoomIn(childPath) {
+    unsettle();
+    const parent = current;
+    const node = parent.entry.layout.nodes.find(n => n.id === childPath[childPath.length - 1]);
+    const nodeG = parent.g.querySelector(`.node[data-id="${CSS.escape(node.id)}"]`);
+    const child = views.get(key(childPath));
+    pickLayout(child);
+    const childG = renderView(child);
+    const p = placement(node, child.layout.bounds);
+    childG.setAttribute('transform', `translate(${p.ox},${p.oy}) scale(${p.s})`);
+    childG.style.opacity = '0';
+    world.appendChild(childG);
+    const end = targetCamera(child.layout.bounds);
+    await flyCamera(toParent(end, p), t => zoomFrame(parent.g, nodeG, childG, t));
+    show(child, childG);
+    applyCamera(end);
+    settle(child.layout.bounds);
+  }
+
+  async function zoomOut(parentPath, speed) {
+    unsettle();
+    const child = current;
+    const parent = views.get(key(parentPath));
+    pickLayout(parent);
+    const parentG = renderView(parent);
+    const node = parent.layout.nodes.find(n => n.id === child.entry.path[child.entry.path.length - 1]);
+    const nodeG = parentG.querySelector(`.node[data-id="${CSS.escape(node.id)}"]`);
+    const p = placement(node, child.entry.layout.bounds);
+    world.insertBefore(parentG, child.g);
+    child.g.setAttribute('transform', `translate(${p.ox},${p.oy}) scale(${p.s})`);
+    zoomFrame(parentG, nodeG, child.g, 1);
+    applyCamera(toParent(camera, p));
+    const centre = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
+    await flyCamera(targetCamera(parent.layout.bounds, centre), t => zoomFrame(parentG, nodeG, child.g, 1 - t), speed);
+    show(parent, parentG);
+    settle(parent.layout.bounds);
+    return node.id;
+  }
+
+  // Show a view without animation.
+  function land(entry) {
+    unsettle();
+    show(entry, renderView(entry));
+    applyCamera(targetCamera(entry.layout.bounds));
+    settle(entry.layout.bounds);
+  }
+
+  function isPrefix(a, b) { return a.length <= b.length && a.every((id, i) => id === b[i]); }
+
+  async function go(path, focusId) {
+    if (busy) { queued = { path, focusId }; return; }
+    busy = true;
+    stage.classList.remove('interactive', 'focusing');
+    const from = current.entry.path;
+    let cameFrom = null;
+    if (path.length === from.length + 1 && isPrefix(from, path)) {
+      await zoomIn(path);
+    } else if (path.length < from.length && isPrefix(path, from)) {
+      const steps = from.length - path.length;
+      while (current.entry.path.length > path.length) {
+        cameFrom = await zoomOut(current.entry.path.slice(0, -1), steps > 1 ? 0.6 : 1);
+      }
+    } else if (key(path) !== key(from)) {
+      const entry = views.get(key(path));
+      pickLayout(entry);
+      land(entry);
+    }
+    busy = false;
+    stage.classList.add('interactive');
+    announce();
+    focusNode(focusId || cameFrom);
+    if (queued) {
+      const next = queued;
+      queued = null;
+      go(next.path, next.focusId);
+    }
+  }
+
+  function navigate(path, focusId) {
+    pendingFocus = focusId || null;
+    const hash = `#${path.map(encodeURIComponent).join('/')}`;
+    if (location.hash === hash || (location.hash === '' && hash === '#')) return;
+    location.hash = hash;
+  }
+
+  let pendingFocus = null;
+
+  function pathFromHash() {
+    const raw = location.hash.replace(/^#/, '');
+    const path = raw ? raw.split('/').map(decodeURIComponent) : [];
+    return views.has(key(path)) ? path : [];
+  }
+
+  window.addEventListener('hashchange', () => {
+    const focusId = pendingFocus;
+    pendingFocus = null;
+    go(pathFromHash(), focusId);
+  });
+
+  /* ---------- Interaction ---------- */
+
+  function connections(id, entry) {
+    const label = end => {
+      const n = entry.layout.nodes.find(x => x.id === end);
+      return n ? n.label : end;
+    };
+    const out = [];
+    for (const e of entry.layout.edges) {
+      if (e.from === id) out.push(e.label ? `Sends ${e.label} to ${label(e.to)}` : `Connects to ${label(e.to)}`);
+      if (e.to === id) out.push(e.label ? `Receives ${e.label} from ${label(e.from)}` : `Connected from ${label(e.from)}`);
+    }
+    return out;
+  }
+
+  function highlight(entry, g, id) {
+    for (const item of g.querySelectorAll('.hi')) item.classList.remove('hi');
+    for (const path of g.querySelectorAll('.edge path')) path.setAttribute('marker-end', 'url(#arrow)');
+    if (!id) { stage.classList.remove('focusing'); return; }
+    stage.classList.add('focusing');
+    const lit = new Set([id]);
+    for (const edgeG of g.querySelectorAll('.edge')) {
+      if (edgeG.dataset.from === id || edgeG.dataset.to === id) {
+        edgeG.classList.add('hi');
+        for (const path of edgeG.querySelectorAll('path')) path.setAttribute('marker-end', 'url(#arrow-hi)');
+        lit.add(edgeG.dataset.from);
+        lit.add(edgeG.dataset.to);
+      }
+    }
+    for (const nodeG of g.querySelectorAll('.node')) {
+      if (lit.has(nodeG.dataset.id)) nodeG.classList.add('hi');
+    }
+  }
+
+  function activate(entry, node) {
+    if (node.kind === 'ghost') navigate(node.homePath, node.target.id);
+    else if (node.view) navigate([...entry.path, node.id]);
+  }
+
+  // Hovering lights up a box's connections, and previews it in the panel only when the panel
+  // sits beside the diagram. Selecting a box (click, tap or keyboard focus) keeps the panel
+  // on it until another box is selected or the background is clicked, so it survives scrolling.
+  function wireView(entry, g) {
+    let hovered = null;
+    let selected = null;
+    const refresh = () => {
+      const lit = hovered || selected;
+      const shown = (!stacked.matches && hovered) || selected;
+      highlight(entry, g, busy ? null : lit);
+      renderPanel(entry, shown ? entry.layout.nodes.find(n => n.id === shown) : null);
+    };
+    for (const nodeG of g.querySelectorAll('.node')) {
+      const node = entry.layout.nodes.find(n => n.id === nodeG.dataset.id);
+      nodeG.addEventListener('mouseenter', () => { hovered = node.id; refresh(); });
+      nodeG.addEventListener('mouseleave', () => { hovered = null; refresh(); });
+      nodeG.addEventListener('focus', () => { selected = node.id; refresh(); });
+      nodeG.addEventListener('click', () => { if (!busy) activate(entry, node); });
+      nodeG.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          if (!busy) activate(entry, node);
+        }
+      });
+    }
+    refresh();
+    return { refresh, clear: () => { selected = null; refresh(); } };
+  }
+
+  function focusNode(id) {
+    if (!id) return;
+    const nodeG = current.g.querySelector(`.node[data-id="${CSS.escape(id)}"]`);
+    if (nodeG) nodeG.focus({ preventScroll: true });
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && current.entry.path.length && !busy) {
+      navigate(current.entry.path.slice(0, -1));
+    }
+  });
+
+  upButton.addEventListener('click', () => navigate(current.entry.path.slice(0, -1)));
+
+  stage.addEventListener('click', e => {
+    if (current && !e.target.closest('.node')) current.controls.clear();
+  });
+
+  stacked.addEventListener('change', () => { if (current) current.controls.refresh(); });
+
+  /* ---------- Chrome: breadcrumb, panel, announcements ---------- */
+
+  function h(tag, text, attrs) {
+    const node = document.createElement(tag);
+    if (text !== undefined && text !== null) node.textContent = text;
+    for (const [k, v] of Object.entries(attrs || {})) node.setAttribute(k, v);
+    return node;
+  }
+
+  function updateChrome(entry) {
+    const { path } = entry;
+    crumbs.replaceChildren();
+    for (let i = 0; i <= path.length; i++) {
+      const sub = path.slice(0, i);
+      const title = i === 0 ? 'Overview' : viewTitle(sub);
+      const li = h('li');
+      if (i === path.length) {
+        li.appendChild(h('span', title, { 'aria-current': 'page' }));
+      } else {
+        li.appendChild(h('a', title, { href: `#${sub.map(encodeURIComponent).join('/')}` }));
+      }
+      crumbs.appendChild(li);
+    }
+    upButton.hidden = path.length === 0;
+    stage.setAttribute('aria-label', `${viewTitle(path)}: diagram with ${entry.layout.nodes.length} parts`);
+    document.title = path.length && viewTitle(path) !== data.title ? `${viewTitle(path)} - ${data.title}` : `${data.title} architecture`;
+  }
+
+  function announce() {
+    const { entry } = current;
+    announcer.textContent = `Now showing ${viewTitle(entry.path)}, ${entry.layout.nodes.length} parts.`;
+  }
+
+  const LEGEND = [
+    ['Person or team', '<rect x="1" y="5" width="34" height="18" rx="9" fill="#011451"/>'],
+    ['Part of the system', '<rect x="1" y="5" width="34" height="18" rx="3" fill="#fff" stroke="#005398" stroke-width="2"/>'],
+    ['Has more inside', '<rect x="6" y="9" width="28" height="16" rx="3" fill="#fff" stroke="#99A1B9" stroke-width="1.5"/><rect x="3" y="6" width="28" height="16" rx="3" fill="#fff" stroke="#99A1B9" stroke-width="1.5"/><rect x="1" y="3" width="28" height="16" rx="3" fill="#fff" stroke="#011451" stroke-width="2"/>'],
+    ['Stored data', '<path d="M2,8 A16,4 0 0 1 34,8 L34,22 A16,4 0 0 1 2,22 Z" fill="#E6E7EE" stroke="#005398" stroke-width="2"/><path d="M2,8 A16,4 0 0 0 34,8" fill="none" stroke="#005398" stroke-width="2"/>'],
+    ['Outside system', '<rect x="1" y="5" width="34" height="18" rx="3" fill="#E6E6E6" stroke="#757575" stroke-width="2" stroke-dasharray="5 3"/>'],
+    ['Lives in another view', '<rect x="1" y="5" width="34" height="18" rx="3" fill="#F5F5F5" stroke="#99A1B9" stroke-width="1.5" stroke-dasharray="4 3"/>'],
+  ];
+  const ISSUE_ICON = '<circle cx="9" cy="9" r="8" fill="#D4351C" stroke="#fff" stroke-width="1.5"/><path d="M9,5 L9,10" stroke="#fff" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="13" r="1.2" fill="#fff"/>';
+  const ISSUE_LEGEND = ['Known issue (select for details)', `<rect x="7" y="7" width="27" height="18" rx="3" fill="#fff" stroke="#D4351C" stroke-width="2.5"/>${ISSUE_ICON}`];
+
+  function issueNote(title, text) {
+    const note = h('div', null, { class: 'issue-note' });
+    const heading = h('h3');
+    heading.innerHTML = `<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">${ISSUE_ICON}</svg>`;
+    heading.appendChild(document.createTextNode(title));
+    note.append(heading, h('p', text));
+    return note;
+  }
+
+  function renderLegend() {
+    const ul = h('ul', null, { class: 'legend' });
+    for (const [label, shape] of issuesInside(data.view) ? [...LEGEND, ISSUE_LEGEND] : LEGEND) {
+      const li = h('li');
+      li.innerHTML = `<svg width="36" height="28" viewBox="0 0 36 28" aria-hidden="true">${shape}</svg>`;
+      li.appendChild(h('span', label));
+      ul.appendChild(li);
+    }
+    return ul;
+  }
+
+  function renderPanel(entry, node) {
+    const parts = [];
+    if (!node) {
+      parts.push(h('p', entry.path.length ? 'Looking inside' : 'Overview', { class: 'eyebrow' }));
+      parts.push(h('h2', viewTitle(entry.path)));
+      if (entry.path.length && nodeAt(entry.path).tech) parts.push(h('p', nodeAt(entry.path).tech, { class: 'tech' }));
+      if (viewDescription(entry.path)) parts.push(h('p', viewDescription(entry.path)));
+      if (entry.path.length && nodeAt(entry.path).issue) parts.push(issueNote('Known issue', nodeAt(entry.path).issue));
+      parts.push(h('p', `${stacked.matches ? 'Select a box to see its details below.' : 'Point at or select a box to see its details here.'} Boxes with stacked edges have more inside: selecting one zooms in. Use the breadcrumb, the Escape key or your browser's back button to zoom back out.`, { class: 'hint' }));
+      parts.push(h('h3', 'Key'));
+      parts.push(renderLegend());
+    } else if (node.kind === 'ghost') {
+      parts.push(h('p', 'Outside this view', { class: 'eyebrow' }));
+      parts.push(h('h2', node.label));
+      if (node.target.description) parts.push(h('p', node.target.description));
+      parts.push(h('p', `It belongs to "${viewTitle(node.homePath)}". Select it to go there.`, { class: 'hint' }));
+    } else {
+      parts.push(h('p', viewTitle(entry.path), { class: 'eyebrow' }));
+      parts.push(h('h2', node.label));
+      if (node.tech) parts.push(h('p', node.tech, { class: 'tech' }));
+      if (node.description) parts.push(h('p', node.description));
+      if (node.issue) parts.push(issueNote('Known issue', node.issue));
+      if (issuesInside(node.view)) parts.push(issueNote('Known issue inside', INSIDE_ISSUE));
+      const links = connections(node.id, entry);
+      if (links.length) {
+        parts.push(h('h3', 'Connections'));
+        const ul = h('ul');
+        for (const link of links) ul.appendChild(h('li', link));
+        parts.push(ul);
+      }
+      if (node.view) {
+        const button = h('button', `Look inside ${node.label}`, { type: 'button', class: 'inside' });
+        button.addEventListener('click', () => activate(entry, node));
+        parts.push(button);
+      }
+    }
+    panel.replaceChildren(...parts);
+  }
+
+  /* ---------- Start ---------- */
+
+  function showErrors(errors) {
+    const box = document.createElement('div');
+    box.id = 'error';
+    box.setAttribute('role', 'alert');
+    box.appendChild(h('h2', 'This diagram\'s data has problems'));
+    const ul = h('ul');
+    for (const e of errors) ul.appendChild(h('li', e));
+    box.appendChild(ul);
+    document.querySelector('main').replaceChildren(box);
+  }
+
+  async function start() {
+    document.getElementById('app-title').textContent = data.title;
+    const errors = [];
+    indexViews(data.view, [], errors);
+    if (!errors.length) validateEdges(errors);
+    if (errors.length) { showErrors(errors); return; }
+
+    // Measure text with the real font if it arrives; fall back quietly when offline.
+    try {
+      await Promise.race([
+        Promise.all([document.fonts.load(`600 18px "Noto Sans"`), document.fonts.load(`italic 400 16px "Noto Sans"`)]),
+        new Promise(resolve => setTimeout(resolve, 2500)),
+      ]);
+    } catch (e) { /* fallback font is fine */ }
+
+    const elk = new ELK();
+    await Promise.all([...views.values()].map(entry => layoutView(elk, entry)));
+
+    land(views.get(key(pathFromHash())));
+    stage.classList.add('interactive');
+
+    // Browser zoom arrives as a resize. Small height-only changes (a phone's address bar
+    // sliding away while scrolling) are ignored so they do not reset the scroll position.
+    const windowSize = () => ({ w: innerWidth, h: innerHeight, rem: getComputedStyle(document.documentElement).fontSize });
+    let lastSize = windowSize();
+    window.addEventListener('resize', () => {
+      const size = windowSize();
+      if (busy || (size.w === lastSize.w && size.rem === lastSize.rem && Math.abs(size.h - lastSize.h) < 120)) return;
+      lastSize = size;
+      unsettle();
+      pickLayout(current.entry);
+      land(current.entry);
+    });
+  }
+
+  start().catch(err => showErrors([`The diagram could not be drawn: ${err.message}`]));
+})();
+</script>
+</body>
+</html>

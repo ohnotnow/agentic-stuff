@@ -1,0 +1,212 @@
+{
+  "title": "Room Bookings",
+  "summary": "Room Bookings lets staff book meeting rooms and borrow equipment such as laptops and projectors. The facilities team look after the rooms and kit, approve bookings for the largest rooms, and get a list of the day's bookings each morning.",
+  "view": {
+    "nodes": [
+      {
+        "id": "staff",
+        "label": "Staff",
+        "kind": "person",
+        "description": "Anyone who works here. They book rooms, reserve equipment, and cancel bookings they no longer need."
+      },
+      {
+        "id": "facilities",
+        "label": "Facilities team",
+        "kind": "person",
+        "description": "Keep the list of rooms and equipment up to date, approve bookings for the largest rooms, and hand out and take back borrowed kit."
+      },
+      {
+        "id": "app",
+        "label": "Room Bookings",
+        "kind": "process",
+        "tech": "Web app",
+        "description": "The website staff and the facilities team use for everything to do with rooms and equipment.",
+        "view": {
+          "nodes": [
+            {
+              "id": "bookings",
+              "label": "Room bookings",
+              "kind": "process",
+              "description": "Staff pick a room and a time. Most bookings are confirmed straight away; the largest rooms need the facilities team's approval first.",
+              "view": {
+                "nodes": [
+                  {
+                    "id": "requested",
+                    "label": "Requested",
+                    "kind": "process",
+                    "description": "A member of staff has asked for a room at a given time. The app checks the room is free before accepting the request."
+                  },
+                  {
+                    "id": "approval",
+                    "label": "Waiting for approval",
+                    "kind": "process",
+                    "tech": "Large rooms only",
+                    "description": "Bookings for rooms that seat more than forty people wait here until someone in the facilities team approves or declines them."
+                  },
+                  {
+                    "id": "confirmed",
+                    "label": "Confirmed",
+                    "kind": "process",
+                    "description": "The room is held. The person who booked it is emailed a confirmation."
+                  },
+                  {
+                    "id": "cancelled",
+                    "label": "Cancelled",
+                    "kind": "process",
+                    "description": "Cancelled by the person who booked it, or declined by the facilities team. The room becomes free again."
+                  }
+                ],
+                "edges": [
+                  { "from": "^staff", "to": "requested", "label": "room and time" },
+                  { "from": "requested", "to": "confirmed", "label": "most rooms" },
+                  { "from": "requested", "to": "approval", "label": "large rooms" },
+                  { "from": "^facilities", "to": "approval", "label": "approve or decline" },
+                  { "from": "approval", "to": "confirmed", "label": "approved" },
+                  { "from": "approval", "to": "cancelled", "label": "declined" },
+                  { "from": "confirmed", "to": "cancelled", "label": "cancelled by staff" },
+                  { "from": "confirmed", "to": "^mail", "label": "confirmation email" }
+                ]
+              }
+            },
+            {
+              "id": "loans",
+              "label": "Kit loans",
+              "kind": "process",
+              "description": "Staff reserve equipment for a set of days, collect it from the facilities desk, and bring it back.",
+              "view": {
+                "nodes": [
+                  {
+                    "id": "reserve",
+                    "label": "Reserve",
+                    "kind": "process",
+                    "description": "Staff choose the equipment and the days they need it. The app only offers kit that is free for the whole loan."
+                  },
+                  {
+                    "id": "collect",
+                    "label": "Collect",
+                    "kind": "process",
+                    "description": "The facilities team record the hand-over at the desk, so the app knows who has each item."
+                  },
+                  {
+                    "id": "return",
+                    "label": "Return",
+                    "kind": "process",
+                    "description": "The facilities team record the item coming back and note any damage before it can be lent again."
+                  }
+                ],
+                "edges": [
+                  { "from": "^staff", "to": "reserve", "label": "what and when" },
+                  { "from": "reserve", "to": "collect" },
+                  { "from": "collect", "to": "return" },
+                  { "from": "^facilities", "to": "collect", "label": "hand-over" },
+                  { "from": "^facilities", "to": "return", "label": "check-in" }
+                ]
+              }
+            },
+            {
+              "id": "catalogue",
+              "label": "Rooms and kit",
+              "kind": "process",
+              "description": "The list of bookable rooms, with their size and facilities, and of the equipment that can be borrowed. Only the facilities team can change it."
+            },
+            {
+              "id": "feed",
+              "label": "Calendar feed",
+              "kind": "process",
+              "description": "Publishes each person's bookings as a link that calendar apps can subscribe to. Possibly no longer in use: the link is not shown anywhere on screen."
+            },
+            {
+              "id": "behind",
+              "label": "Behind the scenes",
+              "kind": "process",
+              "description": "The parts nobody sees directly: where everything is stored, signing people in, and the emails the app sends on its own.",
+              "view": {
+                "nodes": [
+                  {
+                    "id": "db",
+                    "label": "Database",
+                    "kind": "store",
+                    "description": "Holds the rooms, the equipment, and every booking and loan."
+                  },
+                  {
+                    "id": "signin",
+                    "label": "Sign-in",
+                    "kind": "process",
+                    "description": "Hands signing in to the single sign-on service, so nobody needs a separate password, and keeps the facilities team's extra permissions."
+                  },
+                  {
+                    "id": "schedule",
+                    "label": "Scheduled jobs",
+                    "kind": "process",
+                    "description": "Starts the app's regular jobs at set times without anyone pressing a button."
+                  },
+                  {
+                    "id": "daily",
+                    "label": "Daily booking list",
+                    "kind": "process",
+                    "tech": "Every morning",
+                    "description": "Emails the facilities team a list of the day's room bookings and kit collections, so they can set rooms up and have equipment ready."
+                  },
+                  {
+                    "id": "reminder",
+                    "label": "Booking reminder",
+                    "kind": "process",
+                    "description": "An email meant to remind staff the day before a booking, so rooms that are no longer needed get cancelled.",
+                    "issue": "This email is written but nothing ever sends it, so staff never get a reminder and unwanted bookings are not cancelled."
+                  }
+                ],
+                "edges": [
+                  { "from": "^sso", "to": "signin", "label": "who is signing in" },
+                  { "from": "schedule", "to": "daily", "label": "each morning" },
+                  { "from": "db", "to": "daily", "label": "today's bookings" },
+                  { "from": "daily", "to": "^mail", "label": "daily booking list" },
+                  { "from": "db", "to": "reminder", "label": "tomorrow's bookings" }
+                ]
+              }
+            }
+          ],
+          "edges": [
+            { "from": "^staff", "to": "bookings", "label": "book a room" },
+            { "from": "^staff", "to": "loans", "label": "borrow kit" },
+            { "from": "^facilities", "to": "catalogue", "label": "rooms and equipment" },
+            { "from": "catalogue", "to": "bookings", "label": "what can be booked" },
+            { "from": "catalogue", "to": "loans", "label": "what can be borrowed" },
+            { "from": "bookings", "to": "behind", "label": "bookings" },
+            { "from": "loans", "to": "behind", "label": "loans" },
+            { "from": "bookings", "to": "feed", "label": "each person's bookings" },
+            { "from": "feed", "to": "^calendars", "label": "calendar link" },
+            { "from": "bookings", "to": "^mail", "label": "confirmation email" },
+            { "from": "behind", "to": "^mail", "label": "daily booking list" }
+          ]
+        }
+      },
+      {
+        "id": "sso",
+        "label": "Single sign-on",
+        "kind": "external",
+        "description": "The organisation's single sign-on service. Confirms who people are, so the app never handles their passwords."
+      },
+      {
+        "id": "mail",
+        "label": "Mail server",
+        "kind": "external",
+        "description": "Delivers the app's emails: booking confirmations to staff and the daily booking list to the facilities team."
+      },
+      {
+        "id": "calendars",
+        "label": "Calendar apps",
+        "kind": "external",
+        "description": "People's own calendar apps, which can subscribe to the calendar feed. Possibly no longer in use."
+      }
+    ],
+    "edges": [
+      { "from": "staff", "to": "app", "label": "bookings and loans" },
+      { "from": "facilities", "to": "app", "label": "rooms, kit and approvals" },
+      { "from": "sso", "to": "app", "label": "who is signing in" },
+      { "from": "app", "to": "mail", "label": "emails" },
+      { "from": "mail", "to": "staff", "label": "confirmations" },
+      { "from": "mail", "to": "facilities", "label": "daily booking list" },
+      { "from": "app", "to": "calendars", "label": "calendar feed" }
+    ]
+  }
+}
