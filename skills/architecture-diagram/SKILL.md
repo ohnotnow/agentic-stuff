@@ -257,8 +257,11 @@ description) do not stop the build, but take them seriously.
 
 If you have a browser tool, open the page and click into a box or two before
 reporting. Run the browser tool from `$SCRATCH`, as some write snapshot files
-into the current directory. Some refuse `file://` pages; if so, serve the folder
-over HTTP on an uncommon port (`python3 -m http.server 8743`) and stop the
+into the current directory. The page draws itself a moment after it loads, so
+if a snapshot shows an empty diagram, wait a second and take it again. Some
+tools refuse `file://` pages; if so, serve the page's folder over HTTP on a
+free port, on this machine only (`python3 -u -m http.server 0 --bind
+127.0.0.1 --directory <folder>` picks a port and prints it), and stop the
 server afterwards. Then report as below. Do not commit the file or otherwise
 change git state unless asked.
 

@@ -85,7 +85,7 @@ header h1 { font-size: 1.5rem; font-weight: 600; margin: 0; }
 
 main {
   display: grid;
-  grid-template-columns: 1fr minmax(18rem, 26rem);
+  grid-template-columns: 1fr var(--panel-w, minmax(18rem, 26rem));
   min-height: 0;
 }
 
@@ -373,7 +373,24 @@ __DIAGRAM_DATA__
 
   function pickLayout(entry) {
     const before = entry.layout;
-    entry.layout = entry.layouts.reduce((best, l) => (layoutScore(l) > layoutScore(best) + 0.01 ? l : best));
+    const best = () => entry.layouts.reduce((b, l) => (layoutScore(l) > layoutScore(b) + 0.01 ? l : b));
+    document.querySelector('main').style.removeProperty('--panel-w');
+    entry.layout = best();
+    // Beside the diagram, the panel gives up width (down to its 18rem minimum) when
+    // that lets a view fit at a readable size instead of scrolling sideways.
+    const lim = scaleLimits();
+    if (!stacked.matches && fitScale(entry.layout.bounds) < lim.min) {
+      const s = stageSize();
+      const room = s.w + panel.offsetWidth - 18 * parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const needs = entry.layouts.map(l => padded(l.bounds))
+        .filter(p => p.h * lim.min <= s.h)
+        .map(p => Math.ceil(p.w * lim.min) + 1)
+        .filter(w => w <= room);
+      if (needs.length) {
+        document.querySelector('main').style.setProperty('--panel-w', `${s.w + panel.offsetWidth - Math.min(...needs)}px`);
+        entry.layout = best();
+      }
+    }
     return entry.layout !== before;
   }
 
@@ -1056,7 +1073,9 @@ __DIAGRAM_DATA__
     const elk = new ELK();
     await Promise.all([...views.values()].map(entry => layoutView(elk, entry)));
 
-    land(views.get(key(pathFromHash())));
+    const first = views.get(key(pathFromHash()));
+    pickLayout(first);
+    land(first);
     stage.classList.add('interactive');
 
     // Browser zoom arrives as a resize. Small height-only changes (a phone's address bar
