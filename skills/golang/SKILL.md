@@ -50,6 +50,10 @@ covers it.  There is also an example of a straightforward golang GitHub action t
 and publish a release in `templates/release.yml` taken from a project called 'agent-issue-tracker' 
 that creates the `ait` binary.
 
+## Some extra tools you might have available
+
+The user might have installed other common go tooling like `staticcheck`, `govulncheck`.  Use as appropriate.
+
 ## Project Layout
 
 Choose the simplest layout that fits the project's complexity:
