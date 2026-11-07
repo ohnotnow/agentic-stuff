@@ -264,6 +264,75 @@ func runMigrations(ctx context.Context, db *sql.DB) error {
 
 ---
 
+## Skills and agents
+
+For tools built for coding agents to use (the owner's `ait`, `ant` and `aat`
+are the current three). If the tool comes with Claude Code skills, agents or
+commands that only make sense alongside it, **ship them inside the binary**,
+so a binary and its skills always come from the same release. All three tools
+do it the same way; keep it that way. The reference implementation is
+`internal/ait/skills.go` in
+[agent-issue-tracker](https://github.com/ohnotnow/agent-issue-tracker) (with
+`claudefiles.go`, `internal/ait/version.go`, `internal/ait/cmd_self_update.go`
+and `internal/ait/skills_test.go`). The code is copied rather than shared for
+now; don't refactor it into a shared module unprompted.
+
+**Where things live:**
+
+- `claude/` at the repo root, laid out exactly as it should land in
+  `~/.claude`: `claude/skills/<name>/SKILL.md`, `claude/agents/<name>.md`,
+  `claude/commands/<name>.md`.
+- `claudefiles.go` at the repo root: `package <tool>files`, `//go:embed claude`,
+  `var Claude embed.FS`. It must sit at the root because `go:embed` only
+  reaches files at or below the embedding package's directory.
+- Name everything that ships with the tool after it (`ait-recap`,
+  `ait-audit`), so it's obvious in `~/.claude` which installer owns a file.
+- Anything that needs the tool lives in the tool's repo. Generic craft that
+  doesn't need it stays in the owner's agentic-stuff repo, with a short "if
+  `<tool>` is available..." line. Never keep a copy in both: the two installers
+  will overwrite each other.
+
+**`<tool> install-skills [--dry-run] [--force] [--dir D]`** (a command that
+doesn't need the database):
+
+- `--dir` is the config root the whole `claude/` tree is copied under
+  (default `~/.claude`). It's also how other agents get the files, e.g.
+  `--dir ~/.config/opencode`.
+- `--dry-run` writes nothing and only says what would change, per file
+  (`unchanged`, `would be added`, `differs, would ask before replacing`).
+- `--force` replaces changed files without asking.
+- Missing file: added. Identical file: left alone. Changed file: a
+  `[y/N/d]` prompt, where `d` shows the diff and asks again. Input ending
+  mid-prompt aborts with an error and changes nothing more.
+- No terminal on stdin (an agent running it): never prompt. Leave changed
+  files as they are and list them. Detect the terminal with
+  `github.com/mattn/go-isatty`, not a `Mode()&os.ModeCharDevice` check:
+  `/dev/null` is a character device, so the stat check says "terminal" for
+  exactly the agent case.
+- **Never delete anything.** A skill the tool stops shipping stays installed
+  until the user removes it, so when you retire or rename one, say so in the
+  CHANGELOG and README with the path to delete (and add it to agentic-stuff's
+  `migrate` list if it ever came from there).
+
+**`<tool> version`** prints one extra line comparing the installed copies with
+the embedded ones: `skills: up to date in <dir>`, `skills: not installed in
+<dir>; run <tool> install-skills`, or which files differ.
+
+**`<tool> self-update`**, after swapping the binary in, prints a single line:
+"The skills ... may have changed too. Run '<tool> install-skills --dry-run' to
+see." Don't have it run the new binary's dry-run itself: all three tools did
+that at first and backed it out (ait 1.19.2), because it printed the whole
+per-file listing on every update, even when nothing had changed.
+
+**Tests** use `testing/fstest.MapFS` as fake embedded files and a temp dir as
+`--dir`. Cover: add / unchanged, `N`, `d` then `y`, input ending mid-prompt,
+no terminal leaving changed files, `--force`, `--dry-run`, a file the tool
+doesn't ship is never touched, the `version` line, and a test listing the real
+embedded files so a stray or missing one fails loudly. Then check it by hand
+once: run the built binary with `< /dev/null` and confirm it doesn't prompt.
+
+---
+
 ## Error Handling
 
 ### CLI tools with structured output (JSON)
