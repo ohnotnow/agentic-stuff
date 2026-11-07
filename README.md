@@ -4,7 +4,7 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 
 ---
 
-> **Heads up (7th November 2026):** The `ait` and `ant` skills and agents now ship inside their own binaries: run `ait install-skills` and `ant install-skills` instead of syncing them from here. `ait-crafting` is replaced by the tracker-agnostic `spec-crafting` skill below (the ait-specific parts moved into the `ait` skill), and there's a generic `amnesia-check` agent alongside the `ait-amnesia-check` that `ait` ships. If you'd previously synced it, `rm -rf ~/.claude/skills/ait-crafting`.
+> **Heads up (7th November 2026):** The `ait` and `ant` skills and agents now ship inside their own binaries: run `ait install-skills` and `ant install-skills` instead of syncing them from here. `ait-crafting` is replaced by the tracker-agnostic `spec-crafting` skill below (the ait-specific parts moved into the `ait` skill), and there's a generic `amnesia-check` agent alongside the `ait-amnesia-check` that `ait` ships. `expand-issue` and `feature-workflow` have moved into `ait` too, renamed `ait-expand-issue` and `ait-feature-workflow`. `./sync` never deletes anything, so if you'd synced any of the old names, run `./migrate` to remove them (it offers a backup first). Update ait to v1.20.0 or later (`ait self-update`) and run `ait install-skills` *before* `./migrate`, or you'll be left without the renamed skills.
 
 ---
 
@@ -33,8 +33,6 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 - `changelog` -- Analyses git tags and diffs to draft `CHANGELOG.md` entries in Keep a Changelog format. Proposes changes for review rather than writing them directly.
 - `conversation-to-html` -- Turns Claude Code or Codex session logs into single-file HTML transcripts you can share or present.
 - `cruft-or-keep` -- Conversational second pair of eyes for reachable-but-dormant code. Builds evidence-grounded case files for suspect jobs, mailables, listeners, routes, commands, and asks the developer `cruft or keep?` rather than deleting anything.
-- `expand-issue` -- Fleshes out a terse "note to self" `ait` issue into a proper plan. Explores the codebase to work out what past-you meant, makes reasonable assumptions (and lists them for correction), and produces a plan document ready for `plan-to-ait`. Handy for drive-by brain dumps you want to pick up properly the next day.
-- `feature-workflow` -- Streamlined workflow for building features with `ait` issue tracking. Handles orientation, planning (via plan mode), issue creation (via `plan-to-ait`), implementation with acceptance criteria checking, and optional quality gate at the end.
 - `flux-ui` -- Flux UI v2 component reference for Laravel/Livewire. Covers syntax, patterns, common mistakes, and modal/form/table patterns.
 - `github-create` -- Creates a new GitHub repo from the current project, pushes code, and sorts out the README, licence, and metadata. Uses the safe git/gh wrappers from [agent-commit](https://github.com/ohnotnow/agent-commit) if they're installed, falling back to plain `git`/`gh` otherwise.
 - `golang` -- Conventions and patterns for Go CLI/TUI projects. Covers project layout, SQLite storage, Bubble Tea TUIs, embedded web UIs, flag parsing, migrations, error handling, and testing.

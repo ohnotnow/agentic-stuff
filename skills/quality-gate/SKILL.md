@@ -122,7 +122,8 @@ with briefing + file list. When reports come back, triage with your
 implementation context - you were there:
 
 - **Agree and fix**: genuine issues - fix now
-- **Acknowledge but defer**: valid but not now - record as ait issues
+- **Acknowledge but defer**: valid but not now - record as ait issues (if
+  the project doesn't use ait, whatever tracker it does use)
 - **Dismiss with reasoning**: deliberate choices the reviewer couldn't know -
   explain to the user so they can confirm
 

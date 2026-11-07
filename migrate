@@ -1,71 +1,78 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Migration script for the Livewire/Flux skill reorganisation (April 2025).
+# Removes skills and agents this repo used to provide under names that have
+# since been renamed, merged or moved elsewhere, then runs ./sync.
 #
-# Removes old skill/agent names that have been replaced, then runs sync
-# to install the new versions. Only needs to be run once per machine.
+# ./sync only ever adds and updates, never deletes, so retired names linger
+# in ~/.claude until something removes them. This script is that something.
+# Safe to re-run: it only touches names on the lists below.
+#
+# When you retire a name, add it to the lists below (same position in both).
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CLAUDE_DIR="${HOME}/.claude"
 BACKUP_FILE="${HOME}/claude-backup-$(date +%Y%m%d-%H%M%S).zip"
 
-# What's being replaced
-OLD_SKILLS=("frontend-fluxui" "livewire-principles")
-OLD_AGENTS=("livewire-flux-simplifier.md")
+# Retired skill directories, and what replaced each one.
+OLD_SKILLS=(
+    "frontend-fluxui"
+    "livewire-principles"
+    "conversation-to-ait"
+    "ait-crafting"
+    "expand-issue"
+    "feature-workflow"
+)
+OLD_SKILLS_WHY=(
+    "renamed flux-ui (April 2026)"
+    "renamed modern-livewire (April 2026)"
+    "merged into ait-crafting (July 2026)"
+    "replaced by spec-crafting here and the ait skill (November 2026)"
+    "now ait-expand-issue, installed by 'ait install-skills' (November 2026)"
+    "now ait-feature-workflow, installed by 'ait install-skills' (November 2026)"
+)
 
-# What replaces them
-NEW_SKILLS=("flux-ui" "modern-livewire" "ui-to-flux" "quality-gate")
-NEW_AGENTS=("livewire-flux-reviewer.md")
+# Retired agent files, and what replaced each one.
+OLD_AGENTS=(
+    "livewire-flux-simplifier.md"
+)
+OLD_AGENTS_WHY=(
+    "replaced by livewire-flux-reviewer.md (April 2026)"
+)
 
 echo "=========================================="
-echo "  Skill & Agent Migration"
+echo "  Retired skill & agent clean-up"
 echo "=========================================="
 echo ""
-echo "This script removes old skill/agent names that have been replaced"
-echo "in the repo, then runs ./sync to install the new versions."
-echo ""
-echo "Renames:"
-echo "  skills/frontend-fluxui      -> skills/flux-ui"
-echo "  skills/livewire-principles   -> skills/modern-livewire"
-echo "  agents/livewire-flux-simplifier.md -> agents/livewire-flux-reviewer.md"
-echo ""
-echo "New:"
-echo "  skills/ui-to-flux"
-echo "  skills/quality-gate"
-echo ""
 
-# Check ~/.claude exists
 if [ ! -d "$CLAUDE_DIR" ]; then
     echo "No ~/.claude directory found. Nothing to migrate."
     exit 0
 fi
 
-# Check for old items
 found_old=0
-for skill in "${OLD_SKILLS[@]}"; do
-    [ -d "${CLAUDE_DIR}/skills/${skill}" ] && found_old=1
+for i in "${!OLD_SKILLS[@]}"; do
+    if [ -d "${CLAUDE_DIR}/skills/${OLD_SKILLS[$i]}" ]; then
+        [ "$found_old" -eq 0 ] && echo "Found retired items to remove:"
+        found_old=1
+        echo "  ~/.claude/skills/${OLD_SKILLS[$i]}/: ${OLD_SKILLS_WHY[$i]}"
+    fi
 done
-for agent in "${OLD_AGENTS[@]}"; do
-    [ -f "${CLAUDE_DIR}/agents/${agent}" ] && found_old=1
+for i in "${!OLD_AGENTS[@]}"; do
+    if [ -f "${CLAUDE_DIR}/agents/${OLD_AGENTS[$i]}" ]; then
+        [ "$found_old" -eq 0 ] && echo "Found retired items to remove:"
+        found_old=1
+        echo "  ~/.claude/agents/${OLD_AGENTS[$i]}: ${OLD_AGENTS_WHY[$i]}"
+    fi
 done
 
 if [ "$found_old" -eq 0 ]; then
-    echo "No old skill/agent names found in ~/.claude — nothing to migrate."
+    echo "No retired skill or agent names found in ~/.claude, nothing to migrate."
     echo "If you just need to sync, run: ./sync"
     exit 0
 fi
-
-echo "Found old items to remove:"
-for skill in "${OLD_SKILLS[@]}"; do
-    [ -d "${CLAUDE_DIR}/skills/${skill}" ] && echo "  ~/.claude/skills/${skill}/"
-done
-for agent in "${OLD_AGENTS[@]}"; do
-    [ -f "${CLAUDE_DIR}/agents/${agent}" ] && echo "  ~/.claude/agents/${agent}"
-done
 echo ""
 
-# Offer backup
 echo "*** This will DELETE the items listed above, then run ./sync ***"
 echo ""
 read -rp "Create a zip backup of ~/.claude/{skills,agents,commands} first? [Y/n] " backup_answer
@@ -79,7 +86,7 @@ if [[ "$backup_answer" =~ ^[Yy] ]]; then
         dirs_to_zip=()
         [ -d skills ]   && dirs_to_zip+=(skills)
         [ -d agents ]   && dirs_to_zip+=(agents)
-        [ -d commands ]  && dirs_to_zip+=(commands)
+        [ -d commands ] && dirs_to_zip+=(commands)
         if [ ${#dirs_to_zip[@]} -gt 0 ]; then
             zip -rq "$BACKUP_FILE" "${dirs_to_zip[@]}"
         fi
@@ -88,7 +95,6 @@ if [[ "$backup_answer" =~ ^[Yy] ]]; then
     echo ""
 fi
 
-# Final confirmation
 read -rp "Proceed with migration? [y/N] " proceed
 if [[ ! "$proceed" =~ ^[Yy] ]]; then
     echo "Aborted."
@@ -97,7 +103,6 @@ fi
 
 echo ""
 
-# Remove old items
 for skill in "${OLD_SKILLS[@]}"; do
     target="${CLAUDE_DIR}/skills/${skill}"
     if [ -d "$target" ]; then
@@ -116,18 +121,17 @@ done
 
 echo ""
 
-# Run sync
 if [ ! -f "${SCRIPT_DIR}/sync.yaml" ]; then
     echo "No sync.yaml found. Copy the example first:"
     echo "  cp sync.yaml.example sync.yaml"
     echo ""
     echo "Old items have been removed. Run ./sync after setting up sync.yaml."
-    exit 0
+else
+    echo "Running ./sync ..."
+    echo ""
+    "${SCRIPT_DIR}/sync"
 fi
 
-echo "Running ./sync ..."
 echo ""
-"${SCRIPT_DIR}/sync"
-
-echo ""
-echo "Migration complete."
+echo "Migration complete. The ait and ant skills and agents come from their"
+echo "own binaries: run 'ait install-skills' and 'ant install-skills'."

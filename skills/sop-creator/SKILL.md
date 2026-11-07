@@ -1,7 +1,7 @@
 ---
 name: sop-creator
 description: Writes Standard operating procedure documents to a high technical standard.  Use when the user asks for a 'sop' or standard operating procedure document
-allowed-tools: "Read,Bash(ait:*)"
+allowed-tools: "Read"
 version: "0.1.0"
 author: "ohnotnow <https://github.com/ohnotnow>"
 license: "MIT"
