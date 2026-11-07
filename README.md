@@ -4,6 +4,10 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 
 ---
 
+> **Heads up (7th November 2026):** The `ait` and `ant` skills and agents now ship inside their own binaries: run `ait install-skills` and `ant install-skills` instead of syncing them from here. `ait-crafting` is replaced by the tracker-agnostic `spec-crafting` skill below (the ait-specific parts moved into the `ait` skill), and there's a generic `amnesia-check` agent alongside the `ait-amnesia-check` that `ait` ships. If you'd previously synced it, `rm -rf ~/.claude/skills/ait-crafting`.
+
+---
+
 > **Heads up (19th August 2026):** The marp-* skills have moved to their own project in [marp-themes](https://github.com/UoGSoE/marp-themes).
 
 ---
@@ -56,6 +60,7 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 - `readme` -- Generates a README from the actual codebase so claims stay grounded.
 - `shell-function` -- Creates a shell function (bash, zsh, fish, etc.) that does what you describe.
 - `sop-creator` -- Writes Standard Operating Procedure documents from user outlines. Asks minimal clarifying questions, then generates a clean Markdown SOP with purpose, prerequisites, procedure, and verification steps.
+- `spec-crafting` -- Turns a settled feature discussion or plan document into consultant-ready issues in any tracker: a vision document plus implementation specs a fresh agent could pick up cold. Includes a "does this capture it?" review gate for conversation-sourced work, a referent check, testing modes, and pairs with the `amnesia-check` agent. If `ait` is available it records the work there; the `plan-to-ait` agent that `ait` ships loads this skill.
 - `swift` -- Conventions and patterns for native macOS Swift apps. Young sibling of `golang`: XcodeGen workflow, sandbox-first permissions posture, fixture-backed testing, headless verification tricks, and a growing list of hard-won AppKit/SwiftUI gotchas.
 - `technical-overview` -- Generates a `TECHNICAL_OVERVIEW.md` covering stack, architecture, domain model, routes, and key logic. Useful for onboarding.
 - `threejs-quirks` -- Hard-won three.js and WebGL failure modes, each stamped with the version and date it was verified: shaders quietly recompiling when the last material using them is disposed, one NaN pixel blacking out a bloomed screen, colours converted twice, shader errors hiding from the console, and GPU timings that lie. A sibling of `playwright-cli-quirks`.
@@ -66,6 +71,7 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 
 ## Agents
 
+- `amnesia-check.md` -- Fresh-eyes amnesia test for newly written specs, in any tracker or as files. With no conversation context it demonstrates what it would build from each one (restated goal, files, first failing test, every guess and dead end marked) so the caller can diff its reading against the real intent. Never gives a verdict. `ait` ships its own `ait-amnesia-check` for ait issues.
 - `devtools-rummage.md` -- Reads a Laravel app the way a helpful desktop agent with browser devtools would, hunting for places where the frontend promises a restriction the server never checks: `:disabled` buttons with no matching check in the action, unlocked Livewire properties, API routes no page uses, spreadsheet uploads trusted row by row. Friendly colleague tone, read-only. Complements `laravel-owasp-reporter`.
 - `fresh-eyes.md` -- Fresh pair of eyes for when you're stuck or looping. Suggests one or two things to try rather than editing code directly.
 - `humaniser.md` -- Removes common AI-writing patterns from text files like READMEs and docs.

@@ -1,0 +1,319 @@
+---
+name: spec-crafting
+description: >
+  Turn a settled feature discussion or plan document into consultant-ready
+  issues: a vision document for the feature plus implementation specs a fresh
+  agent could pick up cold, tomorrow. Use towards the end of a feature
+  conversation ("let's get this into issues", "let's get this into ait"), or
+  when converting a plan file. Tracker-agnostic; also the knowledge base for
+  the plan-to-ait agent.
+allowed-tools: "Read,Glob,Grep,Agent"
+version: "1.0.0"
+author: "ohnotnow"
+license: "MIT"
+---
+
+# Crafting specs
+
+The goal: a fresh agent with no prior context could read the vision document, the issue and the README and start work immediately. **Consultant-ready.**
+
+This skill is about what a good spec looks like, whatever tracker holds it. **If `ait` is available, record the work there; the ait skill's "Turning a Plan into Issues" section covers the ait side** (overlap commands, initiative or epic, phase trackers, dependencies, recording rejected paths in `ant`).
+
+## The Layered Context Model
+
+```
+Vision document (top-level issue for the feature)
+├── Background: What exists, context
+├── The Problem: Why this is needed
+├── The Vision: What we're building
+├── Who Benefits: Users and how
+├── Success Criteria: Concrete outcomes (and what success is NOT)
+├── Key Principles: Guiding constraints
+├── Technical Approach: High-level architecture
+├── Key Documents: Links to README, TECHNICAL_OVERVIEW, etc.
+└── Phases: Overview of work breakdown
+        ↓
+Issues (implementation specs)
+├── File paths to create/modify
+├── Code snippets (schemas, signatures, return formats)
+├── Pattern references ("Follow X.php for structure")
+├── Acceptance criteria
+└── Prerequisites by ID ("Uses Team model from 3tz.2")
+```
+
+**The vision document has the "why". Issues have the "what".**
+
+Issues can be terse on context because the vision document covers it. But they must be complete on implementation details.
+
+## Workflow
+
+### 1. Calibrate to the project
+
+- Read README.md, CLAUDE.md, TECHNICAL_OVERVIEW.md (if they exist), and any docs mentioned in the discussion or plan.
+- Pick a testing mode (see below). This shapes how you design issues and what acceptance criteria mean.
+
+### 2. Distil and gate (when the source is a conversation)
+
+When working from a live discussion rather than an approved plan document, distil the load-bearing parts before creating anything:
+
+- **Goal**: what we're building and for whom, 1 or 2 sentences
+- **What we decided**: concrete decisions that survived
+- **What we rejected (and why)**: so a fresh agent doesn't reach for a ruled-out path
+- **Phases**: rough breakdown
+- **Sharp edges**: things noticed in conversation that aren't obvious from the code
+
+Present it in chat and ask:
+
+> "Does this capture it? Anything missed, mis-weighted, or that I should drop?"
+
+Iterate until the user is happy. **Do not skip this.** The user is the one who knows which exploratory branches mattered and which were dead ends.
+
+Record the rejected paths and their reasons in the project's decision log (`ant`, if available) and reference that entry from the vision document. Don't paraphrase them into issue descriptions.
+
+**Skip the gate** when converting an already-approved plan-mode plan: approval happened at plan acceptance, and the plan document is the distillation.
+
+For a long or wandering conversation, offer one extra pass before creating issues: save the distillation to a temp file and run the `plan-reconciler` agent over it against the current session. Written summaries reliably drop 10 to 15% of what was actually discussed; the reconciler catches coverage gaps (did what we said make it into what we wrote?), while the amnesia check in step 7 catches conveyance gaps (can a stranger act on what we wrote?). Different failure modes: don't treat one as covering the other.
+
+### 3. Check for overlapping issues
+
+- Search the tracker, closed issues included, for anything related.
+- If the user named a parent issue, read it; if its description is thin, enhance it before creating children.
+- If overlap is found, ask before proceeding.
+
+### 4. Create or enhance the vision document
+
+Include ALL of these sections in the description:
+
+```markdown
+# [Feature Name]
+
+## Background
+[What exists already. Link to relevant docs. 1-2 paragraphs.]
+
+## The Problem
+[Why this is needed. What pain point it solves. Bullet points work well.]
+
+## The Vision
+[What we are building. Be specific about the solution.]
+
+## Who Benefits
+**[User type 1]**: [How they benefit]
+**[User type 2]**: [How they benefit]
+
+## What Success Looks Like
+- [Concrete outcome 1]
+- [Concrete outcome 2]
+- [Concrete outcome 3]
+
+**Success is NOT**: [What we are explicitly not optimising for]
+
+## Key Principles
+1. **[Principle]**: [Explanation]
+2. **[Principle]**: [Explanation]
+
+## Technical Approach
+- [High-level architectural decision 1]
+- [High-level architectural decision 2]
+
+## Key Documents
+- README.md - [What it contains relevant to this]
+- [Other doc] - [What it contains]
+
+## Phases
+1. **[Phase name]** (P1): [Brief description]
+2. **[Phase name]** (P2): [Brief description]
+
+## For implementing agents
+If a spec is silent on something load-bearing, note it on the issue and
+ask before proceeding - do not silently pick a reading. A gap you surface
+is a finding; a gap you paper over is a defect with your name on it.
+```
+
+The "For implementing agents" section ships verbatim in every vision document:
+it makes the surface-don't-improvise norm travel with the tracker, so a cold
+agent picking up an issue next month behaves the same as one you briefed by hand.
+
+### 5. Create consultant-ready issues
+
+Each issue must pass the **Amnesia Test** (defined below).
+
+**For implementation tasks, include:**
+
+```markdown
+[Brief description of what to build]
+
+## Files to create/modify
+- `path/to/file.php` - [what goes here]
+- `path/to/other.php` - [what changes]
+
+## Implementation details
+[Code snippets, schemas, method signatures, return formats as appropriate]
+
+## Pattern reference
+Follow `path/to/existing/similar.php` for [structure/style/approach].
+
+## Acceptance criteria
+- [ ] [Specific testable outcome]
+- [ ] [Specific testable outcome]
+
+## Prerequisites
+Uses [X] from issue [ID] which added [brief description].
+```
+
+**For simple tasks** (config changes, small additions):
+
+```markdown
+[What to do in 1-2 sentences]
+
+File: `path/to/file`
+
+[Code snippet if helpful]
+```
+
+**Mode matrix, for issues that hook into an existing entry point.** When an
+issue adds behaviour to an existing pipeline or command, enumerate that entry
+point's existing flags and modes and state the new behaviour's interaction
+with each one *by name*. An unmentioned mode is a gap, not a default: silence
+forces a cold agent to choose between the literal reading and the sensible
+one, and if the new behaviour is destructive (replaces, deletes, overwrites)
+the wrong choice does real damage. (Learned from a real capture-on-every-run
+spec that carved out one flag and stayed silent on the other; the implementing
+agent had to halt and ask.)
+
+**Referent check: deterministic, all issues, before finalising.** Grep every
+code symbol an issue names (functions, methods, types, flags, file paths)
+against the actual codebase. Anything that does not exist is either a mistake
+to correct or a thing this issue must create: say which, explicitly. A
+confident "follow the existing `log.Warn` style" where no `Warn` exists sends
+a cold agent hunting for a phantom. This complements the amnesia check rather
+than duplicating it: the checker samples a few issues for conveyance; this
+sweep catches phantom referents in all of them, for the cost of a few greps.
+
+### 6. Wire dependencies
+
+- Phase dependencies: Phase 2 work is blocked by Phase 1.
+- Technical dependencies: a feature is blocked by its foundation.
+- **In descriptions**: name what prerequisite issues provide. A cold reader follows the thread by ID.
+
+If the tracker supports dependencies, a milestone issue per phase (no implementation detail, blocking everything in the next phase) keeps "what's ready?" honest and shows progress at a glance.
+
+### 7. Amnesia check (multi-phase or gnarly work)
+
+Important: the amnesia check costs the user a lot of money and is also very slow. Its purpose is to make sure a _future_ Claude or subagent could work on the issues without the context that led to them being created. So **offer** it as a choice for the user to make; never run it automatically.
+
+If the user has indicated that they want to pick the issues up in a future session, whether in conversation or because you asked them, spawn the amnesia checker (`ait-amnesia-check` for ait issues, otherwise the generic `amnesia-check` agent) with a handful of issues: the foundation issues plus one or two deep in the dependency chain, not the lot. It has no conversation context (deliberately) and will *demonstrate* what it would build from each spec: restated goal, files, first failing test, with every guess and dead end marked.
+
+**Never ask it for a verdict.** A "yep, looks great!" costs nothing to emit and means nothing. Instead, diff its demonstration against what you (holding the design context) know was intended. Its wrong guesses point at the exact sentence missing from an issue; its `STUCK` findings usually mean a prerequisite went unnamed. Patch the issues, don't argue with the checker.
+
+## Testing modes
+
+**Strict TDD**: Laravel projects, or any project whose CLAUDE.md mentions TDD / red-green / one-at-a-time.
+
+- Acceptance criteria are **failing tests, written first**. Each criterion = one behaviour.
+- Add this block verbatim to every implementation issue:
+
+  > **TDD: tests come first.** For each acceptance criterion:
+  > 1. Write the failing test.
+  > 2. Run it. Watch it fail for the right reason.
+  > 3. Write the minimum code to make it pass.
+  > 4. Refactor.
+  > 5. *Then* move to the next criterion.
+  >
+  > Do **not** scaffold the implementation first and retrofit tests: that is not TDD. Do **not** write multiple tests upfront. One test, one behaviour, one step at a time.
+
+- If an issue has many criteria, split it so the red-green rhythm stays natural.
+
+**Standard testing**: Python, Go, or other serious projects without an explicit TDD policy.
+
+- Acceptance criteria double as tests, written alongside implementation.
+- No one-at-a-time requirement; the implementing agent can batch sensibly.
+
+**No tests**: throwaway JS/TS toys, exploration scripts, personal fun projects.
+
+- Signals: minimal `package.json`, no tests directory, no CI config, no CLAUDE.md TDD language.
+- Acceptance criteria are plain observable outcomes ("Button changes colour on click"), not tests.
+- Drop TDD language from issues entirely. The user will verify manually.
+
+**If signals are ambiguous, ask once** before creating issues; don't silently guess.
+
+In all modes: **never create standalone "write tests" or "update tests" issues**. If an issue changes behaviour, its acceptance criteria should reflect the new behaviour. No follow-up "fix up the tests afterwards" issue: that invites retrofitting.
+
+## The Amnesia Test
+
+> "If I had amnesia tomorrow and was handed this issue plus the vision document plus README, could I start work?"
+
+The test was never "this issue alone on a desert island". Tomorrow's agent legitimately has: the vision document, the README, the repo, and any issue named as a prerequisite (whose spec stands in for code that doesn't exist yet). What it does *not* have is the conversation in your head, so nothing load-bearing may live only there.
+
+**FAILS the test:**
+
+```
+Create FindMentoringPairs tool
+
+File: app/Services/SkillsCoach/TeamTools/FindMentoringPairs.php
+
+Follow existing pattern.
+```
+
+*Problem: What pattern? What does this tool do? What does it return?*
+
+**PASSES the test:**
+
+```
+Create tool to suggest High+Low skill pairings for mentoring within a team.
+
+## File to create
+`app/Services/SkillsCoach/TeamTools/FindMentoringPairs.php`
+
+## Parameters
+- `skill_name` (required): The skill to find mentoring pairs for
+
+## Return format
+{
+    "skill": "Docker",
+    "pairs": [
+        {"mentor": {"name": "Alice", "level": "High"}, "learner": {"name": "Bob", "level": "Low"}}
+    ]
+}
+
+## Implementation
+1. Get team from CoachContext::getTeam()
+2. Find High-level members (mentors)
+3. Find Low/Medium members (learners)
+4. Match them, respecting coach_contactable flag
+
+## Pattern reference
+Follow `app/Services/SkillsCoach/Tools/FindExperts.php` for Prism tool structure.
+
+## Acceptance criteria
+- [ ] Returns valid mentor/learner pairs
+- [ ] Respects coach_contactable opt-out
+- [ ] Handles "no pairs found" gracefully
+```
+
+## Issue guidelines
+
+### Titles
+
+- Imperative form: "Add user authentication" not "Adding..."
+- Specific: "Add login form validation" not "Handle validation"
+- Under 60 characters
+
+### Priorities
+
+- P1: Foundation work (must be done first)
+- P2: Core features (main implementation)
+- P3: Polish and non-critical enhancements
+
+## When to skip this skill
+
+- The scope is one issue, not a multi-phase feature: just create the issue inline (the issue templates above still apply).
+- The conversation hasn't actually settled on a direction yet: finish the discussion first.
+
+## What you do NOT do
+
+- Modify any code files
+- Create issues for things that weren't discussed or planned
+- Create overly granular issues (one per line of code)
+- Create issues without enough detail to execute
+- Skip the vision document
+- Create separate "testing" issues: tests belong inside each implementation issue
