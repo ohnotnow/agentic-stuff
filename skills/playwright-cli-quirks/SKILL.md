@@ -90,6 +90,45 @@ that shares the instrument's flaw confirms the artefact, not the behaviour.
   state) and read state deterministically instead of doing screenshot
   archaeology. (Verified on a Bun-served TypeScript canvas game, 2026-07.)
 
+## Selectors and forms that do something other than you meant
+
+All verified on a Laravel app (Vue 2 plus Livewire 3), @playwright/cli
+0.1.21, 2026-11-07.
+
+- **`:has-text()` is a case-insensitive SUBSTRING match, and it can land on a
+  destructive button.** `click "button:has-text('All') >> nth=0"`, meant for
+  an "All" filter button, clicked "Clear all staff from courses" instead,
+  because that button came first in the page. It opened a "remove all staff
+  from all courses?" confirmation, which was luckily never confirmed. The
+  mistake was only noticed because a later click timed out behind the
+  modal. Use `:text-is('All')` (exact match) or a snapshot ref, and always
+  near any page that has delete or clear buttons. If a click unexpectedly
+  times out with "subtree intercepts pointer events", read the modal before
+  doing anything else.
+- **`upload` only works while a file chooser is open.** Without one it fails
+  with "The tool "browser_file_upload" can only be used when there is related
+  modal state present". Clicking a styled file button doesn't reliably open
+  one. Set the file directly instead:
+  `run-code "async page => { await page.locator('input[type=file]').nth(0).setInputFiles('/abs/path/file.pdf'); }"`.
+  This fires the input's change event, so Vue and Livewire see it.
+- **`fill` doesn't fire `change`, so `wire:model.change` (and
+  `.lazy`/`.blur`) fields don't update until focus leaves.** A Save button
+  that is disabled until something changes stays disabled, and a click on it
+  does nothing, with no error (output piped to /dev/null hides even the
+  timeout). After `fill`, `press Tab` and wait a second before clicking.
+- **A select showing one option isn't necessarily selected.** In a Vue
+  `v-model` select whose model starts as `""`, the browser displays the only
+  option, but the model is still empty. The form's submit then returned
+  early with no request and no message. A human hits this too, so it's a
+  real finding, but in a probe always `select` the option explicitly, and
+  check `playwright-cli requests` to confirm the POST actually went.
+- **Switching between http:// and https:// on the same host can log you
+  out.** Visiting the https version (to follow a signed link that was
+  generated for https) set a new session cookie that replaced the http one,
+  and the next http page returned 401. Pick one scheme per session, and
+  follow emailed links on the scheme they were generated for (signed URLs
+  include the scheme in the signature).
+
 ## `run-code` is not a sandbox; `eval` is
 
 Matters whenever an agent's playwright-cli use is meant to be confined (e.g.

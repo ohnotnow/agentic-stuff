@@ -5,10 +5,12 @@ description: >
   Shift pull request, for the breakage that the upgrade guide and a green test
   suite both miss - Shift leaving the app half-slimmed or unresolvable, renamed
   and re-defaulted .env variables, cached objects that stop unserialising,
-  tests that silently stop running, deprecations hidden during tests - plus
-  what to put in the go-live notes. Use when upgrading Laravel (11 to 12, 12 to
-  13, or older), reviewing or fixing a Shift PR, or moving an app to a newer
-  PHP version.
+  tests that silently stop running, deprecations hidden during tests, guests
+  shown a blank page instead of the login page - plus walking the app as each
+  kind of user and what to put in the go-live notes. Use when upgrading
+  Laravel (11 to 12, 12 to 13, or older), reviewing or fixing a Shift PR,
+  moving an app to a newer PHP version, or walking through an upgraded app's
+  user journeys before deploying it.
 allowed-tools: "Read,Bash,Glob,Grep"
 version: "0.1.0"
 author: "ohnotnow <https://github.com/ohnotnow>"
@@ -188,8 +190,12 @@ use a real environment variable, which takes priority over `.env`:
 - **Anything the tests fake needs a real run.** Check what `phpunit.xml` and
   the tests replace: an array cache, a sync or faked queue, faked mail and
   storage. On the original app the suite never touched Redis at all. So:
-  - Do a browser click round as each role, with playwright-cli. Check the
-    console is clean, and save at least one form of each kind.
+  - Walk the app as each kind of user, with playwright-cli. Follow
+    [user-journeys.md](user-journeys.md): find the roles from the code,
+    agree the journeys with the developer, walk the workflow in order, check
+    results properly, and check what a stranger and a logged-out visitor
+    can't do. On the original app this found the only regression the suite
+    missed.
   - Run each scheduled command by hand (`lando artisan <command>`), plus
     `schedule:list`.
   - Send one real queued email through the real worker (Horizon) and see it
