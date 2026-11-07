@@ -24,10 +24,6 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 
 ## Skills
 
-- `ait` -- Local-first [issue tracker for coding agents](https://github.com/ohnotnow/agent-issue-tracker). Tracks tasks, models dependencies, and helps agents pick up where they left off after session loss.
-- `ait-crafting` -- Turns a settled feature discussion or plan document into consultant-ready `ait` issues: an initiative/epic vision document plus implementation specs a fresh agent could pick up cold. Includes a "does this capture it?" review gate for conversation-sourced work, and pairs with the `ait-amnesia-check` agent for a fresh-eyes conveyance check. Also the knowledge base for the `plan-to-ait` agent.
-- `ait-recap` -- Generates a friendly markdown recap of recent `ait` activity for the current project or across a directory of projects. Handy for weekly status updates, "what shipped recently?" questions, and quick memory refreshers.
-- `ant` -- Local-first [notebook for the *why*](https://github.com/ohnotnow/agent-note-tracker) behind project work. Captures decisions, alternatives rejected, pivots, and foundation context as a sibling to `ait`'s task tracking.
 - `architecture-diagram` -- Builds an interactive architecture diagram of an app as one self-contained HTML file for non-technical managers: the app in its world first, then click a box to zoom into what's inside it. Reads the code (mostly Laravel, but Go, Python and others work too), groups it by what it does for people rather than how it's built, flags confirmed problems on the diagram, and keeps its report to a few lines. Bundles [elkjs](https://github.com/kieler/elkjs) for layout.
 - `audience-credibility` -- Defensive review pass for audience-facing deliverables. Verifies named places, institutions, personas, and other local details before writing, then checks finished copy and visuals for recognisable AI-generated tells.
 - `changelog` -- Analyses git tags and diffs to draft `CHANGELOG.md` entries in Keep a Changelog format. Proposes changes for review rather than writing them directly.
@@ -47,6 +43,7 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 - `improve` -- Senior-advisor audit and handoff-planning skill. Surveys codebases for bugs, security, performance, tests, tech debt, dependencies, DX, docs, and direction, then writes self-contained plans for other agents to execute while staying read-only on source.
 - `larastan` -- Installs and runs PHPStan + Larastan, separates framework false positives from real defects, and iterates through analysis levels.
 - `laravel-cloud` -- Deploy, update, and tear down demo apps on Laravel Cloud using the `cloud` CLI.
+- `laravel-upgrade` -- Checks for a Laravel major-version upgrade (especially a Laravel Shift PR) that the upgrade guide and a green test suite both miss. Learned on one Laravel 9 to 13 upgrade so far.
 - `livewire-v4-upgrade` -- Audit-first workflow for upgrading production Laravel apps from Livewire v3 to v4. Covers app-shape triage, `wire:model` changes, layout/config traps, legacy model binding remediation, test baselines, browser smoke tests, and deploy pipeline gotchas.
 - `mac-app-icon` -- Turns one square PNG into a macOS app icon: puts the artwork on a rounded square matching Apple's icon grid (so macOS 26 and later don't shrink it into a grey plate), shows the user background choices side by side, and generates an Xcode `AppIcon.appiconset` with a tested script. Needs ImageMagick.
 - `mac-disk-hunter` -- Tracks down where disk space has gone on macOS, including misleading System Data, Time Machine local snapshots, developer caches, Docker, Xcode, and local ML models. Surveys and ranks the likely culprits first, then suggests appropriately cautious cleanup commands without deleting anything until you confirm.
@@ -69,8 +66,6 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 
 ## Agents
 
-- `ait-amnesia-check.md` -- Fresh-eyes amnesia test for newly created `ait` issues. With no conversation context it demonstrates what it would build from each spec — restated goal, files, first failing test, every guess and dead end marked — so the caller can diff its reading against the real intent. Never gives a verdict.
-- `ait-audit.md` -- Reviews open `ait` issues against the codebase and flags work that looks done but hasn't been closed.
 - `devtools-rummage.md` -- Reads a Laravel app the way a helpful desktop agent with browser devtools would, hunting for places where the frontend promises a restriction the server never checks: `:disabled` buttons with no matching check in the action, unlocked Livewire properties, API routes no page uses, spreadsheet uploads trusted row by row. Friendly colleague tone, read-only. Complements `laravel-owasp-reporter`.
 - `fresh-eyes.md` -- Fresh pair of eyes for when you're stuck or looping. Suggests one or two things to try rather than editing code directly.
 - `humaniser.md` -- Removes common AI-writing patterns from text files like READMEs and docs.
@@ -79,7 +74,6 @@ Skills and agents I use with AI coding tools. Mostly Laravel/Livewire, but some 
 - `livewire-flux-reviewer.md` -- Reviews Livewire/Flux code for simplification opportunities. Quick wins, things worth considering, and what looks good. References `flux-ui` and `modern-livewire` skills for pattern details.
 - `phpmetrics-check.md` -- Runs phpmetrics on a PHP/Laravel codebase, flags complexity hotspots, and compares against a saved baseline.
 - `plan-reconciler.md` -- Reconciles a plan document against the conversation that produced it. Reports what was captured, missed, glossed over, or drifted without editing the plan.
-- `plan-to-ait.md` -- Turns approved plan documents into `ait` epics and issues that a fresh coding agent can execute without context. Now a thin shell around the `ait-crafting` skill, which holds the templates and quality bar.
 - `readme-editor.md` -- Deletion-first editor for READMEs and other text files. Cuts padding and applies the owner's house style, learned from their own hand edits of past documents, then reports what it cut. Leaves the owner's voice and slips alone, flagging rather than fixing them.
 - `test-debug.md` -- Debugging assistant for stubborn failing tests. Uses `dump()` instrumentation rather than speculative rewrites.
 - `test-quality-checker.md` -- Reviews Laravel tests for false-confidence patterns and coverage gaps: tautologies, weak assertions, missing control records, unit tests that should be feature tests.
