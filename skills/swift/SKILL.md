@@ -14,8 +14,9 @@ license: "MIT"
 Standards for small native macOS apps — menu-bar utilities, desktop companions,
 focused tools. These are opinionated defaults, not laws. This skill is young
 (much younger than its golang sibling): a handful of conventions and a gotcha
-list earned mostly in one project. When a session teaches a new lesson, add it
-here rather than leaving it in a transcript.
+list earned mostly in one project. When a session teaches a new lesson, offer to
+add it to this skill. Say which copy you would edit, because the installed one may
+be a synced copy of a master kept elsewhere.
 
 ## Project workflow
 

@@ -1,13 +1,6 @@
 ---
 name: quality-gate
-description: One-stop review after feature work, or for a whole codebase. Runs deterministic checks (section ordering, arch conventions) free of charge, then fresh-eyes reviewer agents. Covers team conventions, test quality, complexity, security, and Livewire/Flux patterns - plus runtime checks (a11y, cold UX probe) when UI changed. Also has a quick mid-session sanity-check mode ("this seem ok?").
-triggers:
-  - /quality-gate
-  - /review
-  - run the quality gate
-  - code review
-  - this seem ok
-  - quick sanity check
+description: One-stop review after feature work, or for a whole codebase. Runs deterministic checks (section ordering, arch conventions) free of charge, then fresh-eyes reviewer agents. Covers team conventions, test quality, complexity, security, and Livewire/Flux patterns - plus runtime checks (a11y, cold UX probe) when UI changed. Also has a quick mid-session sanity-check mode ("this seem ok?"). Use when asked to run the quality gate or to review recent work.
 ---
 
 # Quality Gate

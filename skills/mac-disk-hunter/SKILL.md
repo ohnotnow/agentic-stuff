@@ -41,6 +41,8 @@ Disk space is shared system state. A wrong `rm -rf` on `~/Library/Containers` or
 
 Even "obviously safe" things like `~/.cache/uv` get a confirmation. The cost of asking is small. The cost of wiping a dev's signing keys, simulator state, or auth tokens is not.
 
+**Never run `rm` yourself** - that includes `rm -rf` and `find ... -delete`. Where the table gives a tool's own cleanup command (`uv cache prune`, `brew cleanup`, `ollama rm` and so on), run it once the user has said yes. Where the only way is `rm`, show the user the exact command and let them run it themselves with the `!` prefix, so the output still lands in the session. Don't swap `rm` for `trash`: binned files keep using disk space until the bin is emptied, so it would free nothing.
+
 ## The diagnostic flow
 
 Run in this order. Each step narrows the search.
@@ -266,7 +268,7 @@ Memorise these. Most "where did my disk go?" answers live in this table.
 | **`~/go/pkg/mod`** | 1–10 GB | ✅ Yes | `go clean -modcache` (deletes everything; will redownload) |
 | **Stray `node_modules` across projects** | 0.5 GB × N projects | ⚠️ Per-project — only safe if user isn't actively working on it | Find: `find ~/code -name node_modules -type d -prune -exec du -sh {} +` |
 | **`~/Library/Caches/*`** (general) | 1–20 GB total | ⚠️ Mostly safe but app-specific (Slack, Discord, browsers, IDEs) | Spot-check biggest offenders first; most apps recreate on launch |
-| **`~/Library/Logs`** | 0.5–5 GB | ✅ Mostly safe — keep last week | `find ~/Library/Logs -type f -mtime +30 -delete` |
+| **`~/Library/Logs`** | 0.5–5 GB | ✅ Mostly safe - keep the last month | `find ~/Library/Logs -type f -mtime +30 -delete` |
 | **`/private/var/log`** | 0.5–5 GB | ⚠️ System logs — don't blindly delete; let macOS rotate | `sudo log erase --ttl` (the flag takes no argument; drops only expired TTL content) if really needed |
 | **`~/.Trash`** | 0-big; unsizable without Full Disk Access (TCC blocks `du`) | ✅ Yes | Empty via Finder; terminal `rm` hits the same TCC wall as `du` |
 | **`~/Downloads`** | 0–huge | ⚠️ User content — list big ones, let them choose | `find ~/Downloads -size +100M -exec ls -lh {} \;` |

@@ -1,1 +1,4 @@
 sync.yaml
+.ait/
+.ant/
+prompt-audit-*.md

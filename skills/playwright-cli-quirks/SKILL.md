@@ -17,9 +17,9 @@ license: "MIT"
 Field notes to sit beside Microsoft's own playwright-cli skill (which gets
 overwritten by `playwright-cli install --skills`, hence this separate file).
 Every rake below was hit and verified in a real session, and each is stamped
-with the version and date it was verified on. Current playwright-cli at the
-time of writing: **0.1.18 (2026-08-07)**. If you are on a much newer version,
-re-verify a rake before relying on it, and delete any that upstream has fixed.
+with the version and date it was verified on. If you are on a much newer
+version than a rake's stamp, re-verify it before relying on it, and delete any
+that upstream has fixed.
 
 ## Screenshots lie: blank or missing pixels are measurement artefacts
 

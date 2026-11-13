@@ -299,8 +299,9 @@ Fix these in what survives (each: what to look for → what to do):
   `claude mcp add` keeps working") → delete.
 - **Mechanical formatting** - bold-header bullet lists, emoji decoration,
   title case headings → plain sentences, sentence case.
-- **Em dashes** - convert every `-` to a spaced hyphen - like this - as a
-  mechanical substitution. No judgement calls, no exemption for a "good"
+- **Em dashes** - convert every em dash (the long dash) to a spaced hyphen -
+  like this - as a mechanical substitution. Ordinary hyphens in compound
+  words, flags and code stay as they are. No judgement calls, no exemption for a "good"
   one: the owner strips them wholesale (he keeps a shell alias that seds
   them out of a whole file), so any you leave behind he has to hunt down
   by hand.

@@ -41,6 +41,7 @@ You are tasked with evaluating the tests someone has written for a Laravel appli
   - Testing what happens if an admin calls a Livewire action directly without going through the UI flow
   - Testing what happens if an admin calls `deleteSkill()` without first calling `confirmDelete()`
   - Testing authorization on individual Livewire methods when route middleware already restricts to admins
+  - One exception worth a single note (not a missing test): Livewire re-runs only `auth` and `can:` middleware on action requests. A custom role middleware such as `admin` is skipped there unless registered with `Livewire::addPersistentMiddleware()`, so someone who loses the role keeps a working page until they reload.
   - Admins are trusted users. If they can access the page, they can use its features. Don't suggest "belt and braces" authorization tests for admin-only components.
 - For general user-facing pages (not admin-only), we should flag authorization gaps - but frame it as "belt and braces" and note the user would need to be tech-savvy.
 - However, if the test mentions 'students' at all - then we should be more strict. Our users are either admins, academics or students. Students are much more likely to try 'messing about'.

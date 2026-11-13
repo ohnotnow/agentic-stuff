@@ -1,7 +1,7 @@
 ---
 name: technical-overview
 description: |
-  Generate a TECHNICAL_OVERVIEW.md file for any codebase. Automatically detects the tech stack, explores models/routes/services, and produces a concise reference document that helps future AI sessions (or humans) quickly understand the project without re-exploring. Use when starting work on an existing project, onboarding to a new codebase, or creating documentation for your team. Works with Laravel, Rails, Django, Node/Express, and other common stacks.
+  Generate a TECHNICAL_OVERVIEW.md file for any codebase. Automatically detects the tech stack, explores models/routes/services, and produces a concise reference document that helps future AI sessions (or humans) quickly understand the project without re-exploring. Use when starting work on an existing project, onboarding to a new codebase, or creating documentation for your team.
 ---
 
 # Technical Overview Generator
@@ -17,20 +17,9 @@ This document helps future AI sessions (and humans) quickly orient themselves wi
 
 ## Process
 
-### 1. Detect the Stack
+### 1. Detect the stack
 
-Check for framework indicators:
-
-| File | Indicates |
-|------|-----------|
-| `composer.json` | PHP (Laravel, Symfony) |
-| `package.json` | Node.js / JavaScript |
-| `Gemfile` | Ruby (Rails) |
-| `requirements.txt` / `pyproject.toml` | Python (Django, Flask) |
-| `go.mod` | Go |
-| `Cargo.toml` | Rust |
-
-Extract key dependencies and versions from these files.
+Read the manifest files (`composer.json`, `package.json`, `go.mod`, `pyproject.toml` and so on) and note the language, framework and key dependency versions.
 
 ### 2. Check the README
 
@@ -41,11 +30,11 @@ Read `README.md` (or `README.rst`, etc.) and assess:
 **If boilerplate or unclear**: Ask the user:
 > "What does this application do in one sentence?"
 
-### 3. Explore the Codebase
+### 3. Explore the codebase
 
-Adapt exploration based on detected stack:
+Find where the app-specific code lives: entry points, the data model, how requests or commands are routed, business logic, configuration and tests. Skip framework boilerplate.
 
-#### Laravel/PHP
+For Laravel, check these:
 - `app/Models/*.php` - Domain models and relationships
 - `app/Http/Controllers/` - Entry points
 - `app/Livewire/` or `app/Http/Livewire/` - Livewire components
@@ -56,25 +45,6 @@ Adapt exploration based on detected stack:
 - `bootstrap/app.php` - Middleware aliases (Laravel 11+)
 - `config/` - Custom config files (ignore standard Laravel ones)
 - `database/factories/` - Factory states for testing
-
-#### Rails/Ruby
-- `app/models/` - ActiveRecord models
-- `app/controllers/` - Controllers
-- `config/routes.rb` - Routes
-- `app/services/` - Service objects
-- `db/schema.rb` - Database schema
-
-#### Django/Python
-- `*/models.py` - Django models
-- `*/views.py` - Views
-- `*/urls.py` - URL routing
-- `*/services.py` or `*/utils.py` - Business logic
-
-#### Node/Express
-- `src/models/` or `models/` - Data models
-- `src/routes/` or `routes/` - Route handlers
-- `src/services/` or `services/` - Business logic
-- `src/middleware/` - Custom middleware
 
 ### 4. Identify Key Patterns
 
@@ -87,7 +57,7 @@ Look for:
 
 ### 5. Generate the Document
 
-Use this template structure:
+Use this structure as a menu, not a form: keep the sections that fit the project and leave out the rest. For a CLI or TUI, for instance, swap Routes for commands and flags, Authorization for whatever access model it has (often none), and Domain Model for storage (database schema, file formats) and configuration.
 
 ```markdown
 # Technical Overview
@@ -173,4 +143,4 @@ Last updated: YYYY-MM-DD
 
 ## Example Output
 
-See the `examples/` directory for sample outputs from different frameworks.
+See `examples/laravel-livewire-example.md` for one sample output. It shows the expected shape and depth; it is not a template to copy for other stacks.

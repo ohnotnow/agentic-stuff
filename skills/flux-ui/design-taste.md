@@ -131,12 +131,13 @@ The judgement calls baked into that snippet:
 
 ### Accessibility hygiene (non-negotiable)
 
-The demos are quietly rigorous and so are we: `aria-label` on every icon-only button and
-navbar item, labelled `flux:progress` bars, `alt=""` on decorative images, `sr-only` h1
-when there's no visible page title, `tabular-nums` on changing counts. Note that the
-`tooltip` prop is NOT an accessible name - it only wraps the button in a `flux:tooltip`
-(verified in the vendor stub), so icon-only buttons need an explicit `aria-label` even
-when they have a tooltip.
+The demos are quietly rigorous and so are we: an accessible name on every icon-only button
+and navbar item, labelled `flux:progress` bars, `alt=""` on decorative images, `sr-only` h1
+when there's no visible page title, `tabular-nums` on changing counts. On an icon-only
+button or toggle the `tooltip` prop supplies that name: when the trigger has no text,
+Flux's JavaScript points `aria-labelledby` at the tooltip, and that beats any `aria-label`
+(checked in a browser on Flux 2.21, 2026-11-13). So word the tooltip as the name you want
+read out, and add `aria-label` only where there is no tooltip.
 
 ---
 

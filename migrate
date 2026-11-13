@@ -40,6 +40,20 @@ OLD_AGENTS_WHY=(
     "replaced by livewire-flux-reviewer.md (April 2026)"
 )
 
+# Deprecated skills: no longer shipped, but NOT deleted, because people may
+# still rely on them. This script only prints a notice for each one found.
+# Revisit after May 2027: move each to OLD_SKILLS, or drop it from this list.
+DEPRECATED_SKILLS=(
+    "i-impeccable"
+    "i-shape"
+    "improve"
+)
+DEPRECATED_SKILLS_WHY=(
+    "no longer shipped here (November 2026); maintained upstream at https://github.com/pbakaus/impeccable"
+    "no longer shipped here (November 2026); maintained upstream at https://github.com/pbakaus/impeccable"
+    "no longer shipped here (November 2026); it was a modified copy of shadcn's improve skill"
+)
+
 echo "=========================================="
 echo "  Retired skill & agent clean-up"
 echo "=========================================="
@@ -49,6 +63,14 @@ if [ ! -d "$CLAUDE_DIR" ]; then
     echo "No ~/.claude directory found. Nothing to migrate."
     exit 0
 fi
+
+for i in "${!DEPRECATED_SKILLS[@]}"; do
+    if [ -d "${CLAUDE_DIR}/skills/${DEPRECATED_SKILLS[$i]}" ]; then
+        echo "[Deprecated] ~/.claude/skills/${DEPRECATED_SKILLS[$i]}/: ${DEPRECATED_SKILLS_WHY[$i]}."
+        echo "             Left in place; delete it yourself when you no longer need it."
+    fi
+done
+echo ""
 
 found_old=0
 for i in "${!OLD_SKILLS[@]}"; do

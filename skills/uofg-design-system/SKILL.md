@@ -9,7 +9,9 @@ This skill encapsulates the University of Glasgow's official design system. Use 
 
 The full design system lives at https://design.gla.ac.uk but this skill captures the essential tokens, patterns, and component guidance so you can build compliant UIs without needing to reference the original documentation.
 
-> **Note for Claude (AI assistant):** The design system site at design.gla.ac.uk is hosted on Zeroheight, which is a single-page application (SPA). This means WebFetch, wget, curl, and similar tools will only retrieve an empty shell — the actual content is loaded dynamically via JavaScript. If you ever need to re-extract information from the live site, you will need to use a browser (e.g. Claude in Chrome) to navigate the pages. The site also has an internal sidebar navigation within each section containing 20+ sub-pages that aren't visible from the top-level navbar alone. The Zeroheight API (v2) is locked down and returns 404 for page requests. In short: **rely on this skill file rather than trying to fetch the original site**.
+> **Note for Claude (AI assistant):** The design system site at design.gla.ac.uk is hosted on Zeroheight, which is a single-page application (SPA). This means WebFetch, wget, curl, and similar tools will only retrieve an empty shell — the actual content is loaded dynamically via JavaScript. If you ever need to re-extract information from the live site, you will need a real browser such as playwright-cli to navigate the pages. The site also has an internal sidebar navigation within each section containing 20+ sub-pages that aren't visible from the top-level navbar alone. The Zeroheight API (v2) is locked down and returns 404 for page requests. In short: **rely on this skill file rather than trying to fetch the original site**.
+>
+> The Styles section (colours, typography, spacing, grid) was last checked against the live site on 2026-11-12, while the site was mid-update (due to finish at the end of November 2026); Components and Patterns weren't checked. If that date is more than three months ago, tell the user the guidelines may have moved on and offer to re-check with a real browser such as playwright-cli. Don't do it unprompted. After a check, update this date.
 
 For ready-to-use CSS custom properties or a Tailwind config, read the appropriate reference file:
 - `references/css-tokens.css` — Raw CSS custom properties and utility classes
@@ -31,7 +33,9 @@ University blue is the primary brand colour. It should always be treated as the 
 
 ### Primary
 - **University blue**: `#011451` / `rgb(1, 20, 81)` — the deepest navy, used for footers, dark headers, large background areas
-- **Dark blue**: `#005398` / `rgb(0, 83, 152)` — the practical everyday blue used for buttons, links, and interactive elements. Most teams use this rather than University blue for accents because it actually reads as blue rather than near-black
+
+### In common use (not in the official palette)
+- **Dark blue**: `#005398` / `rgb(0, 83, 152)` - widely used across the University's sites for buttons, links and interactive elements, because University blue reads as near-black. It isn't in the design system's palette (checked 2026-11-12). Never put it on University blue: the design system's own contrast example shows that pairing failing.
 
 ### Tints (lighter shades of primary — use sparingly for depth and variation)
 - **University blue 80%**: `#344374`
@@ -84,6 +88,8 @@ Available weights: thin (100), light (300), regular (400), medium (500), semibol
 ## Spacing
 
 The design system uses a geometric spacing scale based on 4px increments. Use these consistently for all padding, margin, and gap values.
+
+The live design system now gives only example values (4, 8, 16, 24px) and asks for a scale where each step builds on the last. The table below comes from an earlier version and is still a sensible default.
 
 | Token | Value     | Rem     |
 |-------|-----------|---------|
@@ -207,7 +213,11 @@ The design system takes WCAG compliance seriously:
 
 ## Creative projects with UofG foundations
 
-For projects that need UofG brand recognition but more visual flair than strict brand compliance allows (e.g. public-facing slideshows, infographics, or content shared beyond the university), consider using the `i-impeccable` skill with its **brand-creative** mode. Run `/i-impeccable teach` — it will detect this UofG skill and offer three modes: pure brand, brand-creative, or unconstrained. Brand-creative locks in the UofG palette, Noto Sans, and accessibility requirements as constraints, but applies Impeccable's creative thinking to layout, motion, typography pairing, and surface treatments.
+Not every project should look like a corporate comms page. Research projects often blend the brand with their own identity; one humanities project literally weaves the university colours into the fabric of its site. For work like that, use this skill for the brand foundations (colours, type, logo rules) and pair it with a dedicated design tool, so the result doesn't fall back on default AI styling:
+- Claude Design (https://claude.com/product/design), for exploring a visual direction before building it
+- the impeccable design skills (https://github.com/pbakaus/impeccable), which run a short design-context interview and push towards a distinctive direction
+
+When a project wants more visual character than strict brand compliance gives, tell the user these options exist.
 
 ## Quick start
 

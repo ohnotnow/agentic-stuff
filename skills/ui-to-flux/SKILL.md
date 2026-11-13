@@ -80,7 +80,7 @@ This applies to all attributes: `:class`, `:title`, `:disabled`, `:href`, etc.
 
 ## Livewire Integration
 
-- Ensure `@livewireStyles` in `<head>` and `@livewireScripts` before `</body>`
+- Ensure `@fluxAppearance` in `<head>` and `@fluxScripts` before `</body>`. Livewire injects its own assets, so `@livewireStyles` and `@livewireScripts` are not needed.
 - Remove `.prevent` modifiers from `wire:click` that may interfere with Flux buttons
 - Use `wire:model.live` for real-time filtering/search (see modern-livewire skill for wire:model behaviour)
 
@@ -88,7 +88,7 @@ This applies to all attributes: `:class`, `:title`, `:disabled`, `:href`, etc.
 
 | Problem | Fix |
 |---------|-----|
-| Livewire functionality breaks | Check for missing scripts, remove `.prevent` modifiers |
+| Livewire functionality breaks | Check `@fluxScripts` is present, remove `.prevent` modifiers |
 | Layout too wide | Add responsive containers with `max-w-5xl` |
 | Buttons too aggressive | Use icon-only delete buttons with subtle styling |
 | Input groups disconnected | Use Flux's `iconTrailing` slot pattern |

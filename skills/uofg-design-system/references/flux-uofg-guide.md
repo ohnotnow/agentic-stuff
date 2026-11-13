@@ -4,7 +4,7 @@ A practical guide to theming Flux (v2, Tailwind v4) to align with the University
 
 ## Philosophy
 
-The UofG brand has two key blues. The "University blue" (#011451) is an extremely dark navy — almost black — used mainly for large background areas and the footer. In practice, most teams reach for the "Dark blue" (#005398) for interactive elements like buttons, links, and accents because it actually reads as *blue* rather than *very dark*. Flux's theming system makes it straightforward to bring that identity into your Laravel/Livewire apps.
+Two blues matter here. The official "University blue" (#011451) is an extremely dark navy — almost black — used mainly for large background areas and the footer. In practice, most teams reach for the "Dark blue" (#005398) for interactive elements like buttons, links, and accents because it actually reads as *blue* rather than *very dark*. Dark blue is widely used but isn't in the design system's official palette, and it fails contrast on University blue, so never put one on the other. Flux's theming system makes it straightforward to bring that identity into your Laravel/Livewire apps.
 
 The approach here is:
 
@@ -45,7 +45,7 @@ Add this to your `resources/css/app.css`:
 }
 
 /* --- Accent colour: UofG Dark Blue ---
-   #005398 is the "Dark blue" from the UofG brand palette.
+   #005398 is the widely used "Dark blue" (not in the official palette).
    In practice this is what most teams use for buttons, links,
    and interactive elements — it reads as a proper blue rather
    than the near-black of University blue (#011451).

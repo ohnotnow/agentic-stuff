@@ -64,7 +64,7 @@ Read the project to understand what it actually does. Work in this order:
 2. **Entry points** — `main.*`, `index.*`, `app.*`, `src/index.*`, CLI definitions, route files.
 3. **Key directories** — scan `src/`, `app/`, `lib/`, `cmd/` to understand the project structure. Read 5-10 key files at most. Do not attempt to read the entire codebase.
 4. **Infrastructure markers** — check for Dockerfile, `.github/workflows/`, `.gitlab-ci.yml`, `.env.example`, Makefile, `docker-compose.yml`.
-5. **Licence file** — check if `LICENCE`, `LICENSE`, or `LICENSE.md` exists.
+5. **Licence file** — check if `LICENCE`, `LICENSE`, or `LICENSE.md` exists. If not, see "Licence attribution" below.
 6. **Git repository** — check if the project is a git repository. If so try and establish the github URL for clone/install guidelines.
 
 ### Step 5: Ask the user (only if needed)
@@ -168,13 +168,17 @@ Follow these rules when writing the README. They are guardrails against the padd
 
 These rules catch the worst offenders. The editorial pass (step 8) is more thorough.
 
+## Licence attribution
+
+When this skill runs on its own (github-create handles licences itself): if the project has no licence file, offer to write one. For the attribution, check the guidelines file for the user's preferences (name, organisation). If there are none, suggest a candidate - the git config user.name, or the owner in the project's GitHub remote URL - and ask, e.g. "Do you want to use <name> for the licence?" Offer to save the answer to the guidelines file so you don't need to ask next time. Whatever the source, confirm with the user that it's the right attribution for this project: a saved one may have come from a personal project and this may be a day-job one, or the other way round. Never write a name into a file without that confirmation, and don't put an email address in the licence.
+
 ## Integration with github-create
 
 When called from the github-create skill, this skill generates the README, picks a tone (step 7), and runs the editorial pass (step 8), then returns. It does not handle licence creation, repository description, or any git operations — github-create manages those separately.
 
 ## The guidelines file
 
-The `assets/guidelines.md` file is the main customisation point for this skill. If you share this skill with a team, each person can edit `guidelines.md` to match their conventions without touching SKILL.md.
+The `assets/guidelines.md` file is the main customisation point for this skill. It does not ship with the skill: each person creates their own at `~/.claude/skills/readme/assets/guidelines.md`, so updating the skill never overwrites it.
 
 Examples of what might go in `guidelines.md`:
 
@@ -183,3 +187,4 @@ Examples of what might go in `guidelines.md`:
 - "Our projects are internal tools — skip the licence section"
 - "Always mention that we use Docker for local development"
 - "Our READMEs should be concise — no more than 80 lines"
+- "Licence attribution: personal projects use my GitHub handle, work projects use our organisation's name"

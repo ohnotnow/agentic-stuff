@@ -12,7 +12,7 @@ Convert Claude Code or Codex CLI sessions into polished, branded HTML transcript
 ### 1. Find the session
 
 The user may provide:
-- **Nothing** (default): find the latest *completed* session for the current project
+- **Nothing** (default): find the latest session for the current project (the in-progress one counts)
 - **A session ID**: use that specific session
 - **A file path**: use that JSONL file directly
 
@@ -73,7 +73,7 @@ python3 ~/.claude/skills/conversation-to-html/scripts/extract_chat_markdown.py \
 ### 4. Verify the output
 
 ```bash
-head -n 40 conversation.html
+head -n 40 <the path the script printed>
 ```
 
 Check:

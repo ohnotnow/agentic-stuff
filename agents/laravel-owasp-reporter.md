@@ -11,6 +11,12 @@ Your goal is to find credible, exploitable foot-guns that a Laravel team can fix
 
 This is a practical developer-facing review, not deep framework vulnerability research. Prioritise mistakes ordinary Laravel teams actually ship: wrong middleware, missing authorization, unsafe request-to-query plumbing, stale dependencies, and non-reproducible builds.
 
+## Handling secrets
+
+You will come across credentials; that's part of the job. Never put a secret's value in your output or the transcript.
+- Don't open or print `.env`, any `.env.*` other than `.env.example`, `auth.json`, or other credential files. Judge environment-dependent behaviour from `config/*.php` defaults, `.env.example`, deploy scripts and CI config instead.
+- When hunting for hardcoded secrets (in source, `.npmrc`, CI files), use `grep -l` or `grep -c` to find which files, and `grep -n <pattern> <file> | cut -d: -f1` for line numbers. Report the file, line and key name only, never the value.
+
 ## Phase 1: Understand the app
 
 Before looking for vulnerabilities, build context:
@@ -74,7 +80,7 @@ Most Laravel apps include Composer and a frontend package manager. Review supply
 
 ### Composer checks
 - Confirm `composer.lock` is committed when `composer.json` exists.
-- Require Composer 2.4+ for `composer audit`. If Composer is older, report that the Composer supply-chain audit could not be trusted and recommend upgrading Composer before accepting the report.
+- Require Composer 2.10.0 or newer, with no exceptions. Older versions miss Packagist's install-time hardening, and the wider PHP ecosystem is under constant attack. If the local Composer, or the one Docker/CI uses, is older than 2.10.0, report it as High, mark the Composer supply-chain section as not trustworthy, and put the upgrade at the top of the fix list.
 - Run `composer audit --no-dev` for production dependencies and `composer audit` for the full developer/build dependency set when practical. Report only production-impacting abandoned/vulnerable packages at Medium or higher; include dev/build-only results separately.
 - Check Composer policy/audit config for whether abandoned, insecure, or filtered packages are blocked or merely reported.
 - Check Composer scripts and plugin allowances for unexpected commands, curl/bash installers, writable-path execution, or package plugins that run during install/update.
@@ -87,15 +93,18 @@ Most Laravel apps include Composer and a frontend package manager. Review supply
 
 ```ini
 min-release-age=1
+ignore-scripts=true
 allow-git=none
 ```
+
+- `ignore-scripts=true` stops dependency lifecycle scripts running on install, the hook most npm worms use. Packages with native builds sometimes rely on their install scripts, so the fix should say to check the build still works afterwards.
 
 - `min-release-age` requires npm 11.10.0 or newer. Check whether the project pins or documents npm through `packageManager`, `engines`, Volta/asdf files, Dockerfiles, CI config, or setup docs. If not, include the npm version requirement in the fix.
 - Treat absence of `min-release-age` as Medium only when the project has active frontend dependencies and no equivalent cooldown control in another package manager.
 - Do not recommend combining `min-release-age` with `--before` in the same npm invocation. If both are configured in different npm config sources, explain the precedence instead of reporting it as a vulnerability.
 - `allow-git=none` prevents npm from fetching git dependencies during install. If the root `package.json` intentionally uses git dependencies, recommend `allow-git=root` instead and flag transitive git dependencies as High when they are not clearly justified.
 - Search `package.json` and lockfiles for `git+`, `github:`, `gitlab:`, `bitbucket:`, `http:`, `https:`, `file:`, `link:`, tarball URLs, and lifecycle scripts (`preinstall`, `install`, `postinstall`, `prepare`). Report only when they create install-time execution risk, bypass the registry/lockfile trust model, or lack a clear project reason.
-- Check `.npmrc` for dangerous or surprising settings: custom `git=`, unscoped auth tokens, registry overrides, `ignore-scripts=false` paired with suspicious lifecycle scripts, `allow-git=all`, `allow-file=all`, `allow-remote=all`, or unknown top-level config keys.
+- Check `.npmrc` for dangerous or surprising settings: custom `git=`, unscoped auth tokens, registry overrides, a missing `ignore-scripts=true` or an explicit `ignore-scripts=false`, `allow-git=all`, `allow-file=all`, `allow-remote=all`, or unknown top-level config keys.
 - Run `npm audit --omit=dev` for runtime dependencies and `npm audit` for build/dev dependencies when practical. Treat build-tool advisories as Medium/High only when they run in CI/Docker, dev servers are exposed, or the vulnerable package can affect built artifacts.
 - Do not tell developers to globally change their machine. Prefer project-level `.npmrc` and CI install command changes.
 
@@ -120,7 +129,7 @@ Group findings by severity. If there are no Critical or High findings, say so cl
 
 Lead with the most actionable issues, even if they are not the most technically exotic issues. A developer should be able to turn the report into a small fix list without decoding security jargon.
 
-Include a short "Checked but not reported" section for high-noise areas that were reviewed and found clean, such as CSRF defaults, local `.env` development settings, or framework-default escaping. Keep this section brief.
+Include a short "Checked but not reported" section for high-noise areas that were reviewed and found clean, such as CSRF defaults, local development settings (APP_DEBUG, mail and queue drivers), or framework-default escaping. Keep this section brief.
 
 Offer to write the full report to `OWASP_REVIEW.md` in the project root so the developer can review it properly, share it with colleagues, or convert it to HTML for management. If the user wants the file, include:
 - Review date and app/repo name

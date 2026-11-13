@@ -6,7 +6,7 @@ description: >
   shell function, alias, helper, shortcut, or one-liner they want to keep. Triggers: 'shell
   function', 'alias', 'make me a command', 'add to my shell', 'bash function', 'zsh function',
   'fish function', or any request to create a reusable shell command.
-allowed-tools: "Read,Bash(echo $SHELL:*),Bash(echo $0:*),Bash(which *),Bash(command -v *),AskUserQuestion"
+allowed-tools: "Bash(echo $SHELL:*),Bash(echo $0:*),Bash(which *),Bash(command -v *),Bash(grep -n agentrc *),Bash(bash -n *),Bash(zsh -n *),Bash(fish -n *),AskUserQuestion"
 version: "0.1.0"
 author: "ohnotnow <https://github.com/ohnotnow>"
 license: "MIT"
@@ -84,62 +84,49 @@ Briefly explain:
 - Any dependencies (external tools needed)
 - How to add it to the users shell config
 
-### Step 5: Offer to Install
+### Step 5: Offer to install
 
-After the user has seen and approved the function, offer to add it to their shell config.
+After the user has approved the function, offer to install it.
 
-**This is the most dangerous part. Be extremely careful.**
+Keep functions in a file of the skill's own, never in the user's main shell config: `~/.bash_agentrc` for bash, `~/.zsh_agentrc` for zsh. Main config files often hold API keys and tokens, so don't read them; the only thing to check there is whether they source the agent file. Fish needs none of this: write the function to `~/.config/fish/functions/<name>.fish`.
 
-Say something like:
+1. **Check the name is free.** Ask the user's real shell what the name means now, printing only its kind (never a function body, which can contain an inline token):
+   - bash: `bash -ic 'type -t <name>'`
+   - zsh: `zsh -ic 'whence -w <name>'`
+   - fish: `fish -c 'type -t <name>'`
 
-> Want me to add this to your shell config (`~/.bashrc` / `~/.zshrc` / `~/.config/fish/functions/`)? I'll create a timestamped backup first.  But this is a potentially risky operation if something goes wrong with the file edit.
+   `-i` makes bash and zsh load the user's config, which the agent's own shell doesn't. If anything prints (an alias, function, builtin or program on the PATH), tell the user what the name already is and suggest another.
 
-If they say yes:
-
-1. **Identify the correct config file**:
-   - bash → `~/.bashrc` (Linux) or `~/.bash_profile` (macOS — but check if `.bashrc` is sourced from `.bash_profile` first)
-   - zsh → `~/.zshrc`
-   - fish → `~/.config/fish/functions/{function_name}.fish` (fish uses one-function-per-file)
-
-2. **Read the config file first** to check:
-   - Does a function/alias with this name already exist? If so, warn the user and ask.
-   - Is the file suspiciously large or complex? If so, warn the user.
-
-3. **Create a backup**:
+2. **Create the agent file** if it doesn't exist, starting with:
    ```bash
-   cp ~/.zshrc ~/.zshrc.backup.$(date +%Y%m%d%H%M%S)
+   # Shell functions and aliases added by an AI coding agent.
+   # Never put API keys, tokens or passwords in this file: agents read it.
    ```
 
-4. **Append the function** with clear markers:
+3. **Add the function.** If the agent file already has content, back it up (`cp ~/.zsh_agentrc ~/.zsh_agentrc.backup.$(date +%Y%m%d%H%M%S)`). Append the function between marker comments:
    ```bash
-   # --- Added by Claude (shell-function skill) $(date +%Y-%m-%d) ---
+   # --- Added by shell-function skill YYYY-MM-DD ---
    the_function_here() {
        ...
    }
-   # --- End Claude addition ---
+   # --- End shell-function addition ---
    ```
+   Then syntax-check the file: `bash -n ~/.bash_agentrc`, `zsh -n ~/.zsh_agentrc`, or `fish -n ~/.config/fish/functions/<name>.fish`. If the check fails, restore the backup and show the user the error.
 
-5. **Verify the result** by reading the file back and checking it parses:
+4. **Check the main config sources the agent file:** `grep -n agentrc ~/.zshrc` (for bash, check `~/.bashrc` and, on macOS, `~/.bash_profile`). If nothing prints, show the user this line to add themselves:
    ```bash
-   bash -n ~/.bashrc    # syntax check for bash
-   zsh -n ~/.zshrc      # syntax check for zsh
-   fish -n ~/.config/fish/functions/name.fish  # syntax check for fish
+   [ -f ~/.zsh_agentrc ] && source ~/.zsh_agentrc
    ```
+   Don't edit the main config yourself.
 
-6. **If the syntax check fails**: immediately restore the backup, show the user the error, and apologise. Do NOT leave a broken config file.
+5. Tell the user to open a new terminal or `source` the agent file.
 
-7. Tell the user to `source ~/.zshrc` (or equivalent) or open a new terminal.
+### If the user declines installation
 
-### If the User Declines Installation
+Show them how to use it manually: paste the function into their terminal for this session, or add it to their shell config themselves.
 
-Just show them the manual steps again:
-> To use this, add the function to your `~/.zshrc` and run `source ~/.zshrc`, or paste it directly into your terminal to use it for this session only.
+## Safety rules
 
-## Safety Rules
-
-- NEVER overwrite a config file. Only append.
-- ALWAYS back up before modifying.
-- ALWAYS syntax-check after modifying.
-- ALWAYS restore from backup if syntax check fails.
-- If in ANY doubt about the config file state, do not modify it — just show the user what to paste.
-- For fish, prefer the `~/.config/fish/functions/` directory (auto-loaded, no sourcing needed, easy to remove).
+- Never write to, or read, the user's main shell config. The only check there is the `grep` for the source line.
+- Back up the agent file before changing it, syntax-check it afterwards, and restore the backup if the check fails.
+- If the agent file is in a state you don't understand, don't modify it: show the user what to paste instead.

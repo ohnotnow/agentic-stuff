@@ -38,6 +38,11 @@ Identical-style outline icons (Lucide, Heroicons) used reflexively next to every
 
 **Instead**: use icons sparingly, where they genuinely aid scanning. Trust labels to do the work.
 
+### Cream or warm off-white page backgrounds
+A beige, cream or parchment-toned page background, often paired with a serif display face, to signal "warm and editorial". It's one of the looks current models fall back on when given no design direction, so it now reads as unconsidered.
+
+**Instead**: the brand's own neutral, or plain white or near-black, with one deliberate accent colour.
+
 ## Layout
 
 ### "Eyebrow → Heading → Lead" stack on every section
@@ -60,6 +65,11 @@ Every gap, padding, and margin set to the same value. Mathematically tidy but vi
 
 **Instead**: vary spacing meaningfully. Tight spacing for related items, loose spacing between sections. Look at any well-designed editorial layout for the pattern.
 
+### Numbered section labels (01 / 02 / 03)
+Sections prefixed with "01", "02", "03" even when the order means nothing.
+
+**Instead**: number sections only when the order matters, such as the steps in a process.
+
 ## Typography
 
 ### Heavy use of italics for emphasis in body copy
@@ -76,6 +86,16 @@ Specifically: em-dashes used as a default sentence connector. Spotted by readers
 Every word capitalised in section headings. Marketing-deck convention now over-applied.
 
 **Instead**: sentence case for most contexts. Title case only where it fits the brand (newspapers, classical institutions).
+
+### Italic accent word inside headlines
+A headline with one word or phrase switched to italic, often a serif italic, for "personality": "Research that *matters*". A favourite default of current models.
+
+**Instead**: a plain headline. If a word truly needs emphasis, use weight or colour, and only where the meaning calls for it.
+
+### Monospace micro-labels
+Small uppercase labels in a monospace font above headings or beside data ("// FEATURES", "STATUS: LIVE"), borrowed from developer tools to look technical.
+
+**Instead**: the body font at a small size, or no label at all.
 
 ## Copy
 
@@ -152,4 +172,4 @@ Date-stamp the bottom of the file so the next reader knows how stale it is.
 
 ---
 
-*Last reviewed: 2026-05*
+*Last reviewed: 2026-11*

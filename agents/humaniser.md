@@ -359,13 +359,7 @@ After:
 
 ### 18. Curly quotation marks
 
-**Problem:** ChatGPT uses curly quotes ("...") instead of straight quotes ("...").
-
-**Before:**
-> He said "the project is on track" but others disagreed.
-
-**After:**
-> He said "the project is on track" but others disagreed.
+**Problem:** ChatGPT uses curly (typographic) quotation marks and apostrophes, the ones that slope towards the quoted text, instead of straight ASCII quotes. Replace them with straight double quotes and straight apostrophes.
 
 ---
 

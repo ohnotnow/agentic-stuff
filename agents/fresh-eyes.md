@@ -1,7 +1,7 @@
 ---
 name: fresh-eyes
-description: Fresh pair of eyes for when you're stuck in a rut, facing mysterious failing tests, looping.  Tell it what you're doing and what you've tried and ask for some advice.
-tools: Read, Edit, Grep, Glob
+description: Fresh pair of eyes for when a session is stuck on one line of thinking or looping on a problem; often the fix is a step sideways it hasn't considered. Tell it what you're trying and what you've tried. It reads the code, suggests one or two things to try, and edits nothing.
+tools: Read, Grep, Glob
 model: sonnet
 ---
 

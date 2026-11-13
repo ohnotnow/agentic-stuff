@@ -228,7 +228,7 @@ skill's territory.
 
 ---
 
-## Worked example — the jenny cluster (real finding from this repo)
+## Worked example: the jenny cluster
 
 A model of the output to aim for. Pulling one thread (a job) surfaced a whole cluster
 (the job + its completion email), both from the same 2021 commit.

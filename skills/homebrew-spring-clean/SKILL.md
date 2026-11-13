@@ -22,6 +22,8 @@ The user is a Unix-literate developer, often a PHP dev, often using `lando` or `
 
 The cost of asking is small. The cost of nuking the user's `azure-cli` because *you* didn't recognise it is a bad afternoon.
 
+**Never run `rm` yourself.** `brew cleanup`, `brew uninstall` and `brew autoremove` are fine once the user has said yes. For a big dead log file, use `truncate -s 0 <file>`: it frees the space without deleting the file. Anything that needs `rm`, such as leftover Cellar directories, show the user the exact command to run themselves with the `!` prefix.
+
 ## The flow
 
 ### Step 0 — Where are we starting from?
@@ -78,7 +80,7 @@ After the user OKs it:
 
 ```bash
 brew cleanup -s          # -s also removes downloaded source archives
-rm /opt/homebrew/var/log/php-fpm.log    # only if confirmed dead
+truncate -s 0 /opt/homebrew/var/log/php-fpm.log    # only if confirmed dead
 ```
 
 ### Step 2 — The leaves table
