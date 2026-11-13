@@ -91,7 +91,9 @@ Different AI coding tools (Claude Code, Codex, Gemini, Cursor, etc.) each have t
 2. Enable the tools you use and adjust paths if needed (`sync.yaml` is gitignored).
 3. Run `./sync` (requires [uv](https://docs.astral.sh/uv/)).
 
-If an existing destination file **differs** from the source, the script asks before overwriting, regardless of timestamps — handy if you've been editing skills in-place. Choose overwrite (`y`), skip (the default), or view a diff (`d`). Identical files are left alone and missing files are copied without prompting. Items containing skipped files are listed at the end for easy copy-back.
+If an installed file **differs** from the repo copy, the script asks before overwriting, regardless of timestamps — handy if you've been editing skills in-place. Choose overwrite the installed copy (`y`), leave both alone (the default), view a diff (`d`), or copy the installed version back into the repo (`b`). Identical files are left alone and missing files are copied without prompting. Items containing skipped files are listed at the end. Copy-back only covers files the repo already has: a file you added to an installed skill is never noticed, so copy that across by hand.
+
+`./sync` refuses to run (`pick` and `preset` included) while `skills/`, `agents/` or `commands/` have uncommitted changes, in this repo or in any `sources:` directory. Commit or stash them first. That keeps unreviewed work from being installed, and means anything copied back with `b` can be undone with git. `--dry-run` still works, and `--force` does not bypass the check. A copy-back leaves the repo with uncommitted changes, so review and commit them before the next sync.
 
 To skip specific items entirely (e.g. you have your own `readme` skill), add an `ignore` block globally or per-target in `sync.yaml`:
 

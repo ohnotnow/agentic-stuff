@@ -36,6 +36,9 @@ Flags (any mode):
   --dry-run    preview only
   --force      overwrite without prompting
 
+Refuses to run (except with --dry-run) while skills/, agents/ or commands/
+have uncommitted changes, here or in any `sources:` directory.
+
 PATH is the base — items land in PATH/skills/<name>, PATH/agents/<name>, etc.
 """
 
@@ -71,6 +74,46 @@ def source_roots(config: dict) -> list[Path]:
             continue
         roots.append(root)
     return roots
+
+
+def git_changes(root: Path) -> list[str]:
+    """Uncommitted or untracked paths in root's content directories.
+
+    Empty when root is clean, is not a git checkout, or git is unavailable.
+    """
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), "status", "--porcelain", "--", *CONTENT_TYPES],
+            capture_output=True,
+            text=True,
+        )
+    except FileNotFoundError:
+        return []
+    if result.returncode != 0:
+        return []
+    return result.stdout.splitlines()
+
+
+def require_clean_sources(config: dict) -> None:
+    """Exit unless the content of every source root is committed.
+
+    Keeps unreviewed work from being installed, and means a copy-back can
+    only ever overwrite something git already has.
+    """
+    roots = [REPO_DIR] + [expand_path(e) for e in config.get("sources") or []]
+    dirty = {root: changes for root in roots if (changes := git_changes(root))}
+    if not dirty:
+        return
+    for root, changes in dirty.items():
+        print(f"Uncommitted changes in {root}:")
+        for line in changes:
+            print(f"  {line}")
+    print(
+        "\nCommit or stash them first, then run sync again. That way everything\n"
+        "installed has been reviewed, and anything copied back into the repo can\n"
+        "be undone with git. (--dry-run still works.)"
+    )
+    sys.exit(1)
 
 
 def collect_items(config: dict) -> dict[str, dict[str, Path]]:
@@ -130,15 +173,15 @@ def show_dates(src: Path, dest: Path) -> None:
         src_note = f"  (newer by {describe_gap(src_m - dest_m)})"
     elif dest_m > src_m:
         dest_note = f"  (newer by {describe_gap(dest_m - src_m)})"
-    print(f"     source: {datetime.fromtimestamp(src_m).strftime(fmt)}{src_note}")
-    print(f"     dest:   {datetime.fromtimestamp(dest_m).strftime(fmt)}{dest_note}")
+    print(f"     repo:       {datetime.fromtimestamp(src_m).strftime(fmt)}{src_note}")
+    print(f"     installed:  {datetime.fromtimestamp(dest_m).strftime(fmt)}{dest_note}")
 
 
 def show_diff(src: Path, dest: Path) -> None:
-    """Show a diff between source and destination."""
+    """Show a diff from the repo copy to the installed copy."""
     try:
         result = subprocess.run(
-            ["diff", "-ru", str(src), str(dest)],
+            ["diff", "-ru", "--label", "repo", "--label", "installed", str(src), str(dest)],
             capture_output=True,
             text=True,
         )
@@ -147,21 +190,53 @@ def show_diff(src: Path, dest: Path) -> None:
         print("  (diff not available)")
 
 
-def ask_user(prompt: str, src: Path | None = None, dest: Path | None = None) -> bool:
-    """Prompt the user. Returns True to overwrite, False to skip. Ctrl-C exits."""
+SKIPPED = "skipped (installed copy differs)"
+COPIED_BACK = "copied back into the repo"
+
+LEGEND = """\
+     y = overwrite the installed copy with the repo copy
+     n = leave both alone (default)
+     d = show the diff
+     b = copy the installed version back into the repo"""
+
+legend_shown = False
+
+
+def ask_user(src: Path, dest: Path) -> str:
+    """Ask what to do about a differing file.
+
+    Returns "overwrite", "skip" or "back". Ctrl-C exits.
+    """
+    global legend_shown
+    if not legend_shown:
+        print(LEGEND)
+        legend_shown = True
+
     while True:
         try:
-            hint = "[y/N/d]" if src else "[y/N]"
-            answer = input(f"  {prompt} {hint} ").strip().lower()
+            answer = input("  Which? [y/N/d/b] ").strip().lower()
         except (EOFError, KeyboardInterrupt):
             print("\nAborted.")
             sys.exit(130)
 
-        if answer in ("d", "diff") and src and dest:
+        if answer in ("d", "diff"):
             show_diff(src, dest)
             continue
+        if answer in ("y", "yes"):
+            return "overwrite"
+        if answer in ("b", "back"):
+            return "back"
+        return "skip"
 
-        return answer in ("y", "yes")
+
+def status_icon(status: str) -> str:
+    if status == "synced":
+        return "✓"
+    if status == "unchanged":
+        return "→"
+    if status == COPIED_BACK:
+        return "←"
+    return "⊘"
 
 
 def ignored_names(config: dict, global_config: dict, content_type: str) -> set[str]:
@@ -179,10 +254,15 @@ def _sync_file(src: Path, dest: Path, force: bool = False) -> str:
             return "unchanged"
 
         if not force:
-            print(f"  ⚠  {dest} differs from source")
+            print(f"  ⚠  {dest} differs from the repo copy")
             show_dates(src, dest)
-            if not ask_user("Overwrite with source version?", src, dest):
-                return "skipped (destination differs)"
+            choice = ask_user(src, dest)
+            if choice == "skip":
+                return SKIPPED
+            if choice == "back":
+                shutil.copy2(dest, src)
+                print(f"     copied back to {src}")
+                return COPIED_BACK
 
     dest.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(src, dest)
@@ -211,7 +291,9 @@ def sync_item(src: Path, dest: Path, force: bool = False) -> str:
     if any("skipped" in s for s in statuses):
         if any(s == "synced" for s in statuses):
             return "partially synced (some files skipped)"
-        return "skipped (destination differs)"
+        return SKIPPED
+    if any(s == COPIED_BACK for s in statuses):
+        return COPIED_BACK
     if any(s == "synced" for s in statuses):
         return "synced"
     return "unchanged"
@@ -245,8 +327,7 @@ def sync_target(
             if status == "unchanged":
                 print(f"  → {content_type}/{item_name} unchanged")
                 continue
-            icon = "✓" if status == "synced" else "⊘"
-            print(f"  {icon} {content_type}/{item_name} → {status}")
+            print(f"  {status_icon(status)} {content_type}/{item_name} → {status}")
             if "skipped" in status:
                 skipped.append((dest, src))
 
@@ -274,13 +355,12 @@ def apply_picks(
     for ct, name, src in chosen:
         dest = to / ct / name
         status = sync_item(src, dest, force=force)
-        icon = "✓" if status == "synced" else ("→" if status == "unchanged" else "⊘")
-        print(f"  {icon} {ct}/{name} → {status}")
+        print(f"  {status_icon(status)} {ct}/{name} → {status}")
         if "skipped" in status:
             skipped.append((dest, src))
 
     if skipped:
-        print("\n⚠  Skipped (destination differs from source):")
+        print("\n⚠  Skipped (installed copy differs from the repo copy):")
         for dest, src in skipped:
             print(f"  {dest}")
             print(f"    ← repo: {src}")
@@ -402,6 +482,9 @@ def main() -> None:
         to = expand_path(args[i + 1])
         args = args[:i] + args[i + 2 :]
 
+    if not dry_run:
+        require_clean_sources(load_config_optional())
+
     if args and args[0] == "pick":
         if to is None:
             print("Usage: ./sync pick --to PATH")
@@ -461,7 +544,7 @@ def main() -> None:
         sync_target(name, target, config, items, skipped, force=force)
 
     if skipped:
-        print("\n⚠  Skipped (destination differs from source):")
+        print("\n⚠  Skipped (installed copy differs from the repo copy):")
         for dest, src in skipped:
             print(f"  {dest}")
             print(f"    ← repo: {src}")
