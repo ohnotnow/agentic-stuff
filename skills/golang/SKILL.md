@@ -469,6 +469,32 @@ GOOS=darwin GOARCH=arm64 go build -o <name>-macos .
 GOOS=windows GOARCH=amd64 go build -o <name>.exe .
 ```
 
+### Which Go builds the release
+
+In release workflows, have `actions/setup-go` install the latest stable Go,
+not the version in `go.mod`:
+
+```yaml
+- uses: actions/setup-go@v5
+  with:
+    go-version: stable
+    check-latest: true
+```
+
+With `go-version-file: go.mod`, setup-go reads the `toolchain` line, or the
+`go` line when there is none, and installs that exact version. The `go` line
+is a minimum, written once and rarely raised, so every release gets built
+with an old standard library and misses its security fixes. In
+agent-edit-checker-go, `go 1.27.1` meant releases were still built with
+Go 1.27.1 when 1.27.4 was out, and govulncheck flagged a `net/http` fix the
+binaries didn't have. With `stable`, each release picks up the latest patched
+Go without anyone editing a file. Leave the `go` line as the minimum version
+the code needs.
+
+`templates/release.yml` also has a `test` job (`go vet`, `go test`,
+govulncheck) that the build `needs`, so a failing check stops the tag before
+any binary is published, and `self-update` users never receive it.
+
 ---
 
 ## Versioning and Self-Update

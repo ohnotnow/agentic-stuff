@@ -167,7 +167,7 @@ Use the template at `assets/MIT-LICENSE-TEMPLATE`, replacing `{{YEAR}}` with the
 
 Check if `.github/workflows/` already contains a release workflow. If not, offer to create one:
 
-> "This is a Go project. Want me to add a GitHub Actions workflow that builds cross-platform binaries and attaches them to a release when you push a version tag (e.g. `v1.0.0`)?"
+> "This is a Go project. Want me to add a GitHub Actions workflow that runs the tests, then builds cross-platform binaries and attaches them to a release when you push a version tag (e.g. `v1.0.0`)?"
 
 If the user accepts, create `.github/workflows/release.yml` using the template at `assets/go-release-workflow.yml`. Read the template and adapt the binary output name to match the repository name (replace the placeholder).
 
