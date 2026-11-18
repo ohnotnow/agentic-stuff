@@ -48,7 +48,8 @@ Reusable code lives under `templates/` (e.g. `templates/theme/nord.go` for
 Nord-themed lipgloss + huh styles) and is referenced from the satellite that
 covers it.  There is also an example of a straightforward golang GitHub action to build
 and publish a release in `templates/release.yml` taken from a project called 'agent-issue-tracker' 
-that creates the `ait` binary.
+that creates the `ait` binary, and a `templates/Makefile` for `make install` from a clone
+(see Versioning and Self-Update).
 
 ## Some extra tools you might have available
 
@@ -501,20 +502,48 @@ any binary is published, and `self-update` users never receive it.
 
 ### `version` / `--version` - every tool gets this
 
-Declare package-level vars stamped at release time via ldflags:
+Declare package-level vars stamped at build time via ldflags:
 
 ```go
 var (
-    Version = "dev" // overwritten by -ldflags at release
-    RepoURL = "https://github.com/<owner>/<repo>"
+    Version    = "dev" // overwritten by -ldflags at release
+    RepoURL    = "https://github.com/<owner>/<repo>"
+    Built      = ""    // build date, set by `make install`
+    FromSource = ""    // "yes" when built by `make install`, set by it
 )
 ```
 
-`templates/release.yml` shows the stamping (`-X <module>/internal/<name>.Version=${VERSION}`).
+`templates/release.yml` shows the release stamping (`-X <module>/internal/<name>.Version=${VERSION}`).
 The `version` command prints the version; on a release build it may also check
 GitHub's `/releases/latest` with a short timeout (~5s) and mention when a newer
 release exists. A `"dev"` build skips the check - there is nothing meaningful
-to compare.
+to compare. GitHub caches `/releases/latest` for 60 seconds, so for a minute
+after a release the check can still see the old one.
+
+### `make install` - building from a clone
+
+Some people can't run downloaded release binaries (managed Macs often refuse
+unsigned ones), so tools that other people use get a `Makefile` from
+`templates/Makefile`. `make install` builds with three stamps:
+
+- `Version` from `git describe --tags --always --dirty`, e.g.
+  `v0.2.0-5-gabc1234` (five commits after v0.2.0) or `v0.2.0-dirty`.
+- `Built`, the date, which `version` shows: "built from source on 2026-11-18".
+- `FromSource=yes`, so the binary knows it was built from a clone.
+
+It installs to `$(PREFIX)/bin` with `PREFIX ?= $(HOME)/.local`, so
+`~/.local/bin` by default (the XDG Base Directory spec's folder for user
+programs; `/usr/local/bin` needs sudo on newer Macs, if it's allowed at all),
+and prints the `~/.zshrc` line when that folder isn't on the PATH. It copies
+to a temporary name and renames over the old binary, because macOS kills a
+binary overwritten in place.
+
+**Compare on the release a source build is based on.** The version check
+parses the leading `vX.Y.Z` and ignores a `-N-gHASH` or `-dirty` suffix, so a
+source build based on v0.1.0 hears about v0.2.0. A version with no leading
+`vX.Y.Z` (a bare hash from an untagged clone) is never "older". For a source
+build, the "newer release" hint says `git pull` then `make install`, not
+`self-update`.
 
 ### `self-update` - a judgement call, so ask the owner
 
@@ -533,6 +562,10 @@ The reference implementation is `internal/ait/cmd_self_update.go` in
 reimplementing, preserve its safety properties:
 
 - `"dev"` builds refuse to self-update (never clobber a hand-built binary).
+- Source builds (`FromSource` set) refuse too, even when their version looks
+  like a release: a clone checked out at `v0.2.0` stamps exactly `v0.2.0`.
+  Say how to update instead (`git pull`, then `make install`). Look the
+  release up first, so the message can say which version is out.
 - Download the release's `SHA256SUMS`, verify the binary's checksum before any
   swap. The release workflow must publish per-platform assets plus
   `SHA256SUMS` (`templates/release.yml` does).
@@ -549,6 +582,14 @@ reimplementing, preserve its safety properties:
   0 = current, 1 = newer available, 2 = lookup failed, for scripting.
 - Atomic swap: write a sibling temp file, `chmod 0755`, rename over the
   target. On Windows rename the running `.exe` to `<name>.old` first.
+- Try the new binary before declaring success (macOS and Linux): keep the old
+  one as a hard link (`os.Link` to a sibling `.<name>.old`), rename the new
+  one in, run it once (`<name> help`, 30s timeout, no network), and if that
+  fails rename the backup back and point the user at building from source.
+  A managed Mac may block a downloaded binary, and this finds out at update
+  time instead of at the next real command. Make the try-run a swappable
+  function so tests can fail it. Reference: `internal/bothy/update.go` in
+  [bothy](https://github.com/ohnotnow/bothy).
 - Keep the per-platform asset-name mapping in sync with the release
   workflow's build matrix.
 
